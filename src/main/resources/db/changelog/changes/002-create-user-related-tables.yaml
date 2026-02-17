@@ -1,0 +1,327 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-users-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  name: phone_number
+                  type: VARCHAR(20)
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  defaultValue: 'USER'
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_email_verified
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+              - column:
+                  name: dietitian_id
+                  type: BIGINT
+              - column:
+                  name: caterer_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: dietitian_id
+            constraintName: fk_users_dietitian
+            referencedTableName: dietitians
+            referencedColumnNames: id
+            onDelete: SET NULL
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: caterer_id
+            constraintName: fk_users_caterer
+            referencedTableName: caterers
+            referencedColumnNames: id
+            onDelete: SET NULL
+        - createIndex:
+            indexName: idx_user_email
+            tableName: users
+            columns:
+              - column:
+                  name: email
+        - createIndex:
+            indexName: idx_user_status
+            tableName: users
+            columns:
+              - column:
+                  name: status
+
+  - changeSet:
+      id: 002-create-addresses-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: addresses
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: address_details
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: city
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: district
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: delivery_notes
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: addresses
+            baseColumnNames: user_id
+            constraintName: fk_addresses_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 002-create-health-profiles-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: health_profiles
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: height
+                  type: DOUBLE PRECISION
+                  constraints:
+                    nullable: false
+              - column:
+                  name: weight
+                  type: DOUBLE PRECISION
+                  constraints:
+                    nullable: false
+              - column:
+                  name: goal
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: restrictions
+                  type: TEXT
+              - column:
+                  name: notes
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: health_profiles
+            baseColumnNames: user_id
+            constraintName: fk_health_profiles_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 002-create-medical-files-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: medical_files
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: health_profile_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_url
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_name
+                  type: VARCHAR(255)
+              - column:
+                  name: file_type
+                  type: VARCHAR(100)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: medical_files
+            baseColumnNames: health_profile_id
+            constraintName: fk_medical_files_health_profile
+            referencedTableName: health_profiles
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 002-create-subscriptions-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: subscriptions
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: plan_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DOUBLE PRECISION
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: subscriptions
+            baseColumnNames: user_id
+            constraintName: fk_subscriptions_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE

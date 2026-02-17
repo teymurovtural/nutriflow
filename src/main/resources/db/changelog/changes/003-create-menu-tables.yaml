@@ -1,0 +1,182 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-menus-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: menus
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dietitian_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: year
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: month
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dietary_notes
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: menus
+            baseColumnNames: user_id
+            constraintName: fk_menus_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: menus
+            baseColumnNames: dietitian_id
+            constraintName: fk_menus_dietitian
+            referencedTableName: dietitians
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: menus
+            columnNames: user_id, year, month
+            constraintName: uk_menus_user_year_month
+
+  - changeSet:
+      id: 003-create-menu-batches-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: menu_batches
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: menu_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rejection_reason
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: menu_batches
+            baseColumnNames: menu_id
+            constraintName: fk_menu_batches_menu
+            referencedTableName: menus
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 003-create-menu-items-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: menu_items
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: batch_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: day_number
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: meal_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: calories
+                  type: INTEGER
+              - column:
+                  name: protein
+                  type: DOUBLE PRECISION
+              - column:
+                  name: carbs
+                  type: DOUBLE PRECISION
+              - column:
+                  name: fats
+                  type: DOUBLE PRECISION
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: menu_items
+            baseColumnNames: batch_id
+            constraintName: fk_menu_items_batch
+            referencedTableName: menu_batches
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: menu_items
+            columnNames: batch_id, day_number, meal_type
+            constraintName: uk_menu_items_batch_day_meal

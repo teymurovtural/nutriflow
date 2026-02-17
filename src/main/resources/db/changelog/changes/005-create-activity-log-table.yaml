@@ -1,0 +1,81 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-activity-logs-table
+      author: nutriflow-team
+      changes:
+        - createTable:
+            tableName: activity_logs
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: actor_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actor_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: action
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entity_type
+                  type: VARCHAR(50)
+              - column:
+                  name: entity_id
+                  type: BIGINT
+              - column:
+                  name: old_value
+                  type: TEXT
+              - column:
+                  name: new_value
+                  type: TEXT
+              - column:
+                  name: ip_address
+                  type: VARCHAR(45)
+              - column:
+                  name: details
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - createIndex:
+            indexName: idx_actor
+            tableName: activity_logs
+            columns:
+              - column:
+                  name: actor_type
+              - column:
+                  name: actor_id
+        - createIndex:
+            indexName: idx_entity
+            tableName: activity_logs
+            columns:
+              - column:
+                  name: entity_type
+              - column:
+                  name: entity_id
+        - createIndex:
+            indexName: idx_created_at
+            tableName: activity_logs
+            columns:
+              - column:
+                  name: created_at

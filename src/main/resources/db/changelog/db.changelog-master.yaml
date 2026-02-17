@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/001-create-base-tables.yaml
+  - include:
+      file: db/changelog/changes/002-create-user-related-tables.yaml
+  - include:
+      file: db/changelog/changes/003-create-menu-tables.yaml
+  - include:
+      file: db/changelog/changes/004-create-delivery-payment-tables.yaml
+  - include:
+      file: db/changelog/changes/005-create-activity-log-table.yaml
