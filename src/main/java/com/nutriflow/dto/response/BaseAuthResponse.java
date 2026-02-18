@@ -8,8 +8,10 @@ import lombok.experimental.SuperBuilder;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder // Miras alan klasslar üçün bu mütləqdir
+@SuperBuilder
 public abstract class BaseAuthResponse {
+
     private String token;
     private String refreshToken;
+
 }

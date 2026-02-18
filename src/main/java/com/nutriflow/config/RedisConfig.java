@@ -21,7 +21,7 @@ public class RedisConfig {
     }
 
     /**
-     * String-Object RedisTemplate (scheduler və generic cache üçün)
+     * String-Object RedisTemplate (for scheduler and generic cache)
      */
     @Bean(name = "objectRedisTemplate")
     public RedisTemplate<String, Object> objectRedisTemplate(RedisConnectionFactory connectionFactory) {

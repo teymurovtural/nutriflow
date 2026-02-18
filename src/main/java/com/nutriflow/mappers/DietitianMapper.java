@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Dietitian Entity və DTO-lar arasında mapping.
- * Enhanced version - bütün response building logic mapper-də.
+ * Mapping between Dietitian Entity and DTOs.
+ * Enhanced version - all response building logic in mapper.
  */
 @Component
 public class DietitianMapper {
 
     /**
-     * DietitianCreateRequest-dən DietitianEntity yaradır.
+     * Creates DietitianEntity from DietitianCreateRequest.
      */
     public DietitianEntity toEntity(DietitianCreateRequest request) {
         if (request == null) return null;
@@ -35,7 +35,7 @@ public class DietitianMapper {
     }
 
     /**
-     * DietitianEntity-dən DietitianProfileResponse yaradır.
+     * Creates DietitianProfileResponse from DietitianEntity.
      */
     public DietitianProfileResponse toProfileResponse(DietitianEntity dietitian) {
         if (dietitian == null) return null;
@@ -51,7 +51,7 @@ public class DietitianMapper {
     }
 
     /**
-     * UserEntity-dən UserSummaryResponse yaradır (assigned patients list üçün).
+     * Creates UserSummaryResponse from UserEntity (for assigned patients list).
      */
     public UserSummaryResponse toUserSummaryResponse(UserEntity user) {
         if (user == null) return null;
@@ -67,7 +67,7 @@ public class DietitianMapper {
     }
 
     /**
-     * Mövcud Entity-ni Request-dəki məlumatlarla yeniləyir.
+     * Updates existing Entity with data from the Request.
      */
     public void updateEntityFromRequest(DietitianEntity entity, DietitianCreateRequest request) {
         if (request == null || entity == null) return;
@@ -79,7 +79,7 @@ public class DietitianMapper {
     }
 
     /**
-     * Əməliyyat nəticəsinə uyğun AdminActionResponse yaradır.
+     * Creates AdminActionResponse based on the operation result.
      */
     public AdminActionResponse toAdminActionResponse(DietitianEntity saved, String message) {
         return AdminActionResponse.builder()
@@ -92,7 +92,7 @@ public class DietitianMapper {
     }
 
     /**
-     * User list-dən UserSummaryResponse list-ə çevirir.
+     * Converts User list to UserSummaryResponse list.
      */
     public List<UserSummaryResponse> toUserSummaryList(List<UserEntity> users) {
         if (users == null) return List.of();
@@ -103,7 +103,7 @@ public class DietitianMapper {
     }
 
     /**
-     * Dashboard statistikasından DietitianDashboardResponse yaradır.
+     * Creates DietitianDashboardResponse from dashboard statistics.
      */
     public DietitianDashboardResponse toDashboardResponse(
             long totalPatients,
@@ -118,7 +118,7 @@ public class DietitianMapper {
     }
 
     /**
-     * User və HealthProfile-dan PatientMedicalProfileResponse yaradır.
+     * Creates PatientMedicalProfileResponse from User and HealthProfile.
      */
     public PatientMedicalProfileResponse toMedicalProfileResponse(
             UserEntity user,
@@ -148,7 +148,7 @@ public class DietitianMapper {
     }
 
     /**
-     * MedicalFileEntity-dən MedicalFileResponse yaradır.
+     * Creates MedicalFileResponse from MedicalFileEntity.
      */
     public MedicalFileResponse toMedicalFileResponse(MedicalFileEntity file) {
         if (file == null) return null;
@@ -161,7 +161,7 @@ public class DietitianMapper {
     }
 
     /**
-     * MenuBatch rejection detail response yaradır.
+     * Creates MenuBatch rejection detail response.
      */
     public MenuRejectionDetailResponse toRejectionDetailResponse(
             MenuBatchEntity batch,
@@ -177,12 +177,12 @@ public class DietitianMapper {
                 .phoneNumber(user.getPhoneNumber())
                 .rejectionReason(batch.getRejectionReason() != null
                         ? batch.getRejectionReason()
-                        : "İmtina səbəbi qeyd olunmayıb.")
+                        : "Rejection reason not specified.")
                 .build();
     }
 
     /**
-     * Medical file detail response yaradır.
+     * Creates medical file detail response.
      */
     public MedicalFileDetailResponse toFileDetailResponse(
             MedicalFileEntity file,
@@ -198,7 +198,7 @@ public class DietitianMapper {
     }
 
     /**
-     * MenuEntity və MenuBatchEntity-dən MenuResponse yaradır.
+     * Creates MenuResponse from MenuEntity and MenuBatchEntity.
      */
     public MenuResponse toMenuResponse(MenuEntity menu, MenuBatchEntity batch) {
         if (menu == null || batch == null) return null;
@@ -219,7 +219,7 @@ public class DietitianMapper {
     }
 
     /**
-     * MenuItemEntity-dən MenuItemResponse yaradır.
+     * Creates MenuItemResponse from MenuItemEntity.
      */
     public MenuItemResponse toMenuItemResponse(MenuItemEntity item) {
         if (item == null) return null;
@@ -236,7 +236,7 @@ public class DietitianMapper {
     }
 
     /**
-     * Urgent patient üçün special status ilə UserSummaryResponse yaradır.
+     * Creates UserSummaryResponse with special status for urgent patient.
      */
     public UserSummaryResponse toUrgentPatientResponse(UserEntity user) {
         if (user == null) return null;

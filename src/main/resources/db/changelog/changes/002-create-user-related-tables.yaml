@@ -2,6 +2,11 @@ databaseChangeLog:
   - changeSet:
       id: 002-create-users-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: users
       changes:
         - createTable:
             tableName: users
@@ -99,6 +104,11 @@ databaseChangeLog:
   - changeSet:
       id: 002-create-addresses-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: addresses
       changes:
         - createTable:
             tableName: addresses
@@ -156,6 +166,11 @@ databaseChangeLog:
   - changeSet:
       id: 002-create-health-profiles-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: health_profiles
       changes:
         - createTable:
             tableName: health_profiles
@@ -216,6 +231,11 @@ databaseChangeLog:
   - changeSet:
       id: 002-create-medical-files-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: medical_files
       changes:
         - createTable:
             tableName: medical_files
@@ -265,6 +285,11 @@ databaseChangeLog:
   - changeSet:
       id: 002-create-subscriptions-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: subscriptions
       changes:
         - createTable:
             tableName: subscriptions

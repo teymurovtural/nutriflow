@@ -7,5 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface HealthProfileService {
+
     HealthDataResponse submitCompleteProfile(String email, HealthDataRequest request, List<MultipartFile> files) throws IOException;
+
 }

@@ -22,24 +22,24 @@ public class PaymentController {
     public ResponseEntity<?> createCheckoutSession(@AuthenticationPrincipal SecurityUser securityUser) {
         try {
             Long userId = securityUser.getId();
-            log.info("Subscription request alındı userId: {}", userId);
+            log.info("Subscription request received for userId: {}", userId);
 
-            // Service-dən Stripe linkini alırıq
+            // Getting the Stripe link from the service
             String checkoutUrl = paymentService.createCheckoutSession(userId);
-            log.info("Checkout URL yaradıldı: {}", checkoutUrl);
+            log.info("Checkout URL created: {}", checkoutUrl);
 
-            // Sənin yaratdığın DTO-nu burada istifadə edirik
+            // Using the DTO here
             PaymentResponse response = new PaymentResponse(
                     checkoutUrl,
                     "Redirect to this URL to complete payment"
             );
 
-            // Obyekti JSON formatında geri qaytarırıq
+            // Returning the object in JSON format
             return ResponseEntity.ok(response);
 
         } catch (StripeException e) {
-            log.error("Stripe xətası: {}", e.getMessage());
-            return ResponseEntity.badRequest().body("Ödəniş yaradılarkən xəta: " + e.getMessage());
+            log.error("Stripe error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("Error creating payment: " + e.getMessage());
         }
     }
 
@@ -48,18 +48,18 @@ public class PaymentController {
             @RequestBody String payload,
             @RequestHeader("Stripe-Signature") String sigHeader) {
 
-        log.info("═══════════════════════════════════════");
-        log.info("Stripe Webhook alındı");
+        log.info("=======================================");
+        log.info("Stripe Webhook received");
         log.info("Signature: {}", sigHeader);
         log.info("Payload length: {}", payload.length());
-        log.info("═══════════════════════════════════════");
+        log.info("=======================================");
 
         try {
             paymentService.handleStripeWebhook(payload, sigHeader);
-            log.info("✅ Webhook uğurla işləndi");
+            log.info("Webhook processed successfully");
             return ResponseEntity.ok("Webhook processed");
         } catch (Exception e) {
-            log.error("❌ Webhook xətası: {}", e.getMessage(), e);
+            log.error("Webhook error: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body("Webhook error: " + e.getMessage());
         }
     }

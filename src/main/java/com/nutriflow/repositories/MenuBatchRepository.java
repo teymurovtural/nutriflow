@@ -9,7 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface MenuBatchRepository extends JpaRepository<MenuBatchEntity, Long> {
+
     List<MenuBatchEntity> findByMenuId(Long menuId);
     Optional<MenuBatchEntity> findFirstByMenu_User_EmailAndStatus(String email, MenuStatus status);
     long countByStatus(MenuStatus status);
+
 }

@@ -6,80 +6,80 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Fayl validation əməliyyatları üçün utility class
+ * Utility class for file validation operations
  */
 @Slf4j
 public final class FileValidationUtil {
 
     private FileValidationUtil() {
-        throw new UnsupportedOperationException("Bu utility class-dır, instantiate edilə bilməz");
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
     /**
-     * Faylın bütün validation-larını yerinə yetirir
+     * Performs all validations on a file
      *
-     * @param file yoxlanılacaq fayl
-     * @throws FileUploadException validation uğursuz olduqda
+     * @param file file to be validated
+     * @throws FileUploadException if validation fails
      */
     public static void validateFile(MultipartFile file) {
-        log.debug("Fayl validation başladı: {}", file.getOriginalFilename());
+        log.debug("File validation started: {}", file.getOriginalFilename());
 
         validateFileNotEmpty(file);
         validateFileSize(file);
         validateFileType(file);
 
-        log.debug("Fayl validation uğurla tamamlandı: {}", file.getOriginalFilename());
+        log.debug("File validation completed successfully: {}", file.getOriginalFilename());
     }
 
     /**
-     * Faylın boş olmadığını yoxlayır
+     * Checks that the file is not empty
      *
-     * @param file yoxlanılacaq fayl
-     * @throws FileUploadException fayl boş olduqda
+     * @param file file to be validated
+     * @throws FileUploadException if the file is empty
      */
     private static void validateFileNotEmpty(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            log.warn("Validation uğursuz: Fayl boşdur");
+            log.warn("Validation failed: File is empty");
             throw new FileUploadException(FileConstants.ERROR_EMPTY_FILE);
         }
     }
 
     /**
-     * Fayl ölçüsünün limit daxilində olduğunu yoxlayır
+     * Checks that the file size is within the allowed limit
      *
-     * @param file yoxlanılacaq fayl
-     * @throws FileUploadException fayl çox böyük olduqda
+     * @param file file to be validated
+     * @throws FileUploadException if the file is too large
      */
     private static void validateFileSize(MultipartFile file) {
         if (file.getSize() > FileConstants.MAX_FILE_SIZE) {
-            log.warn("Validation uğursuz: Fayl ölçüsü limiti aşır. Ölçü: {} bytes, Limit: {} bytes",
+            log.warn("Validation failed: File size exceeds limit. Size: {} bytes, Limit: {} bytes",
                     file.getSize(), FileConstants.MAX_FILE_SIZE);
             throw new FileUploadException(FileConstants.ERROR_FILE_TOO_LARGE);
         }
     }
 
     /**
-     * Fayl tipinin icazə verilən formatlardan olduğunu yoxlayır
+     * Checks that the file type is one of the allowed formats
      *
-     * @param file yoxlanılacaq fayl
-     * @throws FileUploadException fayl tipi icazə verilməyən olduqda
+     * @param file file to be validated
+     * @throws FileUploadException if the file type is not allowed
      */
     private static void validateFileType(MultipartFile file) {
         String contentType = file.getContentType();
 
         if (contentType == null || !FileConstants.ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
-            log.warn("Validation uğursuz: İcazə verilməyən format - {}", contentType);
+            log.warn("Validation failed: File format not allowed - {}", contentType);
             throw new FileUploadException(FileConstants.ERROR_INVALID_FORMAT);
         }
 
-        log.debug("Fayl tipi yoxlanıldı və təsdiqləndi: {}", contentType);
+        log.debug("File type validated and approved: {}", contentType);
     }
 
     /**
-     * Fayl extension-ının düzgün olub olmadığını yoxlayır (əlavə təhlükəsizlik)
+     * Checks if the file extension is valid (additional security check)
      *
-     * @param fileName fayl adı
-     * @return true - düzgün extension, false - yanlış extension
+     * @param fileName file name
+     * @return true - valid extension, false - invalid extension
      */
     public static boolean hasValidExtension(String fileName) {
         if (fileName == null || fileName.isEmpty()) {

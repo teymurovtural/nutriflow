@@ -14,4 +14,5 @@ public class NutriflowApplication {
 		SpringApplication.run(NutriflowApplication.class, args);
 	}
 
+
 }

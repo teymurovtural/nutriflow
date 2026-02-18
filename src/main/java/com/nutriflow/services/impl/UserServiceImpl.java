@@ -30,10 +30,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * User Service Implementation (Refactored).
- * Helper-lər və Utility-lər istifadə edərək təmiz və oxunaqlı kod.
- */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -56,28 +53,28 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDashboardResponse getDashboardSummary(String email) {
-        log.info("Dashboard summary istənilir: email={}", email);
+        log.info("Dashboard summary requested: email={}", email);
 
-        // 1. User-i tap
+        // 1. Find user
         UserEntity user = entityFinder.findUserByEmail(email);
 
-        // 2. Subscription-ı yoxla
+        // 2. Check subscription
         SubscriptionEntity subscription = EntityUtils.getActiveSubscription(user);
         if (subscription == null) {
-            throw new SubscriptionNotFoundException("Aktiv abunəliyiniz tapılmadı.");
+            throw new SubscriptionNotFoundException("No active subscription found.");
         }
 
-        // 3. Cari ay üçün menu statusunu təyin et
+        // 3. Determine menu status for the current month
         MenuStatus currentMenuStatus = menuHelper.getCurrentMonthMenuStatus(user);
 
-        // 4. Çatdırılma statistikasını hesabla
+        // 4. Calculate delivery statistics
         long totalDays = DateUtils.daysBetween(subscription.getStartDate(), subscription.getEndDate());
         long completedCount = deliveryHelper.getDeliveriesByUserAndStatus(user.getId(), DeliveryStatus.DELIVERED).size();
         double progress = subscriptionHelper.calculateSubscriptionProgress(subscription, completedCount);
 
-        log.info("Dashboard summary hazırlandı: UserId={}, Progress={}%", user.getId(), progress);
+        log.info("Dashboard summary prepared: UserId={}, Progress={}%", user.getId(), progress);
 
-        // 5. Mapper ilə response-a çevir
+        // 5. Convert to response via Mapper
         return userMapper.toDashboardResponse(
                 user, subscription, currentMenuStatus,
                 completedCount, totalDays, progress
@@ -87,142 +84,141 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public MenuResponse getMyCurrentMenu(String email) {
-        log.info("Cari menyu istənilir: email={}", email);
+        log.info("Current menu requested: email={}", email);
 
         UserEntity user = entityFinder.findUserByEmail(email);
 
-        // Helper ilə cari ayın menyusunu tap
+        // Find current month's menu via Helper
         MenuEntity menu = menuHelper.getCurrentMonthMenu(user.getId())
-                .orElseThrow(() -> new IdNotFoundException("Cari ay üçün menyu tapılmadı."));
+                .orElseThrow(() -> new IdNotFoundException("No menu found for the current month."));
 
-        // Helper ilə aktiv batch-i tap
+        // Find active batch via Helper
         MenuBatchEntity activeBatch = menuHelper.getActiveBatch(menu)
-                .orElseThrow(() -> new IdNotFoundException("Hələ ki sizə göndərilmiş bir menyu yoxdur."));
+                .orElseThrow(() -> new IdNotFoundException("No menu has been sent to you yet."));
 
-        // Helper ilə sorted items al
+        // Get sorted items via Helper
         List<MenuItemEntity> sortedItems = menuHelper.getSortedMenuItems(activeBatch);
 
-        // Sorted items-i batch-ə set et (mapper istifadə edəcək)
+        // Set sorted items on batch (mapper will use them)
         activeBatch.setItems(sortedItems);
 
-        log.info("Menyu göndərilir: MenuId={}, BatchId={}, Items={}",
+        log.info("Menu returned: MenuId={}, BatchId={}, Items={}",
                 menu.getId(), activeBatch.getId(), sortedItems.size());
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return userMapper.toMenuResponse(menu, activeBatch);
     }
 
     @Override
     @Transactional
     public void approveMenu(String email, MenuApproveRequest request) {
-        log.info("Menyu təsdiq edilir: email={}", email);
+        log.info("Menu being approved: email={}", email);
 
         UserEntity user = entityFinder.findUserByEmail(email);
 
-        // Batch-i tap
-        MenuBatchEntity batch = entityFinder.findBatchById(request != null && request.getBatchId() != null ? request.getBatchId() : menuHelper.getPendingApprovalBatch(email).orElseThrow(() -> new IdNotFoundException("Təsdiqləcək paket tapılmadı")).getId());
+        // Find batch
+        MenuBatchEntity batch = entityFinder.findBatchById(request != null && request.getBatchId() != null ? request.getBatchId() : menuHelper.getPendingApprovalBatch(email).orElseThrow(() -> new IdNotFoundException("No package found for approval")).getId());
 
-        // Helper ilə approve et
+        // Approve via Helper
         menuHelper.approveBatch(batch);
 
-        // Helper ilə hər gün üçün delivery yarat
+        // Create deliveries for each day via Helper
         deliveryHelper.createDeliveriesForApprovedBatch(
                 batch,
                 user,
                 request != null ? request.getDeliveryNotes() : null
         );
 
-
-        log.info("Menyu uğurla təsdiqləndi və deliverylər yaradıldı: BatchId={}", batch.getId());
+        log.info("Menu approved successfully and deliveries created: BatchId={}", batch.getId());
     }
 
     @Override
     @Transactional
     public void rejectMenu(Long batchId, String reason) {
-        log.info("Menyu reject edilir: batchId={}, reason={}", batchId, reason);
+        log.info("Menu being rejected: batchId={}, reason={}", batchId, reason);
 
         MenuBatchEntity batch = menuBatchRepository.findById(batchId)
-                .orElseThrow(() -> new IdNotFoundException("Paket tapılmadı"));
+                .orElseThrow(() -> new IdNotFoundException("Package not found"));
 
-        // Helper ilə reject et
+        // Reject via Helper
         menuHelper.rejectBatch(batch, reason);
 
-        log.info("Menyu reject edildi");
+        log.info("Menu rejected");
     }
 
     @Override
     @Transactional(readOnly = true)
     public PatientMedicalProfileResponse getMyMedicalProfile(String email) {
-        log.info("Medical profile istənilir: email={}", email);
+        log.info("Medical profile requested: email={}", email);
 
         UserEntity user = entityFinder.findUserByEmail(email);
 
         HealthProfileEntity profile = user.getHealthProfile();
         if (profile == null) {
-            throw new HealthProfileNotFoundException("Health profile tapılmadı");
+            throw new HealthProfileNotFoundException("Health profile not found");
         }
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return userMapper.toMedicalProfileResponse(user, profile);
     }
 
     @Override
     @Transactional
     public void updateProfile(String email, UserProfileUpdateRequest request) {
-        log.info("Profil yenilənir: email={}", email);
+        log.info("Profile being updated: email={}", email);
 
         UserEntity user = entityFinder.findUserByEmail(email);
 
-        // User məlumatlarını yenilə
+        // Update user fields
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
         if (request.getLastName() != null) user.setLastName(request.getLastName());
         if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
 
-        // Şifrəni yenilə
+        // Update password
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        // Address yenilə
+        // Update address
         if (EntityUtils.hasAddress(user)) {
             updateAddress(user.getAddress(), request);
         }
 
-        // Health Profile yenilə
+        // Update health profile
         if (EntityUtils.hasHealthProfile(user)) {
             updateHealthProfile(user.getHealthProfile(), request);
         }
 
         userRepository.save(user);
-        log.info("Profil uğurla yeniləndi: UserId={}", user.getId());
+        log.info("Profile updated successfully: UserId={}", user.getId());
     }
 
     @Override
     @Transactional
     public void cancelSubscription(String email) {
-        log.info("Subscription cancel edilir: email={}", email);
+        log.info("Subscription being cancelled: email={}", email);
 
         UserEntity user = entityFinder.findUserByEmail(email);
 
-        // Helper ilə cancel et
+        // Cancel via Helper
         subscriptionHelper.cancelSubscription(user);
 
-        log.info("Subscription cancel edildi");
+        log.info("Subscription cancelled");
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<DeliveryDetailResponse> getMyDeliveries(String email) {
-        log.info("Delivery-lər istənilir: email={}", email);
+        log.info("Deliveries requested: email={}", email);
 
         UserEntity user = entityFinder.findUserByEmail(email);
 
-        // Helper ilə delivery-ləri al
+        // Get deliveries via Helper
         List<DeliveryEntity> deliveries = deliveryHelper.getDeliveriesByUserAndStatus(user.getId(), null);
 
         return deliveries.stream()
                 .map(delivery -> {
-                    // Həmin günün yemək itemlərini helper ilə tap
+                    // Find daily menu items via Helper
                     List<MenuItemEntity> dailyItems = deliveryHelper.getMenuItemsForDay(
                             delivery.getBatch(),
                             delivery.getDate().getDayOfMonth()
@@ -238,7 +234,7 @@ public class UserServiceImpl implements UserService {
     private MenuBatchEntity findBatchForApproval(String email, MenuApproveRequest request) {
         if (request == null || request.getBatchId() == null) {
             return menuHelper.getPendingApprovalBatch(email)
-                    .orElseThrow(() -> new IdNotFoundException("Təsdiqləcək paket tapılmadı"));
+                    .orElseThrow(() -> new IdNotFoundException("No package found for approval"));
         }
 
         return entityFinder.findBatchById(request.getBatchId());

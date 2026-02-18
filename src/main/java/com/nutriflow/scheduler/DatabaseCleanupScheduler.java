@@ -19,10 +19,10 @@ public class DatabaseCleanupScheduler {
     private final DeliveryRepository deliveryRepository;
 
     /**
-     * Köhnə çatdırılma qeydlərini silir
+     * Deletes old delivery records
      *
-     * Schedule: Hər ayın 1-də saat 03:00-da
-     * Silir: 1 ildən köhnə delivery qeydləri
+     * Schedule: On the 1st of every month at 03:00
+     * Deletes: Delivery records older than 1 year
      */
     @Scheduled(cron = "0 0 3 1 * ?")
     @Transactional
@@ -30,40 +30,40 @@ public class DatabaseCleanupScheduler {
         LocalDate oneYearAgo = LocalDate.now().minusYears(1);
         LocalDateTime startTime = LocalDateTime.now();
 
-        log.info("🗑️ [CLEANUP] Köhnə çatdırılma təmizliyi başladı | Limit tarixi: {}", oneYearAgo);
+        log.info("🗑️ [CLEANUP] Old delivery cleanup started | Cutoff date: {}", oneYearAgo);
 
         try {
             int deletedCount = deliveryRepository.deleteOldDeliveries(oneYearAgo);
 
             long durationMs = java.time.Duration.between(startTime, LocalDateTime.now()).toMillis();
 
-            log.info("✅ [CLEANUP] Çatdırılma təmizliyi tamamlandı | Silinən qeyd: {} | Müddət: {}ms",
+            log.info("✅ [CLEANUP] Delivery cleanup completed | Deleted records: {} | Duration: {}ms",
                     deletedCount, durationMs);
 
         } catch (Exception e) {
-            log.error("❌ [CLEANUP] Təmizlik zamanı xəta baş verdi: {}", e.getMessage(), e);
-            // TODO: Admin-ə notification göndər
+            log.error("❌ [CLEANUP] Error occurred during cleanup: {}", e.getMessage(), e);
+            // TODO: Send notification to admin
         }
     }
 
     /**
-     * Database statistikası log edir (monitoring üçün)
+     * Logs database statistics (for monitoring)
      *
-     * Schedule: Hər gün saat 02:00-da
+     * Schedule: Every day at 02:00
      */
     @Scheduled(cron = "0 0 2 * * ?")
     @Transactional(readOnly = true)
     public void logDatabaseStatistics() {
-        log.info("📊 [STATS] Database statistikası yoxlanılır...");
+        log.info("📊 [STATS] Checking database statistics...");
 
         try {
             long totalDeliveries = deliveryRepository.count();
-            // Digər repository count-lar əlavə et
+            // Add other repository counts here
 
             log.info("📊 [STATS] Total Deliveries: {}", totalDeliveries);
 
         } catch (Exception e) {
-            log.error("❌ [STATS] Statistika yoxlanılarkən xəta: {}", e.getMessage(), e);
+            log.error("❌ [STATS] Error while checking statistics: {}", e.getMessage(), e);
         }
     }
 }

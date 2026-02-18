@@ -4,15 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * File əməliyyatları üçün constant dəyərlər
+ * Constant values for file operations
  */
 public final class FileConstants {
 
     private FileConstants() {
-        throw new UnsupportedOperationException("Bu utility class-dır, instantiate edilə bilməz");
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
-    // Icazə verilən MIME type-lar
+    // Allowed MIME types
     public static final List<String> ALLOWED_MIME_TYPES = Arrays.asList(
             "application/pdf",
             "image/jpeg",
@@ -20,7 +20,7 @@ public final class FileConstants {
             "image/png"
     );
 
-    // Icazə verilən fayl extension-ları (UI üçün)
+    // Allowed file extensions (for UI)
     public static final List<String> ALLOWED_FILE_EXTENSIONS = Arrays.asList(
             ".pdf",
             ".jpg",
@@ -28,24 +28,24 @@ public final class FileConstants {
             ".png"
     );
 
-    // Maksimum fayl ölçüsü (10MB - byte ilə)
+    // Maximum file size (10MB - in bytes)
     public static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-    // Error message-lər
-    public static final String ERROR_EMPTY_FILE = "Fayl seçilməyib və ya boşdur!";
-    public static final String ERROR_INVALID_FORMAT = "Yalnız PDF, JPG və PNG formatlarına icazə verilir!";
-    public static final String ERROR_FILE_TOO_LARGE = "Fayl ölçüsü 10MB-dan böyük ola bilməz!";
-    public static final String ERROR_FILE_SAVE_FAILED = "Fayl saxlanılarkən xəta baş verdi";
-    public static final String ERROR_FILE_DELETE_FAILED = "Fayl silinərkən xəta baş verdi";
-    public static final String ERROR_INVALID_FILE_PATH = "Fayl yolu düzgün deyil";
+    // Error messages
+    public static final String ERROR_EMPTY_FILE = "No file selected or file is empty!";
+    public static final String ERROR_INVALID_FORMAT = "Only PDF, JPG, and PNG formats are allowed!";
+    public static final String ERROR_FILE_TOO_LARGE = "File size cannot be larger than 10MB!";
+    public static final String ERROR_FILE_SAVE_FAILED = "An error occurred while saving the file";
+    public static final String ERROR_FILE_DELETE_FAILED = "An error occurred while deleting the file";
+    public static final String ERROR_INVALID_FILE_PATH = "Invalid file path";
 
-    // Log message-lər
-    public static final String LOG_FILE_UPLOAD_STARTED = "Fayl yükləmə prosesi başladı. Fayl adı: {}, Ölçü: {} bytes";
-    public static final String LOG_FILE_SAVED_SUCCESS = "Fayl uğurla saxlanıldı. Yeni ad: {}";
-    public static final String LOG_FILE_DELETED_SUCCESS = "Fayl uğurla silindi: {}";
-    public static final String LOG_FILE_NOT_FOUND = "Silinməli olan fayl tapılmadı: {}";
-    public static final String LOG_UPLOAD_DIR_CREATED = "Yükləmə qovluğu yaradılır: {}";
+    // Log messages
+    public static final String LOG_FILE_UPLOAD_STARTED = "File upload process started. File name: {}, Size: {} bytes";
+    public static final String LOG_FILE_SAVED_SUCCESS = "File saved successfully. New name: {}";
+    public static final String LOG_FILE_DELETED_SUCCESS = "File deleted successfully: {}";
+    public static final String LOG_FILE_NOT_FOUND = "File to be deleted not found: {}";
+    public static final String LOG_UPLOAD_DIR_CREATED = "Creating upload directory: {}";
 
-    // Fayl adı separator
+    // File name separator
     public static final String FILE_NAME_SEPARATOR = "_";
 }

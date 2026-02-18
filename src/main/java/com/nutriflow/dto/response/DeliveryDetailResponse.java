@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 @Builder
 public class DeliveryDetailResponse {
+
     private Long deliveryId;
     private String clientFullName;
     private LocalDate deliveryDate;
@@ -22,4 +23,5 @@ public class DeliveryDetailResponse {
     private DeliveryStatus status;
     private String estimatedTime;
     private List<MealInfoResponse> meals;
+
 }

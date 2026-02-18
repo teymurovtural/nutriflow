@@ -26,4 +26,5 @@ public class OtpEntity extends BaseEntity {
 
     @Column(name = "is_used", nullable = false, columnDefinition = "boolean default false")
     private boolean isUsed;
+
 }

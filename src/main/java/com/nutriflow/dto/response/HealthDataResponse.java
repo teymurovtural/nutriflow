@@ -7,7 +7,9 @@ import lombok.Data;
 @Data
 @Builder
 public class HealthDataResponse {
+
     private String message;
     private String userEmail;
     private UserStatus newStatus;
+
 }

@@ -9,31 +9,29 @@ import lombok.Data;
 @Data
 public class RegisterRequestForAdmin {
 
-        @NotBlank(message = "Ad mütləqdir")
-        @Size(min = 2, max = 50, message = "Ad 2-50 simvol aralığında olmalıdır")
-        private String firstName;
+    @NotBlank(message = "First name is required")
+    @Size(min = 2, max = 50, message = "First name must be between 2-50 characters")
+    private String firstName;
 
-        @NotBlank(message = "Soyad mütləqdir")
-        @Size(min = 2, max = 50, message = "Soyad 2-50 simvol aralığında olmalıdır")
-        private String lastName;
+    @NotBlank(message = "Last name is required")
+    @Size(min = 2, max = 50, message = "Last name must be between 2-50 characters")
+    private String lastName;
 
-        @Email(message = "Email formatı düzgün deyil")
-        @NotBlank(message = "Email mütləqdir")
-        @Size(max = 100, message = "Email çox uzundur")
-        private String email;
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
+    @Size(max = 100, message = "Email is too long")
+    private String email;
 
-        @NotBlank(message = "Şifrə mütləqdir")
-        @Size(min = 8, message = "Şifrə ən az 8 simvol olmalıdır")
-        private String password;
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    private String password;
 
-        @NotBlank(message = "Şifrənin təkrarı mütləqdir")
-        private String confirmPassword;
+    @NotBlank(message = "Password confirmation is required")
+    private String confirmPassword;
 
-        @NotBlank(message = "Telefon nömrəsi mütləqdir")
-        @Pattern(regexp = "^\\+994(50|51|55|70|77|99|10)\\d{7}$", message = "Düzgün Azərbaycan nömrəsi daxil edin")
-        private String phoneNumber;
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^\\+994(50|51|55|70|77|99|10)\\d{7}$", message = "Please enter a valid Azerbaijani phone number")
+    private String phoneNumber;
 
-        private HealthDataRequest healthData;
-    }
-
-
+    private HealthDataRequest healthData;
+}

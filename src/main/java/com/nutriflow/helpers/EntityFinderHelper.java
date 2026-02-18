@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Entity Finder Helper - Bütün service-lər üçün təkrarlanan finder metodları.
- * Repository-dən entity tapır və exception throw edir.
+ * Entity Finder Helper - Reusable finder methods for all services.
+ * Finds entities from repository and throws exceptions if not found.
  */
 @Component
 @RequiredArgsConstructor
@@ -28,185 +28,185 @@ public class EntityFinderHelper {
     private final HealthProfileRepository healthProfileRepository;
 
     /**
-     * User-i ID-yə görə tapır.
+     * Finds a User by ID.
      *
      * @param userId User ID
      * @return UserEntity
-     * @throws UserNotFoundException Tapılmazsa
+     * @throws UserNotFoundException if not found
      */
     public UserEntity findUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("İstifadəçi tapılmadı: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
     }
 
     /**
-     * User-i email-ə görə tapır.
+     * Finds a User by email.
      *
      * @param email User email
      * @return UserEntity
-     * @throws UserNotFoundException Tapılmazsa
+     * @throws UserNotFoundException if not found
      */
     public UserEntity findUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("İstifadəçi tapılmadı: " + email));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + email));
     }
 
     /**
-     * Dietitian-ı email-ə görə tapır.
+     * Finds a Dietitian by email.
      *
      * @param email Dietitian email
      * @return DietitianEntity
-     * @throws UserNotFoundException Tapılmazsa
+     * @throws UserNotFoundException if not found
      */
     public DietitianEntity findDietitianByEmail(String email) {
         return dietitianRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Dietoloq tapılmadı: " + email));
+                .orElseThrow(() -> new UserNotFoundException("Dietitian not found: " + email));
     }
 
     /**
-     * Dietitian-ı ID-yə görə tapır.
+     * Finds a Dietitian by ID.
      *
      * @param dietitianId Dietitian ID
      * @return DietitianEntity
-     * @throws UserNotFoundException Tapılmazsa
+     * @throws UserNotFoundException if not found
      */
     public DietitianEntity findDietitianById(Long dietitianId) {
         return dietitianRepository.findById(dietitianId)
-                .orElseThrow(() -> new UserNotFoundException("Dietoloq tapılmadı: " + dietitianId));
+                .orElseThrow(() -> new UserNotFoundException("Dietitian not found: " + dietitianId));
     }
 
     /**
-     * Caterer-i ID-yə görə tapır.
+     * Finds a Caterer by ID.
      *
      * @param catererId Caterer ID
      * @return CatererEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public CatererEntity findCatererById(Long catererId) {
         return catererRepository.findById(catererId)
-                .orElseThrow(() -> new IdNotFoundException("Caterer tapılmadı: " + catererId));
+                .orElseThrow(() -> new IdNotFoundException("Caterer not found: " + catererId));
     }
 
     /**
-     * Caterer-i email-ə görə tapır.
+     * Finds a Caterer by email.
      *
      * @param email Caterer email
      * @return CatererEntity
-     * @throws UserNotFoundException Tapılmazsa
+     * @throws UserNotFoundException if not found
      */
     public CatererEntity findCatererByEmail(String email) {
         return catererRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Caterer tapılmadı: " + email));
+                .orElseThrow(() -> new UserNotFoundException("Caterer not found: " + email));
     }
 
     /**
-     * Admin-i ID-yə görə tapır.
+     * Finds an Admin by ID.
      *
      * @param adminId Admin ID
      * @return AdminEntity
-     * @throws UserNotFoundException Tapılmazsa
+     * @throws UserNotFoundException if not found
      */
     public AdminEntity findAdminById(Long adminId) {
         return adminRepository.findById(adminId)
-                .orElseThrow(() -> new UserNotFoundException("Admin tapılmadı: " + adminId));
+                .orElseThrow(() -> new UserNotFoundException("Admin not found: " + adminId));
     }
 
     /**
-     * Admin-i email-ə görə tapır.
+     * Finds an Admin by email.
      *
      * @param email Admin email
      * @return AdminEntity
-     * @throws UserNotFoundException Tapılmazsa
+     * @throws UserNotFoundException if not found
      */
     public AdminEntity findAdminByEmail(String email) {
         return adminRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Admin tapılmadı: " + email));
+                .orElseThrow(() -> new UserNotFoundException("Admin not found: " + email));
     }
 
     /**
-     * Menu-nu ID-yə görə tapır.
+     * Finds a Menu by ID.
      *
      * @param menuId Menu ID
      * @return MenuEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public MenuEntity findMenuById(Long menuId) {
         return menuRepository.findById(menuId)
-                .orElseThrow(() -> new IdNotFoundException("Menyu tapılmadı: " + menuId));
+                .orElseThrow(() -> new IdNotFoundException("Menu not found: " + menuId));
     }
 
     /**
-     * MenuBatch-i ID-yə görə tapır.
+     * Finds a MenuBatch by ID.
      *
      * @param batchId Batch ID
      * @return MenuBatchEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public MenuBatchEntity findBatchById(Long batchId) {
         return menuBatchRepository.findById(batchId)
-                .orElseThrow(() -> new IdNotFoundException("Paket tapılmadı: " + batchId));
+                .orElseThrow(() -> new IdNotFoundException("Batch not found: " + batchId));
     }
 
     /**
-     * Delivery-ni ID-yə görə tapır.
+     * Finds a Delivery by ID.
      *
      * @param deliveryId Delivery ID
      * @return DeliveryEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public DeliveryEntity findDeliveryById(Long deliveryId) {
         return deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new IdNotFoundException("Çatdırılma tapılmadı: " + deliveryId));
+                .orElseThrow(() -> new IdNotFoundException("Delivery not found: " + deliveryId));
     }
 
     /**
-     * Subscription-ı ID-yə görə tapır.
+     * Finds a Subscription by ID.
      *
      * @param subscriptionId Subscription ID
      * @return SubscriptionEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public SubscriptionEntity findSubscriptionById(Long subscriptionId) {
         return subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new IdNotFoundException("Abunəlik tapılmadı: " + subscriptionId));
+                .orElseThrow(() -> new IdNotFoundException("Subscription not found: " + subscriptionId));
     }
 
     /**
-     * HealthProfile-i ID-yə görə tapır.
+     * Finds a HealthProfile by ID.
      *
      * @param healthProfileId HealthProfile ID
      * @return HealthProfileEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public HealthProfileEntity findHealthProfileById(Long healthProfileId) {
         return healthProfileRepository.findById(healthProfileId)
-                .orElseThrow(() -> new IdNotFoundException("Sağlamlıq profili tapılmadı: " + healthProfileId));
+                .orElseThrow(() -> new IdNotFoundException("Health profile not found: " + healthProfileId));
     }
 
     /**
-     * User-in HealthProfile-ini tapır.
+     * Finds a user's HealthProfile.
      *
      * @param user UserEntity
      * @return HealthProfileEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public HealthProfileEntity findHealthProfileByUser(UserEntity user) {
         if (user.getHealthProfile() == null) {
-            throw new IdNotFoundException("İstifadəçinin sağlamlıq profili yoxdur: " + user.getId());
+            throw new IdNotFoundException("User has no health profile: " + user.getId());
         }
         return user.getHealthProfile();
     }
 
     /**
-     * User-in aktiv Subscription-ını tapır.
+     * Finds a user's active Subscription.
      *
      * @param user UserEntity
      * @return SubscriptionEntity
-     * @throws IdNotFoundException Tapılmazsa
+     * @throws IdNotFoundException if not found
      */
     public SubscriptionEntity findActiveSubscription(UserEntity user) {
         if (user.getSubscription() == null) {
-            throw new IdNotFoundException("İstifadəçinin aktiv abunəliyi yoxdur: " + user.getId());
+            throw new IdNotFoundException("User has no active subscription: " + user.getId());
         }
         return user.getSubscription();
     }

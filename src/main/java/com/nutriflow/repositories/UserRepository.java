@@ -17,43 +17,43 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     /**
-     * Qeydiyyat zamanı daxil edilən emailin sistemdə olub-olmadığını yoxlayır.
-     * Təkrarlanan qeydiyyatın qarşısını almaq üçün istifadə olunur.
+     * Checks whether the email entered during registration already exists in the system.
+     * Used to prevent duplicate registrations.
      */
     boolean existsByEmail(String email);
 
     /**
-     * İstifadəçini email ünvanına görə tapır.
-     * Giriş (Login) prosesində və profil məlumatlarını gətirərkən istifadə olunur.
+     * Finds a user by their email address.
+     * Used during login and when fetching profile information.
      */
     Optional<UserEntity> findByEmail(String email);
 
     /**
-     * Müəyyən bir dietoloqa təyin edilmiş ümumi istifadəçi (pasiyent) sayını qaytarır.
-     * Dietoloq Dashboard-undakı "Cəmi Pasiyentlər" statistikası üçün istifadə olunur.
+     * Returns the total number of users (patients) assigned to a specific dietitian.
+     * Used for the "Total Patients" statistic on the Dietitian Dashboard.
      */
     long countByDietitianEmail(String email);
 
     /**
-     * Müəyyən bir dietoloqa aid olan və xüsusi statusda (məs: ACTIVE) olan istifadəçilərin sayını qaytarır.
-     * Dashboard-da "Aktiv Menyu" və ya "Gözləyən Menyu" sayını göstərmək üçün istifadə olunur.
+     * Returns the count of users belonging to a specific dietitian with a particular status (e.g. ACTIVE).
+     * Used to display "Active Menu" or "Pending Menu" counts on the dashboard.
      */
     long countByDietitianEmailAndStatus(String email, UserStatus status);
 
     /**
-     * Dietoloqa təyin edilmiş və xüsusi statusu olan istifadəçilərin tam siyahısını gətirir.
-     * "Təcili Pasiyentlər" (Urgent Patients) və ya "Mənim Pasiyentlərim" siyahısını hazırlayarkən istifadə olunur.
+     * Returns the full list of users assigned to a dietitian with a specific status.
+     * Used when building "Urgent Patients" or "My Patients" lists.
      */
     List<UserEntity> findByDietitianEmailAndStatus(String email, UserStatus status);
 
     /**
-     * Admin panelində bütün USER statusunda olanları görmək üçün
+     * Used in admin panel to view all users with a certain status
      */
     List<UserEntity> findAllByStatus(UserStatus status);
 
     /**
-     * Müəyyən bir dietoloqa hələ təyin olunmamış (dietitian == null)
-     * istifadəçiləri tapmaq üçün (Assign prosesi üçün vacibdir)
+     * Finds users who have not yet been assigned to a specific dietitian (dietitian == null)
+     * (Important for the assign process)
      */
     List<UserEntity> findAllByDietitianIsNull();
 
@@ -66,7 +66,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findAllByStatusAndDietitianIsNull(UserStatus status);
 
     /**
-     * Müəyyən bir caterer-ə (mətbəxə) hələ təyin olunmamış ACTIVE istifadəçiləri tapır
+     * Finds ACTIVE users who have not yet been assigned to a specific caterer
      */
     List<UserEntity> findAllByStatusAndCatererIsNull(UserStatus status);
 
@@ -74,7 +74,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     long countByStatusAndDietitianIsNull(UserStatus status);
     long countByStatusAndCatererIsNull(UserStatus status);
 
-    // Axtarış üçün (Ad və ya Soyada görə)
+    // Search by first name or last name
     Page<UserEntity> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName, Pageable pageable);
 
     @Query("SELECT u FROM UserEntity u WHERE " +
@@ -87,7 +87,4 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Query("SELECT COUNT(u) FROM UserEntity u WHERE u.createdAt >= :start AND u.createdAt <= :end")
     long countByCreatedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
-
-
-
 }

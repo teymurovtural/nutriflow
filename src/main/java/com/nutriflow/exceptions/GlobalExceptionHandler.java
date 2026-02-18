@@ -1,7 +1,7 @@
 package com.nutriflow.exceptions;
 
 import com.nutriflow.dto.response.ErrorResponse;
-import lombok.extern.slf4j.Slf4j; // Loglama üçün əlavə edildi
+import lombok.extern.slf4j.Slf4j; // Added for logging
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,146 +17,144 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-@Slf4j // Loglama üçün əlavə edildi
+@Slf4j // Added for logging
 public class GlobalExceptionHandler {
 
-    // Reject səbəbi tapılmadıqda - 404 Not Found
+    // Resource not found - 404 Not Found
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        log.warn("Resurs tapılmadı: {}", ex.getMessage());
+        log.warn("Resource not found: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // Fayl saxlama xətası - 500 Internal Server Error
+    // File storage error - 500 Internal Server Error
     @ExceptionHandler(FileStorageException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> handleFileStorageException(FileStorageException ex) {
-        log.error("Fayl saxlama xətası: {}", ex.getMessage());
+        log.error("File storage error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
-
-
-    // Abunəlik tapılmadıqda - 404 Not Found
+    // Subscription not found - 404 Not Found
     @ExceptionHandler(SubscriptionNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleSubscriptionNotFoundException(SubscriptionNotFoundException ex) {
-        log.warn("Abunəlik tapılmadı: {}", ex.getMessage());
+        log.warn("Subscription not found: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(org.springframework.security.core.AuthenticationException ex) {
-        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Giriş rədd edildi: " + ex.getMessage());
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Access denied: " + ex.getMessage());
     }
 
-    // Resurs (Dietoloq/Caterer) çatışmazlığı - 503 Service Unavailable
-    // (Çünki bu daxili resurs problemidir)
+    // Resource (Dietitian/Caterer) unavailability - 503 Service Unavailable
+    // (Because this is an internal resource problem)
     @ExceptionHandler(ResourceNotAvailableException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ResponseEntity<ErrorResponse> handleResourceNotAvailable(ResourceNotAvailableException ex) {
-        log.error("Resurs çatışmazlığı xətası: {}", ex.getMessage());
+        log.error("Resource unavailability error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
     }
 
-    // Webhook xətaları - 400 Bad Request (Stripe-a yanlış müraciət olduğunu bildirir)
+    // Webhook errors - 400 Bad Request (notifies Stripe of an invalid request)
     @ExceptionHandler(WebhookProcessingException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleWebhookException(WebhookProcessingException ex) {
-        log.error("Webhook emal xətası: {}", ex.getMessage());
+        log.error("Webhook processing error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // Menyu tapılmadıqda - 404 Not Found
+    // Menu not found - 404 Not Found
     @ExceptionHandler(MenuNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleMenuNotFoundException(MenuNotFoundException ex) {
-        log.warn("Menyu tapılmadı: {}", ex.getMessage());
+        log.warn("Menu not found: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // Sağlamlıq profili tapılmadıqda - 404 Not Found
+    // Health profile not found - 404 Not Found
     @ExceptionHandler(HealthProfileNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleHealthProfileNotFoundException(HealthProfileNotFoundException ex) {
-        log.warn("Sağlamlıq profili tapılmadı: {}", ex.getMessage());
+        log.warn("Health profile not found: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // Menyu statusu (məsələn APPROVED deyilse) uyğun olmadıqda - 400 Bad Request
+    // Menu status mismatch (e.g. not APPROVED) - 400 Bad Request
     @ExceptionHandler(InvalidMenuStatusException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleInvalidMenuStatusException(InvalidMenuStatusException ex) {
-        log.warn("Menyu statusu uyğun deyil: {}", ex.getMessage());
+        log.warn("Invalid menu status: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // Refresh Token və ya JWT xətaları - 401 Unauthorized
+    // Refresh Token or JWT errors - 401 Unauthorized
     @ExceptionHandler(InvalidTokenException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException ex) {
-        log.warn("Təhlükəsizlik xətası (Unauthorized): {}", ex.getMessage());
+        log.warn("Security error (Unauthorized): {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
-    // Resurs artıq mövcud olduqda - 409 Conflict
+    // Resource already exists - 409 Conflict
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<ErrorResponse> handleResourceAlreadyExists(ResourceAlreadyExistsException ex) {
-        log.warn("Resurs artıq mövcuddur xətası: {}", ex.getMessage());
+        log.warn("Resource already exists error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    // Id xətası: Id tapılmadıqda
+    // ID error: ID not found
     @ExceptionHandler(IdNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleIdNotFound(IdNotFoundException ex) {
-        log.warn("ID tapılmadı xətası: {}", ex.getMessage());
+        log.warn("ID not found error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // Biznes Xətası: Email artıq mövcud olduqda (409 Conflict)
+    // Business Error: Email already exists (409 Conflict)
     @ExceptionHandler(EmailAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
-        log.warn("Email artıq mövcuddur: {}", ex.getMessage());
+        log.warn("Email already exists: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    // Tapılmama Xətası: İstifadəçi tapılmadıqda (404 Not Found)
+    // Not Found Error: User not found (404 Not Found)
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
-        log.warn("İstifadəçi tapılmadı: {}", ex.getMessage());
+        log.warn("User not found: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // OTP Xətası: Kod yanlış və ya vaxtı bitmiş olduqda (400 Bad Request)
+    // OTP Error: Code is invalid or expired (400 Bad Request)
     @ExceptionHandler(InvalidOtpException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleInvalidOtp(InvalidOtpException ex) {
-        log.warn("Yanlış və ya müddəti bitmiş OTP cəhdi: {}", ex.getMessage());
+        log.warn("Invalid or expired OTP attempt: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // Ümumi Biznes Xətası
+    // General Business Error
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
-        log.warn("Biznes qaydası pozuntusu: {}", ex.getMessage());
+        log.warn("Business rule violation: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // Fayl Yükləmə Xətası
+    // File Upload Error
     @ExceptionHandler(FileUploadException.class)
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public ResponseEntity<ErrorResponse> handleFileUploadException(FileUploadException ex) {
-        log.error("Fayl yükləmə xətası: {}", ex.getMessage());
+        log.error("File upload error: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.getMessage());
     }
 
-    // Validation Xətaları: @Valid-dən keçməyən sahələr
+    // Validation Errors: Fields that failed @Valid
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -167,8 +165,8 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        log.warn("Validasiya xətası baş verdi. Sahə sayı: {}", errors.size());
-        log.debug("Validasiya detalları: {}", errors);
+        log.warn("Validation error occurred. Field count: {}", errors.size());
+        log.debug("Validation details: {}", errors);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -179,38 +177,38 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Yanlış JSON formatı və ya Enum dəyəri
+    // Invalid JSON format or Enum value
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        log.warn("Oxunula bilməyən HTTP mesajı (JSON formatı səhv ola bilər): {}", ex.getMessage());
+        log.warn("Unreadable HTTP message (possibly malformed JSON): {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "Malformed JSON request or invalid field value");
     }
 
-    // Tip uyğunsuzluğu
+    // Type mismatch
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        log.warn("Parametr tip uyğunsuzluğu: {} - Gələn dəyər: {}", ex.getName(), ex.getValue());
+        log.warn("Parameter type mismatch: {} - Received value: {}", ex.getName(), ex.getValue());
         String message = String.format("The parameter '%s' of value '%s' could not be converted to type '%s'",
                 ex.getName(), ex.getValue(),
                 ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
         return buildErrorResponse(HttpStatus.BAD_REQUEST, message);
     }
 
-    // Global Xəta: Gözlənilməz digər bütün xətalar
+    // Global Error: All other unexpected errors
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
-        // Bu hissə çox önəmlidir: Bütün stack trace-i loglayırıq ki, xətanın kökünü tapa bilək
-        log.error("GÖZLƏNİLMƏZ SİSTEM XƏTASI: ", ex);
+        // This section is critical: we log the entire stack trace so we can find the root cause
+        log.error("UNEXPECTED SYSTEM ERROR: ", ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
     }
 
-    // Yardımçı metod
+    // Helper method
     private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message) {
-        // Hər bir error response qurulanda bunu trace səviyyəsində loglayırıq
-        log.trace("ErrorResponse yaradıldı: Status={}, Message={}", status, message);
+        // Log at trace level every time an error response is built
+        log.trace("ErrorResponse created: Status={}, Message={}", status, message);
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .httpStatus(status.value())

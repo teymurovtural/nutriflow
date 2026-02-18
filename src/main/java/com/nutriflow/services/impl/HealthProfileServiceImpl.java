@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * HealthProfile Service Implementation (Refactored).
- * EntityFinder və təmiz logging ilə professional kod.
+ * Professional code with EntityFinder and clean logging.
  */
 @Service
 @RequiredArgsConstructor
@@ -43,88 +43,88 @@ public class HealthProfileServiceImpl implements HealthProfileService {
             HealthDataRequest request,
             List<MultipartFile> files) throws IOException {
 
-        log.info("Health profile submit başladı: email={}", email);
+        log.info("Health profile submission started: email={}", email);
         logRequestData(request, files);
 
-        // 1. User-i tap
+        // 1. Find user
         UserEntity user = entityFinder.findUserByEmail(email);
-        log.info("User tapıldı: userId={}", user.getId());
+        log.info("User found: userId={}", user.getId());
 
-        // 2. HealthProfile və Address yarat
+        // 2. Create HealthProfile and Address
         HealthProfileEntity healthProfile = healthMapper.toHealthProfileEntity(request, user);
         AddressEntity address = healthMapper.toAddressEntity(request, user);
 
-        // 3. User-ə set et
+        // 3. Set on user
         user.setHealthProfile(healthProfile);
         user.setAddress(address);
         user.setStatus(UserStatus.DATA_SUBMITTED);
 
-        // 4. İlk save - healthProfile ID yaranması üçün
-        log.info("User, HealthProfile və Address save edilir...");
+        // 4. First save - to generate healthProfile ID
+        log.info("Saving user, HealthProfile and Address...");
         UserEntity savedUser = userRepository.save(user);
-        log.info("İlk save tamamlandı. HealthProfileId={}", savedUser.getHealthProfile().getId());
+        log.info("First save completed. HealthProfileId={}", savedUser.getHealthProfile().getId());
 
-        // 5. Medical files-ı emal et
+        // 5. Process medical files
         if (hasFiles(files)) {
             processMedicalFiles(files, savedUser.getHealthProfile());
 
-            // İkinci save - medical files ilə
+            // Second save - with medical files
             userRepository.save(savedUser);
-            log.info("Medical files save edildi. Count={}",
+            log.info("Medical files saved. Count={}",
                     savedUser.getHealthProfile().getMedicalFiles().size());
         } else {
-            log.warn("Medical file yüklənmədi");
+            log.warn("No medical file uploaded");
         }
 
-        log.info("Health profile submit tamamlandı: userId={}, status={}",
+        log.info("Health profile submission completed: userId={}, status={}",
                 savedUser.getId(), savedUser.getStatus());
 
-        // Mapper ilə response yarat
+        // Create response via Mapper
         return createSuccessResponse(savedUser);
     }
 
     // ==================== Private Helper Methods ====================
 
     /**
-     * Request və files-ı log edir.
+     * Logs request and file data.
      */
     private void logRequestData(HealthDataRequest request, List<MultipartFile> files) {
         log.debug("Request: height={}, weight={}, goal={}",
                 request.getHeight(), request.getWeight(), request.getGoal());
 
         if (files != null && !files.isEmpty()) {
-            log.info("Yüklənən file sayı: {}", files.size());
+            log.info("Number of files being uploaded: {}", files.size());
             files.forEach(file -> log.debug("File: name={}, size={} bytes, type={}",
                     file.getOriginalFilename(), file.getSize(), file.getContentType()));
         }
     }
 
     /**
-     * Files list-inin boş olub-olmadığını yoxlayır.
+     * Checks whether the files list is empty.
      */
     private boolean hasFiles(List<MultipartFile> files) {
         return files != null && !files.isEmpty();
     }
 
     /**
-     * Medical files-ı emal edir və HealthProfile-ə əlavə edir.
+     * Processes medical files and adds them to the HealthProfile.
      */
     private void processMedicalFiles(
             List<MultipartFile> files,
             HealthProfileEntity healthProfile) throws IOException {
 
-        log.info("Medical files emal edilir: count={}", files.size());
+        log.info("Processing medical files: count={}", files.size());
 
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
 
-            log.debug("File #{} emal olunur: name={}", i + 1, file.getOriginalFilename());
+            log.debug("Processing file #{}: name={}", i + 1, file.getOriginalFilename());
 
-            // File-ı diskə yaz
+            // Write file to disk
             String filePath = fileStorageService.saveFile(file);
-            log.debug("File diskə yazıldı: path={}", filePath);
+            log.debug("File written to disk: path={}", filePath);
 
-            // MedicalFile entity yarat
+            // Create MedicalFile entity
             MedicalFileEntity medicalFile = MedicalFileEntity.builder()
                     .healthProfile(healthProfile)
                     .fileUrl(filePath)
@@ -132,21 +132,21 @@ public class HealthProfileServiceImpl implements HealthProfileService {
                     .fileType(file.getContentType())
                     .build();
 
-            // HealthProfile-ə əlavə et
+            // Add to HealthProfile
             healthProfile.getMedicalFiles().add(medicalFile);
-            log.debug("MedicalFile entity yaradıldı və əlavə edildi");
+            log.debug("MedicalFile entity created and added");
         }
 
-        log.info("Bütün medical files uğurla emal edildi");
+        log.info("All medical files processed successfully");
     }
 
     /**
-     * Success response yaradır.
+     * Creates a success response.
      */
     private HealthDataResponse createSuccessResponse(UserEntity user) {
         return healthMapper.toHealthDataResponse(
                 user,
-                "Məlumatlar və fayllar uğurla yadda saxlanıldı."
+                "Data and files saved successfully."
         );
     }
 }

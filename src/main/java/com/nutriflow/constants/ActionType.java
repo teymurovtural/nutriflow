@@ -3,10 +3,10 @@ package com.nutriflow.constants;
 import lombok.experimental.UtilityClass;
 
 /**
- * Activity Log-da istifadə olunan aksiya tiplərinin konstantları.
- * Hardcoded strings yerinə constants istifadə edin.
+ * Constants for action types used in the Activity Log.
+ * Use constants instead of hardcoded strings.
  *
- * İstifadə:
+ * Usage:
  * activityLogService.logAction(Role.ADMIN, userId, ActionType.CREATE_DIETITIAN, ...);
  */
 @UtilityClass

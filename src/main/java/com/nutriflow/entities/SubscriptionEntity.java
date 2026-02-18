@@ -35,4 +35,5 @@ public class SubscriptionEntity extends BaseEntity {
 
     @OneToOne(mappedBy = "subscription", cascade = CascadeType.ALL, orphanRemoval = true)
     private PaymentEntity payment;
+
 }

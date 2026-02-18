@@ -2,6 +2,11 @@ databaseChangeLog:
   - changeSet:
       id: 003-create-menus-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: menus
       changes:
         - createTable:
             tableName: menus
@@ -69,6 +74,11 @@ databaseChangeLog:
   - changeSet:
       id: 003-create-menu-batches-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: menu_batches
       changes:
         - createTable:
             tableName: menu_batches
@@ -115,6 +125,11 @@ databaseChangeLog:
   - changeSet:
       id: 003-create-menu-items-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: menu_items
       changes:
         - createTable:
             tableName: menu_items

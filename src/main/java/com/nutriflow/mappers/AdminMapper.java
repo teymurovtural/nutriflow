@@ -11,15 +11,15 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * Admin-ə bağlı Entity-ləri Response DTO-lara çevirmə.
- * Həmçinin loglama məlumatlarını formatlamaq üçün metodlar var.
+ * Converts Admin-related Entities to Response DTOs.
+ * Also contains methods for formatting logging information.
  */
 @Component
 @RequiredArgsConstructor
 public class AdminMapper {
 
     /**
-     * User Entity-ni Summary Response-a çevirir (Admin paneli üçün)
+     * Converts User Entity to Summary Response (for Admin panel)
      */
     public UserSummaryResponse toUserSummaryResponse(UserEntity entity) {
         if (entity == null) return null;
@@ -30,13 +30,13 @@ public class AdminMapper {
                 .lastName(entity.getLastName())
                 .email(entity.getEmail())
                 .status(entity.getStatus() != null ? entity.getStatus().name() : null)
-                // BirbaÅŸa HealthProfile-dan enum-u Ã§É™kirik
+                // Directly fetching enum from HealthProfile
                 .goal(entity.getHealthProfile() != null ? entity.getHealthProfile().getGoal() : null)
                 .build();
     }
 
     /**
-     * Dietitian Entity-ni Profile Response-a çevirir
+     * Converts Dietitian Entity to Profile Response
      */
     public DietitianProfileResponse toDietitianResponse(DietitianEntity entity) {
         if (entity == null) return null;
@@ -53,7 +53,7 @@ public class AdminMapper {
     }
 
     /**
-     * Caterer Entity-ni Response-a çevirir
+     * Converts Caterer Entity to Response
      */
     public CatererResponse toCatererResponse(CatererEntity entity) {
         if (entity == null) return null;
@@ -69,7 +69,7 @@ public class AdminMapper {
     }
 
     /**
-     * Sub-admin-i Summary Response-a çevirir
+     * Converts Sub-admin to Summary Response
      */
     public AdminSummaryResponse toAdminSummaryResponse(AdminEntity entity) {
         if (entity == null) return null;
@@ -85,7 +85,7 @@ public class AdminMapper {
     }
 
     /**
-     * Payment Entity-ni Admin Response-a çevirir
+     * Converts Payment Entity to Admin Response
      */
     public PaymentAdminResponse toPaymentResponse(PaymentEntity payment) {
         if (payment == null) return null;
@@ -99,12 +99,12 @@ public class AdminMapper {
                 .transactionId(payment.getTransactionRef())
                 .subscriptionId(payment.getSubscription() != null ? payment.getSubscription().getId() : null)
                 .userEmail(payment.getSubscription() != null && payment.getSubscription().getUser() != null
-                        ? payment.getSubscription().getUser().getEmail() : "Məlumat yoxdur")
+                        ? payment.getSubscription().getUser().getEmail() : "No data available")
                 .build();
     }
 
     /**
-     * Activity Log Entity-ni Response-a çevirir
+     * Converts Activity Log Entity to Response
      */
     public ActivityLogResponse toLogResponse(ActivityLogEntity log) {
         if (log == null) return null;
@@ -125,19 +125,19 @@ public class AdminMapper {
     }
 
     public AdminActionResponse toUserCreatedResponse(UserEntity user) {
-        if (user == null) return null; //
+        if (user == null) return null;
 
         return AdminActionResponse.builder()
-                .message("İstifadəçi və sağlamlıq profili uğurla yaradıldı")
-                .targetId(user.getId()) // UserEntity-dən id-ni götürür
+                .message("User and health profile created successfully")
+                .targetId(user.getId())
                 .operationStatus(com.nutriflow.enums.OperationStatus.SUCCESS)
-                .userStatus(user.getStatus()) // Entity daxilindəki ACTIVE statusunu götürür
+                .userStatus(user.getStatus())
                 .timestamp(java.time.LocalDateTime.now())
                 .build();
     }
 
     /**
-     * Mövcud AdminEntity-ni Request-dəki məlumatlarla yeniləyir.
+     * Updates existing AdminEntity with data from the Request.
      */
     public void updateEntityFromRequest(AdminEntity entity, AdminCreateRequest request) {
         if (request == null || entity == null) return;
@@ -147,7 +147,7 @@ public class AdminMapper {
     }
 
     /**
-     * AdminCreateRequest-dən yeni AdminEntity yaradır.
+     * Creates a new AdminEntity from AdminCreateRequest.
      */
     public AdminEntity toEntity(AdminCreateRequest request) {
         if (request == null) return null;
@@ -163,7 +163,7 @@ public class AdminMapper {
     }
 
     /**
-     * Əməliyyat nəticəsinə uyğun AdminActionResponse yaradır.
+     * Creates AdminActionResponse based on the operation result.
      */
     public AdminActionResponse toAdminActionResponse(AdminEntity saved, String message) {
         return AdminActionResponse.builder()
@@ -174,10 +174,8 @@ public class AdminMapper {
                 .build();
     }
 
-    // AdminMapper.java daxilinə əlavə et:
-
     /**
-     * Dashboard statistikaları üçün response obyektini qurur.
+     * Builds response object for dashboard statistics.
      */
     public AdminDashboardResponse toDashboardResponse(
             long totalUsers,
@@ -212,50 +210,49 @@ public class AdminMapper {
     }
 
     /**
-     * Dashboard logları üçün oldData (filtr məlumatları) formatlayır.
+     * Formats oldData (filter information) for dashboard logs.
      */
     public String formatDashboardFilterLog(java.time.LocalDateTime start, java.time.LocalDateTime end) {
-        return String.format("Filtr: %s - %s", start.toLocalDate(), end.toLocalDate());
+        return String.format("Filter: %s - %s", start.toLocalDate(), end.toLocalDate());
     }
 
     /**
-     * Dashboard logları üçün newData (əsas nəticələr) formatlayır.
+     * Formats newData (main results) for dashboard logs.
      */
     public String formatDashboardResultLog(Double revenue, long userCount) {
-        return String.format("Gəlir: %.2f AZN, İstifadəçi: %d", revenue, userCount);
+        return String.format("Revenue: %.2f AZN, Users: %d", revenue, userCount);
     }
 
     public String formatUserAssignmentOldData(UserEntity user) {
         if (user == null) return "";
 
         if (user.getDietitian() != null) {
-            return String.format("İstifadəçi: %s %s (%s), Köhnə Dietoloq: %s %s, Status: %s",
+            return String.format("User: %s %s (%s), Previous Dietitian: %s %s, Status: %s",
                     user.getFirstName(), user.getLastName(), user.getStatus(),
                     user.getDietitian().getFirstName(), user.getDietitian().getLastName(),
-                    user.getDietitian().isActive() ? "AKTİV" : "DEAKTİV");
+                    user.getDietitian().isActive() ? "ACTIVE" : "INACTIVE");
         }
 
         if (user.getCaterer() != null) {
-            return String.format("İstifadəçi: %s (%s), Köhnə Mətbəx: %s, Status: %s",
+            return String.format("User: %s (%s), Previous Caterer: %s, Status: %s",
                     user.getEmail(), user.getStatus(), user.getCaterer().getName(), user.getCaterer().getStatus());
         }
 
-        return String.format("İstifadəçi: %s (%s), Təyinat: Təyin edilməyib", user.getEmail(), user.getStatus());
+        return String.format("User: %s (%s), Assignment: Not assigned", user.getEmail(), user.getStatus());
     }
 
     public String formatDietitianAssignmentNewData(DietitianEntity dietitian) {
-        return String.format("Yeni Dietoloq: %s %s, Email: %s, Status: %s",
+        return String.format("New Dietitian: %s %s, Email: %s, Status: %s",
                 dietitian.getFirstName(), dietitian.getLastName(), dietitian.getEmail(),
-                dietitian.isActive() ? "AKTİV" : "DEAKTİV");
+                dietitian.isActive() ? "ACTIVE" : "INACTIVE");
     }
 
     public String formatCatererAssignmentNewData(CatererEntity caterer) {
-        return String.format("Yeni Mətbəx: %s, Email: %s, Status: %s",
+        return String.format("New Caterer: %s, Email: %s, Status: %s",
                 caterer.getName(), caterer.getEmail(), caterer.getStatus());
     }
 
-
-    // Ümumi AdminActionResponse yaratmaq üçün
+    // General method for creating AdminActionResponse
     public AdminActionResponse toAdminActionResponse(Long targetId, String message) {
         return AdminActionResponse.builder()
                 .message(message)
@@ -265,22 +262,19 @@ public class AdminMapper {
                 .build();
     }
 
-
-
     /**
-     * AdminProfileUpdateRequest-dən gələn məlumatlarla mövcud entity-ni yeniləyir.
-     * Email və Şifrə yoxlanışı Service-də aparılacaq.
+     * Updates existing entity with data from AdminProfileUpdateRequest.
+     * Email and password validation will be handled in the Service layer.
      */
     public void updateAdminProfileFromRequest(AdminEntity entity, AdminProfileUpdateRequest request) {
         if (entity == null || request == null) return;
 
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
-        // Email və Password birbaşa set edilmir, çünki service-də validasiya lazımdır
+        // Email and Password are not set directly here, as validation is required in the service
     }
 
-
-    // User statusu üçün xüsusi (çünki userStatus field-i var)
+    // Special response for user status (because userStatus field exists)
     public AdminActionResponse toUserStatusResponse(Long targetId, com.nutriflow.enums.UserStatus status, String message) {
         return AdminActionResponse.builder()
                 .message(message)
@@ -291,40 +285,40 @@ public class AdminMapper {
                 .build();
     }
 
-    // ========== LOGLAMA MƏLUMATLARININ FORMATLANMASI ==========
-    // Bu metodlar Service-lərdə istifadə olunur (ActivityLog-da saxlanmaq üçün)
+    // ========== LOGGING DATA FORMATTING ==========
+    // These methods are used in Services (to be stored in ActivityLog)
 
     /**
-     * Dietitian məlumatlarını loqlama üçün formatlar.
-     * LoggingUtil-ə dele edirik (reusability üçün).
+     * Formats Dietitian data for logging.
+     * Delegates to LoggingUtils (for reusability).
      */
     public String formatDietitianData(DietitianEntity entity) {
         return LoggingUtils.formatDietitianData(entity);
     }
 
     /**
-     * Caterer məlumatlarını loqlama üçün formatlar
+     * Formats Caterer data for logging.
      */
     public String formatCatererData(CatererEntity entity) {
         return LoggingUtils.formatCatererData(entity);
     }
 
     /**
-     * User məlumatlarını loqlama üçün formatlar
+     * Formats User data for logging.
      */
     public String formatUserData(UserEntity entity) {
         return LoggingUtils.formatUserData(entity);
     }
 
     /**
-     * Admin məlumatlarını loqlama üçün formatlar
+     * Formats Admin data for logging.
      */
     public String formatAdminData(AdminEntity entity) {
         return LoggingUtils.formatAdminData(entity);
     }
 
     /**
-     * Payment məlumatlarını loqlama üçün formatlar
+     * Formats Payment data for logging.
      */
     public String formatPaymentData(PaymentEntity entity) {
         return LoggingUtils.formatPaymentData(entity);

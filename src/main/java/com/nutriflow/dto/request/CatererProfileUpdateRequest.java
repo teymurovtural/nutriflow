@@ -6,18 +6,18 @@ import lombok.Data;
 @Data
 public class CatererProfileUpdateRequest {
 
-    @Size(min = 2, max = 100, message = "Şirkət adı 2-100 simvol aralığında olmalıdır")
+    @Size(min = 2, max = 100, message = "Company name must be between 2-100 characters")
     private String name;
 
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Telefon nömrəsi düzgün formatda deyil")
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone number is not in a valid format")
     private String phone;
 
-    @Size(max = 255, message = "Ünvan 255 simvolu keçməməlidir")
+    @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;
 
-    @Email(message = "Email formatı düzgün deyil")
+    @Email(message = "Invalid email format")
     private String email;
 
-    @Size(min = 8, message = "Şifrə ən azı 8 simvoldan ibarət olmalıdır")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 }

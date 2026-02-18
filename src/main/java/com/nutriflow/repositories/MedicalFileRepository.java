@@ -8,5 +8,7 @@ import java.util.List;
 
 @Repository
 public interface MedicalFileRepository extends JpaRepository<MedicalFileEntity, Long> {
+
     List<MedicalFileEntity> findByHealthProfileId(Long healthProfileId);
+
 }

@@ -24,4 +24,5 @@ public interface MenuItemRepository extends JpaRepository<MenuItemEntity, Long> 
     void deleteByBatchId(Long batchId);
 
     Optional<MenuItemEntity> findByBatchIdAndDayAndMealType(Long batchId, Integer day, MealType mealType);
+
 }

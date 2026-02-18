@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 
 /**
- * Health və Address mapping.
- * Request to Entity və Entity to Response çevirməsi.
+ * Health and Address mapping.
+ * Conversion from Request to Entity and Entity to Response.
  */
 @Component
 public class HealthMapper {
 
     /**
-     * HealthDataRequest-dən HealthProfileEntity yaradır.
+     * Creates HealthProfileEntity from HealthDataRequest.
      */
     public HealthProfileEntity toHealthProfileEntity(HealthDataRequest request, UserEntity user) {
         if (request == null) return null;
@@ -29,12 +29,12 @@ public class HealthMapper {
                 .goal(request.getGoal())
                 .restrictions(request.getRestrictions())
                 .notes(request.getNotes())
-                .medicalFiles(new ArrayList<>()) // Boş list ilə başladırıq
+                .medicalFiles(new ArrayList<>()) // Starting with empty list
                 .build();
     }
 
     /**
-     * HealthDataRequest-dən AddressEntity yaradır.
+     * Creates AddressEntity from HealthDataRequest.
      */
     public AddressEntity toAddressEntity(HealthDataRequest request, UserEntity user) {
         if (request == null) return null;
@@ -49,8 +49,8 @@ public class HealthMapper {
     }
 
     /**
-     * UserEntity-dən HealthDataResponse yaradır.
-     * Health profile submit-dən sonra success response.
+     * Creates HealthDataResponse from UserEntity.
+     * Success response after health profile submission.
      */
     public HealthDataResponse toHealthDataResponse(UserEntity user, String message) {
         if (user == null) return null;

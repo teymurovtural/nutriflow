@@ -29,4 +29,5 @@ public class MenuBatchEntity extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItemEntity> items = new ArrayList<>();
+
 }

@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * Dietitian Service Implementation (Refactored).
- * Helper-lər və Mapper-lər istifadə edərək təmiz kod.
+ * Clean code using Helpers and Mappers.
  */
 @Service
 @RequiredArgsConstructor
@@ -49,56 +49,56 @@ public class DietitianServiceImpl implements DietitianService {
     @Override
     @Transactional(readOnly = true)
     public List<UserSummaryResponse> getMyAssignedUsers(String dietitianEmail) {
-        log.info("Təyin edilmiş istifadəçilər istənilir: email={}", dietitianEmail);
+        log.info("Assigned users requested: email={}", dietitianEmail);
 
         DietitianEntity dietitian = entityFinder.findDietitianByEmail(dietitianEmail);
 
-        // Mapper ilə list-i response-a çevir
+        // Convert list to response via Mapper
         return dietitianMapper.toUserSummaryList(dietitian.getUsers());
     }
 
     @Override
     @Transactional
     public void createMonthlyMenu(String dietitianEmail, MenuCreateRequest request) {
-        log.info("Aylıq menyu yaradılır: email={}, userId={}, year={}, month={}",
+        log.info("Creating monthly menu: email={}, userId={}, year={}, month={}",
                 dietitianEmail, request.getUserId(), request.getYear(), request.getMonth());
 
         DietitianEntity dietitian = entityFinder.findDietitianByEmail(dietitianEmail);
         UserEntity user = entityFinder.findUserById(request.getUserId());
 
-        // Helper ilə draft batch tap və ya yarat
+        // Find or create draft batch via Helper
         MenuBatchEntity draftBatch = menuBatchHelper.getOrCreateDraftBatch(
                 user, dietitian, request.getYear(), request.getMonth());
 
-        // Dietary notes-u menu-ya yaz
+        // Write dietary notes to menu
         if (request.getDietaryNotes() != null) {
             draftBatch.getMenu().setDietaryNotes(request.getDietaryNotes());
         }
 
-        // Helper ilə item-ləri əlavə və ya update et
+        // Add or update items via Helper
         menuBatchHelper.addOrUpdateItems(draftBatch, request.getItems());
 
         menuRepository.save(draftBatch.getMenu());
-        log.info("Menyu uğurla yaradıldı/yeniləndi");
+        log.info("Menu created/updated successfully");
     }
 
     @Override
     @Transactional
     public String submitMenu(Long batchId) {
-        log.info("Menyu submit edilir: batchId={}", batchId);
+        log.info("Submitting menu: batchId={}", batchId);
 
         MenuBatchEntity batch = entityFinder.findBatchById(batchId);
 
-        // Helper ilə submit et
+        // Submit via Helper
         menuBatchHelper.submitBatch(batch);
 
-        return "Menyu paketi istifadəçiyə təqdim edildi.";
+        return "Menu package submitted to the user.";
     }
 
     @Override
     @Transactional
     public String updateProfile(String currentEmail, DietitianUpdateRequest request) {
-        log.info("Dietitian profili yenilənir: email={}", currentEmail);
+        log.info("Updating dietitian profile: email={}", currentEmail);
 
         DietitianEntity dietitian = entityFinder.findDietitianByEmail(currentEmail);
 
@@ -110,7 +110,7 @@ public class DietitianServiceImpl implements DietitianService {
         // Email update + duplicate check
         if (request.getEmail() != null && !request.getEmail().equals(currentEmail)) {
             if (dietitianRepository.existsByEmail(request.getEmail())) {
-                throw new ResourceAlreadyExistsException("Bu email artıq istifadədədir.");
+                throw new ResourceAlreadyExistsException("This email is already in use.");
             }
             dietitian.setEmail(request.getEmail());
         }
@@ -121,25 +121,25 @@ public class DietitianServiceImpl implements DietitianService {
         }
 
         dietitianRepository.save(dietitian);
-        log.info("Profil uğurla yeniləndi");
-        return "Profil məlumatlarınız uğurla yeniləndi.";
+        log.info("Profile updated successfully");
+        return "Your profile information has been updated successfully.";
     }
 
     @Override
     @Transactional(readOnly = true)
     public DietitianProfileResponse getProfile(String email) {
-        log.info("Dietitian profili istənilir: email={}", email);
+        log.info("Dietitian profile requested: email={}", email);
 
         DietitianEntity dietitian = entityFinder.findDietitianByEmail(email);
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toProfileResponse(dietitian);
     }
 
     @Override
     @Transactional(readOnly = true)
     public DietitianDashboardResponse getDashboardStats(String dietitianEmail) {
-        log.info("Dashboard statistikası hesablanır: email={}", dietitianEmail);
+        log.info("Calculating dashboard statistics: email={}", dietitianEmail);
 
         LocalDate now = LocalDate.now();
         int year = now.getYear();
@@ -152,30 +152,30 @@ public class DietitianServiceImpl implements DietitianService {
         List<UserEntity> activeUsers = userRepository.findByDietitianEmailAndStatus(
                 dietitianEmail, UserStatus.ACTIVE);
 
-        // Helper ilə approved menu sayını hesabla
+        // Calculate approved menu count via Helper
         long activeMenusCount = activeUsers.stream()
                 .filter(u -> menuBatchHelper.hasApprovedMenu(u.getId(), year, month))
                 .count();
 
-        // Helper ilə pending menu sayını hesabla
+        // Calculate pending menu count via Helper
         long pendingMenusCount = activeUsers.stream()
                 .filter(u -> menuBatchHelper.isDietitianActionRequired(u.getId(), year, month))
                 .count();
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toDashboardResponse(total, pendingMenusCount, activeMenusCount);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<UserSummaryResponse> getUrgentPatients(String dietitianEmail) {
-        log.info("Urgent patients istənilir: email={}", dietitianEmail);
+        log.info("Urgent patients requested: email={}", dietitianEmail);
 
         LocalDate now = LocalDate.now();
         int year = now.getYear();
         int month = now.getMonthValue();
 
-        // Helper ilə filter et
+        // Filter via Helper
         return userRepository.findByDietitianEmailAndStatus(dietitianEmail, UserStatus.ACTIVE).stream()
                 .filter(user -> !menuBatchHelper.hasApprovedMenu(user.getId(), year, month))
                 .map(dietitianMapper::toUrgentPatientResponse)
@@ -185,45 +185,45 @@ public class DietitianServiceImpl implements DietitianService {
     @Override
     @Transactional(readOnly = true)
     public PatientMedicalProfileResponse getPatientMedicalProfile(Long userId) {
-        log.info("Patient medical profile istənilir: userId={}", userId);
+        log.info("Patient medical profile requested: userId={}", userId);
 
         UserEntity user = entityFinder.findUserById(userId);
 
         HealthProfileEntity profile = user.getHealthProfile();
         if (profile == null) {
-            throw new HealthProfileNotFoundException("Sağlamlıq profili tapılmadı.");
+            throw new HealthProfileNotFoundException("Health profile not found.");
         }
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toMedicalProfileResponse(user, profile);
     }
 
     @Override
     @Transactional(readOnly = true)
     public MenuResponse getMonthlyMenu(Long userId, Integer year, Integer month) {
-        log.info("Aylıq menyu istənilir: userId={}, year={}, month={}", userId, year, month);
+        log.info("Monthly menu requested: userId={}, year={}, month={}", userId, year, month);
 
         MenuEntity menu = menuRepository.findByUserIdAndYearAndMonth(userId, year, month)
-                .orElseThrow(() -> new IdNotFoundException("Menyu tapılmadı."));
+                .orElseThrow(() -> new IdNotFoundException("Menu not found."));
 
-        // Helper ilə ən son batch-i tap
+        // Find the latest batch via Helper
         MenuBatchEntity latestBatch = menuBatchHelper.getLatestBatch(menu);
         if (latestBatch == null) {
-            throw new IdNotFoundException("Heç bir paket tapılmadı.");
+            throw new IdNotFoundException("No package found.");
         }
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toMenuResponse(menu, latestBatch);
     }
 
     @Override
     @Transactional
     public String deleteMenuContent(Long batchId, Integer day, MealType mealType) {
-        log.info("Menu content silinir: batchId={}, day={}, mealType={}", batchId, day, mealType);
+        log.info("Deleting menu content: batchId={}, day={}, mealType={}", batchId, day, mealType);
 
         MenuBatchEntity batch = entityFinder.findBatchById(batchId);
 
-        // Helper ilə sil
+        // Delete via Helper
         return menuBatchHelper.deleteMenuContent(batch, day, mealType);
     }
 
@@ -234,65 +234,65 @@ public class DietitianServiceImpl implements DietitianService {
 
         List<UserEntity> patients = userRepository.searchPatientsByDietitian(dietitianEmail, query);
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toUserSummaryList(patients);
     }
 
     @Override
     @Transactional(readOnly = true)
     public MenuRejectionDetailResponse getMenuRejectionReason(Long batchId) {
-        log.info("Menu rejection reason istənilir: batchId={}", batchId);
+        log.info("Menu rejection reason requested: batchId={}", batchId);
 
         MenuBatchEntity batch = entityFinder.findBatchById(batchId);
 
-        // Status yoxlaması - ResourceNotFoundException istifadə edirik (404)
+        // Status check - using ResourceNotFoundException (404)
         if (batch.getStatus() != MenuStatus.REJECTED) {
             throw new ResourceNotFoundException(
-                    "Bu paket üçün rədd səbəbi tapılmadı. Hazırkı status: " + batch.getStatus());
+                    "No rejection reason found for this package. Current status: " + batch.getStatus());
         }
 
         UserEntity user = batch.getMenu().getUser();
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toRejectionDetailResponse(batch, user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public MedicalFileDetailResponse getAnalysisFileUrl(Long fileId) {
-        log.info("Medical file detail istənilir: fileId={}", fileId);
+        log.info("Medical file detail requested: fileId={}", fileId);
 
         MedicalFileEntity file = medicalFileRepository.findById(fileId)
-                .orElseThrow(() -> new IdNotFoundException("Fayl tapılmadı"));
+                .orElseThrow(() -> new IdNotFoundException("File not found"));
 
         UserEntity user = file.getHealthProfile().getUser();
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toFileDetailResponse(file, user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public MenuResponse getBatchDetails(Long batchId) {
-        log.info("Batch details istənilir: batchId={}", batchId);
+        log.info("Batch details requested: batchId={}", batchId);
 
         MenuBatchEntity batch = entityFinder.findBatchById(batchId);
         MenuEntity menu = batch.getMenu();
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return dietitianMapper.toMenuResponse(menu, batch);
     }
 
     @Override
     @Transactional
     public void updateMenu(Long batchId, MenuCreateRequest request) {
-        log.info("Rejected batch yenilənir: batchId={}", batchId);
+        log.info("Updating rejected batch: batchId={}", batchId);
 
         MenuBatchEntity batch = entityFinder.findBatchById(batchId);
 
-        // Helper ilə update et
+        // Update via Helper
         menuBatchHelper.updateRejectedBatch(batch, request.getItems());
 
-        log.info("Batch uğurla yeniləndi");
+        log.info("Batch updated successfully");
     }
 }

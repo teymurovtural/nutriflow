@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdminActionResponse {
+
     private String message;
     private Long targetId;
     private OperationStatus operationStatus;
@@ -20,4 +21,5 @@ public class AdminActionResponse {
     private CatererStatus catererStatus;
     private Boolean dietitianActive;
     private LocalDateTime timestamp;
+
 }

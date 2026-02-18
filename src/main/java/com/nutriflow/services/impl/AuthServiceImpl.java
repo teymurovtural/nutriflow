@@ -65,31 +65,31 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String register(RegisterRequest request) {
-        log.info("Qeydiyyat prosesi başladı: Email = {}", request.getEmail());
+        log.info("Registration process started: Email = {}", request.getEmail());
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            log.warn("Qeydiyyat xətası: Şifrə təsdiqi uğursuzdur - Email: {}", request.getEmail());
+            log.warn("Registration error: Password confirmation failed - Email: {}", request.getEmail());
             throw new BusinessException(AuthMessages.PASSWORD_MISMATCH);
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            log.warn("Qeydiyyat xətası: Email artıq sistemdə var - Email: {}", request.getEmail());
+            log.warn("Registration error: Email already exists in the system - Email: {}", request.getEmail());
             throw new EmailAlreadyExistsException(AuthMessages.EMAIL_ALREADY_EXISTS + request.getEmail());
         }
 
         UserEntity user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-        log.info("İstifadəçi bazaya uğurla yazıldı. ID: {}, Email: {}", user.getId(), request.getEmail());
+        log.info("User successfully saved to database. ID: {}, Email: {}", user.getId(), request.getEmail());
 
         String otp = generateOtp();
-        log.debug("OTP yaradıldı: {}", otp);
+        log.debug("OTP generated: {}", otp);
 
         try {
             redisTemplate.opsForValue().set(otpPrefix + request.getEmail(), otp, 5, TimeUnit.MINUTES);
-            log.info("OTP Redis-ə yazıldı (5 dəqiqəlik): {}", request.getEmail());
+            log.info("OTP written to Redis (5-minute TTL): {}", request.getEmail());
         } catch (Exception e) {
-            log.error("Redis-ə yazılarkən xəta baş verdi: {}", e.getMessage());
+            log.error("Error occurred while writing to Redis: {}", e.getMessage());
         }
 
         OtpEntity otpEntity = OtpEntity.builder()
@@ -99,10 +99,10 @@ public class AuthServiceImpl implements AuthService {
                 .isUsed(false)
                 .build();
         otpRepository.save(otpEntity);
-        log.info("OTP məlumatı verilənlər bazasında (OtpRepository) saxlanıldı.");
+        log.info("OTP data saved to the database (OtpRepository).");
 
         emailService.sendVerificationEmail(request.getEmail(), otp);
-        log.info("Təsdiq emaili göndərildi: {}", request.getEmail());
+        log.info("Verification email sent: {}", request.getEmail());
 
         return AuthMessages.REGISTRATION_SUCCESS;
     }
@@ -110,60 +110,60 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String verifyOtp(VerifyRequest request) {
-        log.info("OTP təsdiqləmə sorğusu gəldi: {}", request.getEmail());
+        log.info("OTP verification request received: {}", request.getEmail());
 
         String storedOtp = redisTemplate.opsForValue().get(otpPrefix + request.getEmail());
 
         if (storedOtp == null) {
-            log.warn("OTP tapılmadı (Müddəti bitmiş ola bilər): {}", request.getEmail());
+            log.warn("OTP not found (may have expired): {}", request.getEmail());
             throw new InvalidOtpException(AuthMessages.INVALID_OTP);
         }
 
         if (!storedOtp.equals(request.getOtpCode())) {
-            log.warn("Yanlış OTP daxil edildi: Gözlənilən: {}, Daxil edilən: {} - Email: {}",
+            log.warn("Incorrect OTP entered - Expected: {}, Entered: {} - Email: {}",
                     storedOtp, request.getOtpCode(), request.getEmail());
             throw new InvalidOtpException(AuthMessages.WRONG_OTP);
         }
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
-                    log.error("OTP təsdiqləmə zamanı email bazada tapılmadı: {}", request.getEmail());
+                    log.error("Email not found in database during OTP verification: {}", request.getEmail());
                     return new UserNotFoundException(AuthMessages.USER_NOT_FOUND);
                 });
 
         user.setEmailVerified(true);
         user.setStatus(UserStatus.VERIFIED);
         userRepository.save(user);
-        log.info("İstifadəçi statusu VERIFIED olaraq dəyişdirildi: {}", request.getEmail());
+        log.info("User status changed to VERIFIED: {}", request.getEmail());
 
         otpRepository.findByEmailAndCode(request.getEmail(), request.getOtpCode())
                 .ifPresent(otp -> {
                     otp.setUsed(true);
                     otpRepository.save(otp);
-                    log.info("OTP bazada 'istifadə olunmuş' kimi işarələndi.");
+                    log.info("OTP marked as 'used' in the database.");
                 });
 
         redisTemplate.delete(otpPrefix + request.getEmail());
-        log.info("OTP Redis-dən silindi: {}", request.getEmail());
+        log.info("OTP deleted from Redis: {}", request.getEmail());
 
         return AuthMessages.OTP_VERIFIED_SUCCESS;
     }
 
     @Override
     public BaseAuthResponse login(LoginRequest request) {
-        log.info("Giriş cəhdi başladı: {}", request.getEmail());
+        log.info("Login attempt started: {}", request.getEmail());
 
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
-            log.info("Authentication Manager tərəfindən doğrulanma uğurlu: {}", request.getEmail());
+            log.info("Authentication successful via Authentication Manager: {}", request.getEmail());
 
             SecurityUser securityUser = (SecurityUser) auth.getPrincipal();
 
             String accessToken = jwtService.generateToken(securityUser);
             String refreshToken = jwtService.generateRefreshToken(securityUser);
-            log.info("Access və Refresh tokenlər yaradıldı.");
+            log.info("Access and Refresh tokens generated.");
 
             redisTemplate.opsForValue().set(
                     refreshTokenPrefix + securityUser.getUsername(),
@@ -171,13 +171,13 @@ public class AuthServiceImpl implements AuthService {
                     refreshExpiration,
                     TimeUnit.MILLISECONDS
             );
-            log.info("Refresh token Redis-də saxlanıldı. İstifadəçi: {}", securityUser.getUsername());
+            log.info("Refresh token stored in Redis. User: {}", securityUser.getUsername());
 
             String role = securityUser.getRole();
-            log.info("İstifadəçi rolu: {}", role);
+            log.info("User role: {}", role);
 
             if (Role.ADMIN.name().equals(role) || Role.SUPER_ADMIN.name().equals(role)) {
-                log.info("Admin/SuperAdmin məlumatları gətirilir...");
+                log.info("Fetching Admin/SuperAdmin data...");
                 AdminEntity a = adminRepository.findByEmail(request.getEmail())
                         .orElseThrow(() -> new UserNotFoundException(AuthMessages.ADMIN_NOT_FOUND + request.getEmail()));
                 return AdminAuthResponse.builder()
@@ -192,7 +192,7 @@ public class AuthServiceImpl implements AuthService {
             }
 
             if (Role.DIETITIAN.name().equals(role)) {
-                log.info("Dietoloq məlumatları gətirilir...");
+                log.info("Fetching Dietitian data...");
                 DietitianEntity d = dietitianRepository.findByEmail(request.getEmail())
                         .orElseThrow(() -> new UserNotFoundException(AuthMessages.DIETITIAN_NOT_FOUND + request.getEmail()));
                 return DietitianAuthResponse.builder()
@@ -208,7 +208,7 @@ public class AuthServiceImpl implements AuthService {
             }
 
             if (Role.CATERER.name().equals(role)) {
-                log.info("Caterer məlumatları gətirilir...");
+                log.info("Fetching Caterer data...");
                 CatererEntity c = catererRepository.findByEmail(request.getEmail())
                         .orElseThrow(() -> new UserNotFoundException(AuthMessages.CATERER_NOT_FOUND + request.getEmail()));
                 return CatererAuthResponse.builder()
@@ -222,7 +222,7 @@ public class AuthServiceImpl implements AuthService {
                         .build();
             }
 
-            log.info("Standart istifadəçi məlumatları gətirilir...");
+            log.info("Fetching standard user data...");
             UserEntity u = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UserNotFoundException(AuthMessages.USER_NOT_FOUND));
             return AuthResponse.builder()
@@ -234,39 +234,39 @@ public class AuthServiceImpl implements AuthService {
                     .build();
 
         } catch (BadCredentialsException e) {
-            log.warn("Yanlış giriş cəhdi (Email və ya şifrə səhvdir): {}", request.getEmail());
+            log.warn("Invalid login attempt (incorrect email or password): {}", request.getEmail());
             throw new BusinessException(AuthMessages.INVALID_CREDENTIALS);
 
         } catch (AuthenticationException e) {
-            log.warn("Təhlükəsizlik xətası: {} - {}", request.getEmail(), e.getMessage());
+            log.warn("Security error: {} - {}", request.getEmail(), e.getMessage());
             throw new BusinessException(AuthMessages.LOGIN_FAILED);
 
         } catch (Exception e) {
-            log.error("GÖZLƏNİLMƏZ SİSTEM XƏTASI: {}", e.getMessage());
+            log.error("UNEXPECTED SYSTEM ERROR: {}", e.getMessage());
             throw new BusinessException(AuthMessages.SYSTEM_ERROR);
         }
     }
 
     @Override
     public BaseAuthResponse refreshToken(String refreshToken) {
-        log.info("Refresh token yeniləmə sorğusu gəldi.");
+        log.info("Refresh token renewal request received.");
 
         String cleanToken = (refreshToken != null && refreshToken.startsWith("Bearer "))
                 ? refreshToken.substring(7)
                 : refreshToken;
 
         String userEmail = jwtService.extractUsername(cleanToken);
-        log.info("Token daxilindən email oxundu: {}", userEmail);
+        log.info("Email extracted from token: {}", userEmail);
 
         String storedToken = redisTemplate.opsForValue().get(refreshTokenPrefix + userEmail);
 
         if (storedToken == null) {
-            log.warn("Refresh token Redis-də tapılmadı: {}", userEmail);
+            log.warn("Refresh token not found in Redis: {}", userEmail);
             throw new InvalidTokenException(AuthMessages.INVALID_REFRESH_TOKEN);
         }
 
         if (!storedToken.equals(cleanToken)) {
-            log.error("Təqdim edilən refresh token Redis-dəki ilə uyğun deyil: {}", userEmail);
+            log.error("Provided refresh token does not match the one stored in Redis: {}", userEmail);
             throw new InvalidTokenException(AuthMessages.TOKEN_MISMATCH);
         }
 
@@ -275,12 +275,12 @@ public class AuthServiceImpl implements AuthService {
         SecurityUser securityUser = (SecurityUser) userDetails;
         String role = securityUser.getRole();
 
-        log.info("Yeni Access Token yaradıldı. Rol: {}", role);
+        log.info("New Access Token generated. Role: {}", role);
 
         if (Role.ADMIN.name().equals(role) || Role.SUPER_ADMIN.name().equals(role)) {
             AdminEntity a = adminRepository.findByEmail(userEmail)
                     .orElseThrow(() -> {
-                        log.error("Refresh zamanı Admin tapılmadı: {}", userEmail);
+                        log.error("Admin not found during refresh: {}", userEmail);
                         return new UserNotFoundException(AuthMessages.ADMIN_NOT_FOUND);
                     });
             return AdminAuthResponse.builder()
@@ -297,7 +297,7 @@ public class AuthServiceImpl implements AuthService {
         if (Role.DIETITIAN.name().equals(role)) {
             DietitianEntity d = dietitianRepository.findByEmail(userEmail)
                     .orElseThrow(() -> {
-                        log.error("Refresh zamanı Dietoloq tapılmadı: {}", userEmail);
+                        log.error("Dietitian not found during refresh: {}", userEmail);
                         return new UserNotFoundException(AuthMessages.DIETITIAN_NOT_FOUND);
                     });
             return DietitianAuthResponse.builder()
@@ -315,7 +315,7 @@ public class AuthServiceImpl implements AuthService {
         if (Role.CATERER.name().equals(role)) {
             CatererEntity c = catererRepository.findByEmail(userEmail)
                     .orElseThrow(() -> {
-                        log.error("Refresh zamanı Caterer tapılmadı: {}", userEmail);
+                        log.error("Caterer not found during refresh: {}", userEmail);
                         return new UserNotFoundException(AuthMessages.CATERER_NOT_FOUND);
                     });
             return CatererAuthResponse.builder()
@@ -331,11 +331,11 @@ public class AuthServiceImpl implements AuthService {
 
         UserEntity u = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> {
-                    log.error("Refresh zamanı istifadəçi tapılmadı: {}", userEmail);
+                    log.error("User not found during refresh: {}", userEmail);
                     return new UserNotFoundException(AuthMessages.USER_NOT_FOUND);
                 });
 
-        log.info("Token yeniləmə uğurla tamamlandı: {}", userEmail);
+        log.info("Token renewal completed successfully: {}", userEmail);
         return AuthResponse.builder()
                 .token(newAccessToken)
                 .refreshToken(cleanToken)

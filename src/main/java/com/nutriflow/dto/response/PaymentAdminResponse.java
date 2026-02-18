@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class PaymentAdminResponse {
+
     private Long id;
     private Double amount;
     private String currency;
@@ -15,4 +16,5 @@ public class PaymentAdminResponse {
     private String transactionId;
     private String userEmail;
     private Long subscriptionId;
+
 }

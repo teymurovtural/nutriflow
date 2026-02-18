@@ -1,7 +1,7 @@
 package com.nutriflow.security;
 
 /**
- * JWT token-i invalid olduqda throw edilən exception
+ * Exception thrown when a JWT token is invalid
  */
 public class InvalidTokenException extends RuntimeException {
     public InvalidTokenException(String message) {

@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Delivery əməliyyatları üçün helper sinif.
- * Delivery yaratma, filtrasiya və business logic.
+ * Helper class for Delivery operations.
+ * Delivery creation, filtering and business logic.
  */
 @Component
 @RequiredArgsConstructor
@@ -26,15 +26,15 @@ public class DeliveryHelper {
     private final DeliveryRepository deliveryRepository;
 
     /**
-     * MenuBatch təsdiq edildikdən sonra hər gün üçün Delivery yaradır.
+     * Creates a Delivery for each day after a MenuBatch is approved.
      *
      * @param batch           MenuBatch
      * @param user            User
-     * @param deliveryNotes   Çatdırılma qeydləri
+     * @param deliveryNotes   Delivery notes
      */
     @Transactional
     public void createDeliveriesForApprovedBatch(MenuBatchEntity batch, UserEntity user, String deliveryNotes) {
-        log.info("Təsdiqlənmiş batch üçün delivery-lər yaradılır. BatchId: {}, UserId: {}", batch.getId(), user.getId());
+        log.info("Creating deliveries for approved batch. BatchId: {}, UserId: {}", batch.getId(), user.getId());
 
         List<Integer> distinctDays = batch.getItems().stream()
                 .map(MenuItemEntity::getDay)
@@ -42,7 +42,7 @@ public class DeliveryHelper {
                 .sorted()
                 .collect(Collectors.toList());
 
-        // Batch-ə aid mövcud delivery-ləri bir dəfə tap
+        // Fetch existing deliveries for the batch once
         List<DeliveryEntity> existingDeliveries = deliveryRepository.findAllByBatchId(batch.getId());
 
         int createdCount = 0;
@@ -56,24 +56,24 @@ public class DeliveryHelper {
                         day
                 );
 
-                // Mövcud delivery-ni tap
+                // Find existing delivery
                 DeliveryEntity existingDelivery = existingDeliveries.stream()
                         .filter(d -> d.getDate().equals(deliveryDate))
                         .findFirst()
                         .orElse(null);
 
                 if (existingDelivery != null) {
-                    // Mövcuddursa - yalnız notes yenilə
+                    // If exists - only update notes
                     if (deliveryNotes != null && !deliveryNotes.isBlank()) {
                         existingDelivery.setDeliveryNotes(deliveryNotes);
                         deliveryRepository.save(existingDelivery);
                         updatedCount++;
-                        log.debug("Delivery notes yeniləndi: Date={}", deliveryDate);
+                        log.debug("Delivery notes updated: Date={}", deliveryDate);
                     }
                     continue;
                 }
 
-                // Yoxdursa - yeni yarat
+                // If not exists - create new
                 DeliveryEntity delivery = DeliveryEntity.builder()
                         .user(user)
                         .caterer(user.getCaterer())
@@ -87,21 +87,21 @@ public class DeliveryHelper {
                 deliveryRepository.save(delivery);
                 createdCount++;
 
-                log.debug("Delivery yaradıldı: Date={}, Status={}", deliveryDate, DeliveryStatus.PENDING);
+                log.debug("Delivery created: Date={}, Status={}", deliveryDate, DeliveryStatus.PENDING);
 
             } catch (Exception e) {
-                log.error("Gün {} üçün delivery yaradılarkən xəta: {}", day, e.getMessage());
+                log.error("Error creating delivery for day {}: {}", day, e.getMessage());
             }
         }
 
-        log.info("Batch üçün {} delivery yaradıldı, {} delivery yeniləndi", createdCount, updatedCount);
+        log.info("{} deliveries created, {} deliveries updated for batch", createdCount, updatedCount);
     }
 
     /**
-     * User-ə aid olan bütün delivery-ləri statusuna görə filtrlər.
+     * Filters all deliveries belonging to a user by status.
      *
      * @param userId User ID
-     * @param status DeliveryStatus (null olarsa hamısı)
+     * @param status DeliveryStatus (if null, returns all)
      * @return Filtered deliveries
      */
     public List<DeliveryEntity> getDeliveriesByUserAndStatus(Long userId, DeliveryStatus status) {
@@ -118,12 +118,12 @@ public class DeliveryHelper {
     }
 
     /**
-     * Caterer-ə aid olan müəyyən tarixdəki delivery-ləri filtrlər.
+     * Filters deliveries for a caterer on a specific date.
      *
      * @param catererId Caterer ID
-     * @param date      Tarix (null olarsa bugün)
-     * @param name      Müştəri adı (optional)
-     * @param district  Rayon (optional)
+     * @param date      Date (if null, uses today)
+     * @param name      Client name (optional)
+     * @param district  District (optional)
      * @return Filtered deliveries
      */
     public List<DeliveryEntity> getDeliveriesByCatererAndDate(Long catererId, LocalDate date, String name, String district) {
@@ -132,11 +132,11 @@ public class DeliveryHelper {
     }
 
     /**
-     * Müəyyən günün menu item-lərini çıxarır.
+     * Retrieves menu items for a specific day.
      *
      * @param batch MenuBatch
-     * @param day   Gün
-     * @return Həmin günün menu items
+     * @param day   Day
+     * @return Menu items for that day
      */
     public List<MenuItemEntity> getMenuItemsForDay(MenuBatchEntity batch, Integer day) {
         if (batch == null || batch.getItems() == null || day == null) {
@@ -149,26 +149,26 @@ public class DeliveryHelper {
     }
 
     /**
-     * Delivery-nin statusunu yeniləyir və əlavə məntiq tətbiq edir.
+     * Updates the delivery status and applies additional business logic.
      *
      * @param delivery  Delivery entity
-     * @param newStatus Yeni status
-     * @param note      Caterer qeydi
+     * @param newStatus New status
+     * @param note      Caterer note
      */
     @Transactional
     public void updateDeliveryStatus(DeliveryEntity delivery, DeliveryStatus newStatus, String note) {
-        log.info("Delivery status yenilənir: ID={}, OldStatus={}, NewStatus={}",
+        log.info("Updating delivery status: ID={}, OldStatus={}, NewStatus={}",
                 delivery.getId(), delivery.getStatus(), newStatus);
 
-        // DELIVERED-dən başqa statusa keçid olmaz
+        // Cannot transition from DELIVERED to another status
         if (delivery.getStatus() == DeliveryStatus.DELIVERED) {
-            throw new IllegalStateException("Çatdırılmış sifariş artıq dəyişdirilə bilməz!");
+            throw new IllegalStateException("A delivered order can no longer be modified!");
         }
 
-        // FAILED-dən yalnız PENDING-ə qayıda bilər (retry)
+        // From FAILED, can only return to PENDING (retry)
         if (delivery.getStatus() == DeliveryStatus.FAILED
                 && newStatus != DeliveryStatus.PENDING) {
-            throw new IllegalStateException("Uğursuz sifariş yalnız yenidən PENDING-ə qaytarıla bilər!");
+            throw new IllegalStateException("A failed order can only be reset back to PENDING!");
         }
 
         delivery.setStatus(newStatus);
@@ -179,45 +179,45 @@ public class DeliveryHelper {
 
         if (newStatus == DeliveryStatus.DELIVERED) {
             delivery.setActualDeliveryTime(java.time.LocalDateTime.now());
-            log.info("Delivery tamamlandı: ID={}, Time={}", delivery.getId(), delivery.getActualDeliveryTime());
+            log.info("Delivery completed: ID={}, Time={}", delivery.getId(), delivery.getActualDeliveryTime());
         }
 
         if (newStatus == DeliveryStatus.FAILED) {
             delivery.setActualDeliveryTime(java.time.LocalDateTime.now());
-            log.warn("Delivery uğursuz oldu: ID={}, Reason={}", delivery.getId(), note);
+            log.warn("Delivery failed: ID={}, Reason={}", delivery.getId(), note);
         }
 
-        // PENDING-ə retry zamanı vaxtı sıfırla
+        // Reset time on PENDING retry
         if (newStatus == DeliveryStatus.PENDING) {
             delivery.setActualDeliveryTime(null);
             delivery.setEstimatedDeliveryTime(null);
-            log.info("Delivery retry üçün sıfırlandı: ID={}", delivery.getId());
+            log.info("Delivery reset for retry: ID={}", delivery.getId());
         }
 
         deliveryRepository.save(delivery);
     }
 
     /**
-     * Estimated delivery time yeniləyir.
+     * Updates the estimated delivery time.
      *
      * @param delivery      Delivery entity
-     * @param estimatedTime Təxmini vaxt
+     * @param estimatedTime Estimated time
      */
     @Transactional
     public void updateEstimatedTime(DeliveryEntity delivery, String estimatedTime) {
-        // Əgər artıq çatdırılıbsa, vaxtı dəyişdirmək olmaz
+        // Cannot change time if already delivered
         if (delivery.getStatus() == DeliveryStatus.DELIVERED) {
-            throw new IllegalStateException("Sifariş artıq çatdırılıb! Təxmini vaxtı dəyişdirə bilməzsiniz.");
+            throw new IllegalStateException("Order has already been delivered! You cannot change the estimated time.");
         }
 
         delivery.setEstimatedDeliveryTime(estimatedTime);
         deliveryRepository.save(delivery);
 
-        log.info("Estimated time yeniləndi: DeliveryId={}, Time={}", delivery.getId(), estimatedTime);
+        log.info("Estimated time updated: DeliveryId={}, Time={}", delivery.getId(), estimatedTime);
     }
 
     /**
-     * Keçmişdəki delivery-ləri tapır.
+     * Finds past deliveries.
      *
      * @param userId User ID
      * @return Past deliveries
@@ -229,7 +229,7 @@ public class DeliveryHelper {
     }
 
     /**
-     * Gələcəkdəki delivery-ləri tapır.
+     * Finds upcoming deliveries.
      *
      * @param userId User ID
      * @return Upcoming deliveries
@@ -241,7 +241,7 @@ public class DeliveryHelper {
     }
 
     /**
-     * Bugünkü delivery-ləri tapır.
+     * Finds today's deliveries.
      *
      * @param userId User ID
      * @return Today's deliveries
@@ -253,11 +253,11 @@ public class DeliveryHelper {
     }
 
     /**
-     * Caterer statistikası hesablayır.
+     * Calculates caterer statistics.
      *
      * @param catererId Caterer ID
-     * @param date      Tarix
-     * @return Status sayları
+     * @param date      Date
+     * @return Status counts
      */
     public CatererStatsData calculateCatererStats(Long catererId, LocalDate date) {
         LocalDate targetDate = date != null ? date : LocalDate.now();
@@ -282,6 +282,4 @@ public class DeliveryHelper {
         private Long delivered;
         private Long failed;
     }
-
-
 }

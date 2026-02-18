@@ -9,18 +9,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
- * Security əməliyyatları üçün yardımçı sinif.
- * Authentication, Authorization və current user məlumatlarının əldə edilməsi.
+ * Utility class for security operations.
+ * Handles authentication, authorization, and retrieval of current user information.
  */
 @Component
 @Slf4j
 public class SecurityUtils {
 
     /**
-     * Cari authenticated user-in ID-sini qaytarır.
+     * Returns the ID of the currently authenticated user.
      *
      * @return User ID
-     * @throws AccessDeniedException Əgər sistemə giriş edilməyibsə
+     * @throws AccessDeniedException if the user is not logged in
      */
     public static Long getCurrentUserId() {
         SecurityUser securityUser = getCurrentSecurityUser();
@@ -28,10 +28,10 @@ public class SecurityUtils {
     }
 
     /**
-     * Cari authenticated user-in email-ini qaytarır.
+     * Returns the email of the currently authenticated user.
      *
      * @return User email
-     * @throws AccessDeniedException Əgər sistemə giriş edilməyibsə
+     * @throws AccessDeniedException if the user is not logged in
      */
     public static String getCurrentUserEmail() {
         SecurityUser securityUser = getCurrentSecurityUser();
@@ -39,47 +39,47 @@ public class SecurityUtils {
     }
 
     /**
-     * Cari authenticated user-in Role-unu qaytarır.
+     * Returns the role of the currently authenticated user.
      *
      * @return User role
-     * @throws AccessDeniedException Əgər sistemə giriş edilməyibsə
+     * @throws AccessDeniedException if the user is not logged in
      */
     public static Role getCurrentUserRole() {
         SecurityUser securityUser = getCurrentSecurityUser();
-        // SecurityUser.getRole() String qaytarırsa, Role enum-a çeviririk
+        // If SecurityUser.getRole() returns a String, convert it to Role enum
         String roleString = securityUser.getRole();
         return Role.valueOf(roleString);
     }
 
     /**
-     * SecurityContext-dən SecurityUser obyektini çıxarır.
+     * Extracts the SecurityUser object from the SecurityContext.
      *
      * @return SecurityUser
-     * @throws AccessDeniedException Əgər sistemə giriş edilməyibsə
+     * @throws AccessDeniedException if the user is not logged in
      */
     public static SecurityUser getCurrentSecurityUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Sistemə giriş edilməyib!");
-            throw new AccessDeniedException("Sistemə giriş tələb olunur!");
+            log.warn("User is not authenticated!");
+            throw new AccessDeniedException("Authentication is required!");
         }
 
         Object principal = authentication.getPrincipal();
 
         if (!(principal instanceof SecurityUser)) {
-            log.error("Principal SecurityUser tipində deyil: {}", principal.getClass().getName());
-            throw new AccessDeniedException("Yanlış authentication tipi!");
+            log.error("Principal is not of type SecurityUser: {}", principal.getClass().getName());
+            throw new AccessDeniedException("Invalid authentication type!");
         }
 
         return (SecurityUser) principal;
     }
 
     /**
-     * User-in müəyyən role-a sahib olub-olmadığını yoxlayır.
+     * Checks whether the user has a specific role.
      *
-     * @param role Yoxlanılacaq role
-     * @return true əgər user həmin role-a sahibdirsə
+     * @param role The role to check
+     * @return true if the user has the given role
      */
     public static boolean hasRole(Role role) {
         try {
@@ -90,36 +90,36 @@ public class SecurityUtils {
     }
 
     /**
-     * User-in ADMIN roluna sahib olub-olmadığını yoxlayır.
+     * Checks whether the user has the ADMIN role.
      *
-     * @return true əgər admin-dirsə
+     * @return true if the user is an admin
      */
     public static boolean isAdmin() {
         return hasRole(Role.ADMIN);
     }
 
     /**
-     * User-in DIETITIAN roluna sahib olub-olmadığını yoxlayır.
+     * Checks whether the user has the DIETITIAN role.
      *
-     * @return true əgər dietitian-dırsa
+     * @return true if the user is a dietitian
      */
     public static boolean isDietitian() {
         return hasRole(Role.DIETITIAN);
     }
 
     /**
-     * User-in CATERER roluna sahib olub-olmadığını yoxlayır.
+     * Checks whether the user has the CATERER role.
      *
-     * @return true əgər caterer-dirsə
+     * @return true if the user is a caterer
      */
     public static boolean isCaterer() {
         return hasRole(Role.CATERER);
     }
 
     /**
-     * Sistemə giriş edilib-edilmədiyini yoxlayır.
+     * Checks whether the user is currently authenticated.
      *
-     * @return true əgər authenticated-dirsə
+     * @return true if the user is authenticated
      */
     public static boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -127,31 +127,31 @@ public class SecurityUtils {
     }
 
     /**
-     * Current user-in başqa bir user-ə access hüququnu yoxlayır.
-     * Admin və Dietitian öz müştərilərinə baxa bilər.
+     * Checks whether the current user has access to another user's data.
+     * Admins and Dietitians can view their own clients.
      *
-     * @param targetUserId Baxılacaq user-in ID-si
-     * @return true əgər access varsa
+     * @param targetUserId The ID of the user to be accessed
+     * @return true if access is granted
      */
     public static boolean canAccessUser(Long targetUserId) {
         try {
             Long currentUserId = getCurrentUserId();
 
-            // Özünə həmişə baxa bilər
+            // Users can always access their own data
             if (currentUserId.equals(targetUserId)) {
                 return true;
             }
 
-            // Admin hər kəsə baxa bilər
+            // Admin can access anyone
             if (isAdmin()) {
                 return true;
             }
 
-            // Dietitian və Caterer öz müştərilərinə baxa bilər (bu logic service-də yoxlanılmalı)
+            // Dietitian and Caterer can access their own clients (this logic should be validated in the service layer)
             return isDietitian() || isCaterer();
 
         } catch (Exception e) {
-            log.error("Access yoxlaması zamanı xəta: {}", e.getMessage());
+            log.error("Error during access check: {}", e.getMessage());
             return false;
         }
     }

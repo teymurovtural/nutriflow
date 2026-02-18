@@ -13,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Activity Log Service Implementation.
- * İstifadəçi və admin əməliyyatlarını bazada saxlayır.
+ * Saves user and admin operations to the database.
  *
  * NOTE: @Transactional(propagation = Propagation.REQUIRES_NEW)
- * istifadə edilir ki, loqlama əməliyyatı əsas tranzaksiya ilə asılı olmasın.
- * Əgər əsas əməliyyat fail olsa belə, loq yaradılır.
+ * is used so that the logging operation is independent of the main transaction.
+ * Even if the main operation fails, the log entry is still created.
  */
 @Service
 @RequiredArgsConstructor
@@ -39,9 +39,9 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                     .action(action)
                     .entityType(entityType)
                     .entityId(entityId)
-                    // Null gələrsə, bazada null göründümsün deyə default dəyər veririk
-                    .oldValue(oldValue != null ? oldValue : "Məlumat yoxdur")
-                    .newValue(newValue != null ? newValue : "Məlumat yoxdur")
+                    // If null is received, we assign a default value so it doesn't appear as null in the database
+                    .oldValue(oldValue != null ? oldValue : "No data available")
+                    .newValue(newValue != null ? newValue : "No data available")
                     .details(details)
                     .ipAddress(getClientIp())
                     .build();
@@ -49,16 +49,16 @@ public class ActivityLogServiceImpl implements ActivityLogService {
             activityLogRepository.save(logEntry);
 
         } catch (Exception e) {
-            // Log yazarkən xəta olsa, sistemin çökmməməsi üçün sadəcə konsola yazırıq
-            log.error("Activity Log yadda saxlanılarkən xəta baş verdi: {}", e.getMessage(), e);
+            // If an error occurs while writing the log, we only print to console to prevent system crash
+            log.error("An error occurred while saving the Activity Log: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * Client-in real IP ünvanını tapır.
-     * IpAddressUtil-dən istifadə edir.
+     * Retrieves the real IP address of the client.
+     * Uses IpAddressUtil.
      *
-     * @return Client IP ünvanı
+     * @return Client IP address
      */
     @Override
     public String getClientIp() {

@@ -35,33 +35,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String jwt;
             final String userEmail;
 
-            // Authorization header-ı yoxla
+            // Check Authorization header
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // JWT token-i çıxar (substring)
+            // Extract JWT token (substring)
             jwt = authHeader.substring(7);
 
-            // Username-i çıxarmağa çalış
+            // Try to extract username
             try {
                 userEmail = jwtService.extractUsername(jwt);
             } catch (InvalidTokenException e) {
-                // Invalid token - davam et
+                // Invalid token - continue
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\": \"Invalid token\"}");
                 return;
             }
 
-            // Əgər username var və authentication hələ set edilməyibsə
+            // If username exists and authentication has not been set yet
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 try {
-                    // User detaillarını yükləməyə çalış
+                    // Try to load user details
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                    // Token etibarlı mı yoxla
+                    // Check if token is valid
                     if (jwtService.isTokenValid(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(
@@ -73,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 } catch (UsernameNotFoundException e) {
-                    // User tapılmadı - davam et
+                    // User not found - continue
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json");
                     response.getWriter().write("{\"error\": \"User not found\"}");
@@ -84,7 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            // Hər cür xəta olsa
+            // Any kind of error
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Authentication error\"}");

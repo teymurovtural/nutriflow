@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Caterer (Kuryer/Aşpaz) paneli üçün əməliyyatları idarə edən controller.
+ * Controller managing operations for the Caterer (Courier/Chef) panel.
  */
 @RestController
 @RequestMapping("/api/v1/caterer")
@@ -29,7 +29,7 @@ public class CatererController {
     private final CatererService catererService;
 
     /**
-     * Dashboard üçün statistik məlumatları (cəmi, yolda, çatdırılan və s.) qaytarır.
+     * Returns statistical data for the dashboard (total, on the way, delivered, etc.).
      */
     @GetMapping("/stats")
     public ResponseEntity<CatererStatsResponse> getDashboardStats() {
@@ -37,7 +37,7 @@ public class CatererController {
     }
 
     /**
-     * Müəyyən edilmiş tarixə (default olaraq bugün) görə çatdırılma siyahısını qaytarır.
+     * Returns the delivery list for a specified date (default: today).
      */
     @GetMapping("/deliveries")
     public ResponseEntity<List<DeliveryDetailResponse>> getDailyDeliveries(
@@ -48,20 +48,20 @@ public class CatererController {
     }
 
     /**
-     * Sifarişin statusunu yeniləyir və kuryerin qeydini bazaya yazır.
+     * Updates the order status and saves the courier's note to the database.
      */
     @PatchMapping("/deliveries/{deliveryId}/status")
     public ResponseEntity<Void> updateDeliveryStatus(
             @PathVariable Long deliveryId,
-            @Valid @RequestBody DeliveryStatusUpdateRequest request) { // DTO validasiyası aktivdir
+            @Valid @RequestBody DeliveryStatusUpdateRequest request) { // DTO validation is active
 
-        // Status və kuryer qeydi service-ə ötürülür
+        // Status and courier note are passed to the service
         catererService.updateDeliveryStatus(deliveryId, request.getStatus(), request.getCatererNote());
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * Kuryerin profil məlumatlarını (ad, telefon, ünvan) gətirir.
+     * Retrieves the courier's profile information (name, phone, address).
      */
     @GetMapping("/profile")
     public ResponseEntity<CatererResponse> getProfile() {
@@ -69,7 +69,7 @@ public class CatererController {
     }
 
     /**
-     * Kuryerin profil məlumatlarını yeniləyir.
+     * Updates the courier's profile information.
      */
     @PutMapping("/profile")
     public ResponseEntity<String> updateProfile(@Valid @RequestBody CatererProfileUpdateRequest request) {
@@ -78,20 +78,20 @@ public class CatererController {
     }
 
     /**
-     * Müştəri üçün təxmini çatdırılma vaxtını təyin edir.
+     * Sets the estimated delivery time for the customer.
      */
     @PutMapping("/deliveries/{id}/estimate")
     public ResponseEntity<String> updateEstimate(
             @PathVariable Long id,
             @RequestParam String time) {
         catererService.updateEstimatedTime(id, time);
-        return ResponseEntity.ok("Təxmini çatdırılma vaxtı qeyd olundu: " + time);
+        return ResponseEntity.ok("Estimated delivery time recorded: " + time);
     }
 
     @PatchMapping("/deliveries/failed")
     public ResponseEntity<String> markDeliveryAsFailed(
             @Valid @RequestBody DeliveryFailureRequest request) {
         catererService.markDeliveryAsFailed(request);
-        return ResponseEntity.ok("Çatdırılma uğursuz kimi işarələndi.");
+        return ResponseEntity.ok("Delivery marked as failed.");
     }
 }

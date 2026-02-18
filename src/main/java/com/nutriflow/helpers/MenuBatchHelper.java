@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * MenuBatch əməliyyatları üçün helper sinif.
- * Batch creation, update və management logic.
+ * Helper class for MenuBatch operations.
+ * Batch creation, update and management logic.
  */
 @Component
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class MenuBatchHelper {
     private final MenuBatchRepository menuBatchRepository;
 
     /**
-     * User-in müəyyən ay üçün APPROVED statuslu batch-i olub-olmadığını yoxlayır.
+     * Checks whether a user has an APPROVED batch for a given month.
      */
     public boolean hasApprovedMenu(Long userId, int year, int month) {
         return menuRepository.findByUserIdAndYearAndMonth(userId, year, month)
@@ -42,8 +42,8 @@ public class MenuBatchHelper {
     }
 
     /**
-     * Dietitian action tələb edən batch-lər olub-olmadığını yoxlayır.
-     * DRAFT və ya REJECTED statuslu batch-lər dietitian action tələb edir.
+     * Checks whether there are batches that require dietitian action.
+     * Batches with DRAFT or REJECTED status require dietitian action.
      */
     public boolean isDietitianActionRequired(Long userId, int year, int month) {
         return menuRepository.findByUserIdAndYearAndMonth(userId, year, month)
@@ -51,13 +51,13 @@ public class MenuBatchHelper {
                         .max(Comparator.comparing(BaseEntity::getCreatedAt))
                         .map(batch -> batch.getStatus() == MenuStatus.DRAFT
                                 || batch.getStatus() == MenuStatus.REJECTED)
-                        .orElse(true)) // Heç batch yoxdursa, action lazımdır
-                .orElse(true); // Menyu yoxdursa, mütləq yaradılmalıdır
+                        .orElse(true)) // If no batch exists, action is required
+                .orElse(true); // If no menu exists, must be created
     }
 
     /**
-     * Menu və ya Batch tapır, yoxdursa yaradır.
-     * Draft batch tapır, yoxdursa yeni yaradır.
+     * Finds or creates a Menu and/or Batch.
+     * Finds a Draft batch, or creates a new one if not found.
      */
     @Transactional
     public MenuBatchEntity getOrCreateDraftBatch(
@@ -66,10 +66,10 @@ public class MenuBatchHelper {
             int year,
             int month) {
 
-        log.info("Draft batch tapılır və ya yaradılır: UserId={}, Year={}, Month={}",
+        log.info("Finding or creating draft batch: UserId={}, Year={}, Month={}",
                 user.getId(), year, month);
 
-        // 1. Menu tap və ya yarat
+        // 1. Find or create Menu
         MenuEntity menu = menuRepository.findByUserIdAndYearAndMonth(user.getId(), year, month)
                 .orElseGet(() -> {
                     MenuEntity newMenu = MenuEntity.builder()
@@ -82,7 +82,7 @@ public class MenuBatchHelper {
                     return menuRepository.save(newMenu);
                 });
 
-        // 2. Draft batch tap və ya yarat
+        // 2. Find or create Draft batch
         MenuBatchEntity draftBatch = menu.getBatches().stream()
                 .filter(b -> b.getStatus() == MenuStatus.DRAFT)
                 .findFirst()
@@ -96,15 +96,15 @@ public class MenuBatchHelper {
                     return newBatch;
                 });
 
-        log.info("Draft batch hazırdır: BatchId={}", draftBatch.getId());
+        log.info("Draft batch is ready: BatchId={}", draftBatch.getId());
         return draftBatch;
     }
 
     /**
-     * MenuBatch-ə item əlavə edir və ya mövcud item-i update edir.
+     * Adds or updates items in a MenuBatch.
      */
     public void addOrUpdateItems(MenuBatchEntity batch, List<MenuItemRequest> itemRequests) {
-        // Mövcud itemləri map-ə çeviririk (key: "day-mealType")
+        // Convert existing items to a map (key: "day-mealType")
         Map<String, MenuItemEntity> existingItemsMap = batch.getItems().stream()
                 .collect(Collectors.toMap(
                         item -> item.getDay() + "-" + item.getMealType(),
@@ -114,7 +114,7 @@ public class MenuBatchHelper {
         LocalDate today = LocalDate.now();
 
         for (MenuItemRequest itemRequest : itemRequests) {
-            // Keçmiş tarix yoxlaması
+            // Past date validation
             LocalDate targetDate = LocalDate.of(
                     batch.getMenu().getYear(),
                     batch.getMenu().getMonth(),
@@ -122,25 +122,25 @@ public class MenuBatchHelper {
             );
 
             if (DateUtils.isBeforeToday(targetDate)) {
-                log.warn("Keçmiş tarix göndərildi: {}", targetDate);
+                log.warn("A past date was submitted: {}", targetDate);
                 throw new IllegalArgumentException(
-                        itemRequest.getDay() + " tarixi keçmişdə qalıb!");
+                        "Day " + itemRequest.getDay() + " is in the past!");
             }
 
             String key = itemRequest.getDay() + "-" + itemRequest.getMealType();
 
             if (existingItemsMap.containsKey(key)) {
-                // Mövcud item-i update et
+                // Update existing item
                 updateMenuItem(existingItemsMap.get(key), itemRequest);
             } else {
-                // Yeni item yarat
+                // Create new item
                 batch.getItems().add(createMenuItem(batch, itemRequest));
             }
         }
     }
 
     /**
-     * MenuItem-i update edir.
+     * Updates a MenuItem.
      */
     private void updateMenuItem(MenuItemEntity item, MenuItemRequest request) {
         item.setDescription(request.getDescription());
@@ -151,7 +151,7 @@ public class MenuBatchHelper {
     }
 
     /**
-     * Yeni MenuItem yaradır.
+     * Creates a new MenuItem.
      */
     private MenuItemEntity createMenuItem(MenuBatchEntity batch, MenuItemRequest request) {
         return MenuItemEntity.builder()
@@ -167,90 +167,88 @@ public class MenuBatchHelper {
     }
 
     /**
-     * Batch-i SUBMITTED statusuna çevirir.
+     * Sets the Batch status to SUBMITTED.
      */
     @Transactional
     public void submitBatch(MenuBatchEntity batch) {
         if (batch.getItems().isEmpty()) {
-            throw new IllegalStateException("Boş paketi istifadəçiyə təqdim edə bilməzsiniz.");
+            throw new IllegalStateException("Cannot submit an empty batch to the user.");
         }
 
         batch.setStatus(MenuStatus.SUBMITTED);
         menuBatchRepository.save(batch);
 
-        log.info("Batch submit edildi: BatchId={}, ItemCount={}",
+        log.info("Batch submitted: BatchId={}, ItemCount={}",
                 batch.getId(), batch.getItems().size());
     }
 
     /**
-     * Batch-i və ya specific item-i silir.
+     * Deletes a Batch or a specific item.
      */
     @Transactional
     public String deleteMenuContent(MenuBatchEntity batch, Integer day, MealType mealType) {
-        // APPROVED batch silinə bilməz
+        // APPROVED batch cannot be deleted
         if (batch.getStatus() == MenuStatus.APPROVED) {
             throw new IllegalStateException(
-                    "Təsdiqlənmiş menyu silinə bilməz. Əvvəlcə ləğv edilməlidir.");
+                    "An approved menu cannot be deleted. It must be cancelled first.");
         }
 
-        // Bütün batch-i sil
+        // Delete entire batch
         if (day == null && mealType == null) {
             menuBatchRepository.delete(batch);
-            log.info("Batch silindi: BatchId={}", batch.getId());
-            return "Batch ID " + batch.getId() + " olan bütün menyu paketi uğurla silindi.";
+            log.info("Batch deleted: BatchId={}", batch.getId());
+            return "Menu batch with ID " + batch.getId() + " successfully deleted.";
         }
 
-        // Specific item-ləri sil
+        // Delete specific items
         List<MenuItemEntity> items = batch.getItems();
         boolean removed = items.removeIf(item ->
                 item.getDay().equals(day) && (mealType == null || item.getMealType() == mealType)
         );
 
         if (!removed) {
-            return "Göstərilən kriteriyalara uyğun yemək tapılmadı (Gün: " + day + ").";
+            return "No meal found matching the given criteria (Day: " + day + ").";
         }
 
         menuBatchRepository.save(batch);
 
         if (mealType != null) {
-            log.info("Specific meal silindi: BatchId={}, Day={}, MealType={}",
+            log.info("Specific meal deleted: BatchId={}, Day={}, MealType={}",
                     batch.getId(), day, mealType);
-            return batch.getId() + " nömrəli paketin " + day + ". gününün "
-                    + mealType + " yeməyi silindi.";
+            return "The " + mealType + " meal for day " + day + " of batch " + batch.getId() + " has been deleted.";
         } else {
-            log.info("Günün bütün yemək itemləri silindi: BatchId={}, Day={}",
+            log.info("All meal items for the day deleted: BatchId={}, Day={}",
                     batch.getId(), day);
-            return batch.getId() + " nömrəli paketin " + day
-                    + ". gününə aid bütün yeməklər silindi.";
+            return "All meals for day " + day + " of batch " + batch.getId() + " have been deleted.";
         }
     }
 
     /**
-     * Rejected batch-i yeniləyir.
+     * Updates a rejected batch.
      */
     @Transactional
     public void updateRejectedBatch(MenuBatchEntity batch, List<MenuItemRequest> newItems) {
-        // YALNIZ APPROVED statusu bloklanır
+        // Only APPROVED status is blocked
         if (batch.getStatus() == MenuStatus.APPROVED) {
             throw new IllegalStateException(
-                    "Təsdiqlənmiş menyu dəyişdirilə bilməz. Paket statusu: " + batch.getStatus());
+                    "An approved menu cannot be modified. Batch status: " + batch.getStatus());
         }
 
-        log.info("Batch yenilənir: BatchId={}, CurrentStatus={}", batch.getId(), batch.getStatus());
+        log.info("Updating batch: BatchId={}, CurrentStatus={}", batch.getId(), batch.getStatus());
 
-        // Item-ləri əlavə və ya update et
+        // Add or update items
         addOrUpdateItems(batch, newItems);
 
-        // Statusu DRAFT et, rejection reason-u təmizlə
+        // Set status to DRAFT and clear rejection reason
         batch.setStatus(MenuStatus.DRAFT);
         batch.setRejectionReason(null);
 
         menuBatchRepository.save(batch);
-        log.info("Batch yeniləndi və DRAFT statusuna keçdi");
+        log.info("Batch updated and transitioned to DRAFT status");
     }
 
     /**
-     * User-in müəyyən ay üçün REJECTED batch-i olub-olmadığını yoxlayır.
+     * Checks whether a user has a REJECTED batch for a given month.
      */
     public boolean hasRejectedBatch(Long userId, int year, int month) {
         return menuRepository.findByUserIdAndYearAndMonth(userId, year, month)
@@ -260,7 +258,7 @@ public class MenuBatchHelper {
     }
 
     /**
-     * Menu-nun ən son batch-ini tapır.
+     * Finds the latest batch of a Menu.
      */
     public MenuBatchEntity getLatestBatch(MenuEntity menu) {
         return menu.getBatches().stream()

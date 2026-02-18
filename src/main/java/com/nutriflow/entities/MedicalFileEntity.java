@@ -17,11 +17,11 @@ public class MedicalFileEntity extends BaseEntity {
     private HealthProfileEntity healthProfile;
 
     @Column(name = "file_url", nullable = false)
-    private String fileUrl; // Bulud saxlancındakı link
+    private String fileUrl; // Link in cloud storage
 
     @Column(name = "file_name")
-    private String fileName; // Faylın adı (məs: qan_analizi.pdf)
+    private String fileName; // File name (e.g: blood_test.pdf)
 
     @Column(name = "file_type")
-    private String fileType; // mime-type (məs: application/pdf)
+    private String fileType; // mime-type (e.g: application/pdf)
 }

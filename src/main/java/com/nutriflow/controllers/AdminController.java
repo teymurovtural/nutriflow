@@ -28,7 +28,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    // --- 1. DASHBOARD & STATİSTİKA ---
+    // --- 1. DASHBOARD & STATISTICS ---
     @GetMapping("/dashboard/stats")
     public ResponseEntity<AdminDashboardResponse> getStats(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
@@ -37,7 +37,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getDashboardStatistics(start, end, currentUser));
     }
 
-    // --- 2. PROFİL İDARƏETMƏSİ ---
+    // --- 2. PROFILE MANAGEMENT ---
     @PutMapping("/profile")
     public ResponseEntity<AdminActionResponse> updateProfile(
             @Valid @RequestBody AdminProfileUpdateRequest request,
@@ -45,10 +45,10 @@ public class AdminController {
         return ResponseEntity.ok(adminService.updateAdminProfile(request, currentUser));
     }
 
-    // --- 3. CREATE (YARATMA) ---
+    // --- 3. CREATE ---
     @PostMapping("/users")
     public ResponseEntity<AdminActionResponse> createUser(
-            @Valid @RequestBody RegisterRequestForAdmin request, // Bura dəyişdi
+            @Valid @RequestBody RegisterRequestForAdmin request, // Changed here
             @AuthenticationPrincipal SecurityUser currentUser) {
         return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createUser(request, currentUser));
     }
@@ -74,7 +74,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createSubAdmin(request, currentUser));
     }
 
-    // --- 4. LİSTƏLƏMƏ ---
+    // --- 4. LISTING ---
     @GetMapping("/users")
     public ResponseEntity<Page<UserSummaryResponse>> getAllUsers(Pageable pageable) {
         return ResponseEntity.ok(adminService.getAllUsers(pageable));
@@ -95,7 +95,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllSubAdmins(pageable));
     }
 
-    // --- 5. AXTARIŞ ---
+    // --- 5. SEARCH ---
     @GetMapping("/users/search")
     public ResponseEntity<Page<UserSummaryResponse>> searchUsers(@RequestParam String query, Pageable pageable) {
         return ResponseEntity.ok(adminService.searchUsers(query, pageable));
@@ -106,7 +106,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.searchDietitians(query, pageable));
     }
 
-    // --- 6. TƏYİNAT (ASSIGNMENT) ---
+    // --- 6. ASSIGNMENT ---
     @PostMapping("/users/{userId}/assign-dietitian/{dietitianId}")
     public ResponseEntity<AdminActionResponse> assignDietitian(
             @PathVariable Long userId,
@@ -133,7 +133,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getPendingCatererAssignments());
     }
 
-    // --- 7. STATUS DƏYİŞİKLİYİ (TOGGLE) ---
+    // --- 7. STATUS TOGGLE ---
     @PatchMapping("/users/{id}/toggle-status")
     public ResponseEntity<AdminActionResponse> toggleUserStatus(
             @PathVariable Long id,
@@ -162,7 +162,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.toggleSubAdminStatus(id, currentUser));
     }
 
-    // --- 8. SİLMƏ ---
+    // --- 8. DELETE ---
     @DeleteMapping("/users/{id}")
     public ResponseEntity<AdminActionResponse> deleteUser(
             @PathVariable Long id,
@@ -191,17 +191,17 @@ public class AdminController {
         return ResponseEntity.ok(adminService.deleteSubAdmin(id, currentUser));
     }
 
-    // --- 9. DİGƏR ---
+    // --- 9. OTHER ---
 
     @GetMapping("/payments")
     public ResponseEntity<Page<PaymentAdminResponse>> getAllPayments(Pageable pageable) {
-        // Artıq PaymentEntity yox, PaymentAdminResponse qaytarırıq
+        // Now returning PaymentAdminResponse instead of PaymentEntity
         return ResponseEntity.ok(adminService.getAllPayments(pageable));
     }
 
     @GetMapping("/payments/{id}")
     public ResponseEntity<PaymentAdminResponse> getPaymentDetails(@PathVariable Long id) {
-        // Tək ödəniş detalı üçün də DTO-ya keçdik
+        // Also switched to DTO for single payment details
         return ResponseEntity.ok(adminService.getPaymentDetails(id));
     }
 

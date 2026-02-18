@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 @Builder
 public class MealInfoResponse {
+
     private MealType type;
     private String description;
+
 }

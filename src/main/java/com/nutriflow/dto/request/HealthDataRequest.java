@@ -10,26 +10,26 @@ import lombok.Data;
 @Data
 public class HealthDataRequest {
 
-    @NotNull(message = "Boy mütləqdir")
-    @Min(value = 50, message = "Boy 50 sm-dən az ola bilməz")
-    @Max(value = 250, message = "Boy 250 sm-dən çox ola bilməz")
+    @NotNull(message = "Height is required")
+    @Min(value = 50, message = "Height cannot be less than 50 cm")
+    @Max(value = 250, message = "Height cannot be more than 250 cm")
     private Double height;
 
-    @NotNull(message = "Çəki mütləqdir")
-    @Min(value = 20, message = "Çəki 20 kq-dan az ola bilməz")
-    @Max(value = 300, message = "Çəki 300 kq-dan çox ola bilməz")
+    @NotNull(message = "Weight is required")
+    @Min(value = 20, message = "Weight cannot be less than 20 kg")
+    @Max(value = 300, message = "Weight cannot be more than 300 kg")
     private Double weight;
 
-    @NotNull(message = "Məqsəd mütləqdir")
+    @NotNull(message = "Goal is required")
     private GoalType goal;
 
-    private String restrictions; // Allergiyalar, vegeterianlıq və s.
+    private String restrictions; // Allergies, vegetarianism, etc.
     private String notes;
 
-    @NotBlank(message = "Ünvan tam qeyd olunmalıdır")
+    @NotBlank(message = "Full address must be provided")
     private String addressDetails;
 
-    @NotBlank(message = "Şəhər mütləqdir")
+    @NotBlank(message = "City is required")
     private String city;
 
     private String district;

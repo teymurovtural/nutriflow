@@ -11,6 +11,6 @@ public class MenuApproveRequest {
 
     private Long batchId;
 
-    @Size(max = 500, message = "Çatdırılma qeydi 500 simvolu keçməməlidir")
+    @Size(max = 500, message = "Delivery note must not exceed 500 characters")
     private String deliveryNotes;
 }

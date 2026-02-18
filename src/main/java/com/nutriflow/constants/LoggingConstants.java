@@ -1,14 +1,14 @@
 package com.nutriflow.constants;
 
 /**
- * Logging üçün constant dəyərlər
+ * Constant values for logging
  *
- * LoggingAspect və digər logging class-ları tərəfindən istifadə olunur
+ * Used by LoggingAspect and other logging classes
  */
 public final class LoggingConstants {
 
     private LoggingConstants() {
-        throw new UnsupportedOperationException("Bu utility class-dır, instantiate edilə bilməz");
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
     // Layer identifiers
@@ -23,10 +23,10 @@ public final class LoggingConstants {
     public static final String SYMBOL_SUCCESS = "✓";
 
     // Log templates
-    public static final String TEMPLATE_METHOD_START = "{} [{}] {}.{} başladı | Parametrlər: {}";
-    public static final String TEMPLATE_METHOD_END = "{} [{}] {}.{} tamamlandı | Müddət: {}ms | Return: {}";
-    public static final String TEMPLATE_METHOD_ERROR = "{} [{}] {}.{} xəta baş verdi | Exception: {} | Mesaj: {}";
-    public static final String TEMPLATE_METHOD_FAILED = "{} [{}] {}.{} uğursuz oldu | Müddət: {}ms";
+    public static final String TEMPLATE_METHOD_START = "{} [{}] {}.{} started | Parameters: {}";
+    public static final String TEMPLATE_METHOD_END = "{} [{}] {}.{} completed | Duration: {}ms | Return: {}";
+    public static final String TEMPLATE_METHOD_ERROR = "{} [{}] {}.{} error occurred | Exception: {} | Message: {}";
+    public static final String TEMPLATE_METHOD_FAILED = "{} [{}] {}.{} failed | Duration: {}ms";
 
     // Sensitive fields to hide
     public static final String[] SENSITIVE_FIELDS = {
@@ -38,6 +38,6 @@ public final class LoggingConstants {
     public static final int MAX_LOG_LENGTH = 200;
 
     // Time thresholds (ms)
-    public static final long SLOW_METHOD_THRESHOLD = 1000; // 1 saniyə
-    public static final long VERY_SLOW_METHOD_THRESHOLD = 5000; // 5 saniyə
+    public static final long SLOW_METHOD_THRESHOLD = 1000; // 1 second
+    public static final long VERY_SLOW_METHOD_THRESHOLD = 5000; // 5 seconds
 }

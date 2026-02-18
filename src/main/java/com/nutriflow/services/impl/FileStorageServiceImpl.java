@@ -16,11 +16,11 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Fayl saxlama və idarəetmə service implementasiyası
+ * Service implementation for file storage and management.
  *
- * Bu service faylların diskdə saxlanılması və silinməsi üçün istifadə olunur.
- * Dəstəklənən formatlar: PDF, JPG, PNG
- * Maksimum fayl ölçüsü: 10MB
+ * This service is used for saving and deleting files on disk.
+ * Supported formats: PDF, JPG, PNG
+ * Maximum file size: 10MB
  */
 @Service
 @Slf4j
@@ -30,33 +30,33 @@ public class FileStorageServiceImpl implements FileStorageService {
     private String uploadDir;
 
     /**
-     * Faylı diskə saxlayır
+     * Saves a file to disk.
      *
-     * @param file saxlanılacaq fayl
-     * @return saxlanılan faylın tam yolu
-     * @throws IOException fayl saxlanılarkən xəta baş verdikdə
-     * @throws FileStorageException validation və ya storage xətası baş verdikdə
+     * @param file the file to be saved
+     * @return the full path of the saved file
+     * @throws IOException if an error occurs while saving the file
+     * @throws FileStorageException if a validation or storage error occurs
      */
     @Override
     public String saveFile(MultipartFile file) throws IOException {
         log.info(FileConstants.LOG_FILE_UPLOAD_STARTED,
                 file.getOriginalFilename(), file.getSize());
 
-        // 1. Faylı validate et
+        // 1. Validate the file
         FileValidationUtil.validateFile(file);
 
-        // 2. Upload directory-ni hazırla
+        // 2. Prepare the upload directory
         FileOperationUtil.ensureDirectoryExists(uploadDir);
 
-        // 3. Unikal fayl adı yarat
+        // 3. Generate a unique file name
         String uniqueFileName = FileOperationUtil.generateUniqueFileName(
                 file.getOriginalFilename());
 
-        // 4. Tam fayl yolunu müəyyən et
+        // 4. Determine the full file path
         Path uploadPath = FileOperationUtil.toPath(uploadDir);
         Path filePath = uploadPath.resolve(uniqueFileName);
 
-        // 5. Faylı diskə yaz
+        // 5. Write the file to disk
         saveFileToDisk(file, filePath);
 
         log.info(FileConstants.LOG_FILE_SAVED_SUCCESS, uniqueFileName);
@@ -64,36 +64,36 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * Faylı fiziki olaraq diskə yazır
+     * Physically writes the file to disk.
      *
-     * @param file yazılacaq fayl
-     * @param targetPath hədəf fayl yolu
-     * @throws IOException yazma əməliyyatında xəta baş verdikdə
+     * @param file the file to be written
+     * @param targetPath the target file path
+     * @throws IOException if an error occurs during the write operation
      */
     private void saveFileToDisk(MultipartFile file, Path targetPath) throws IOException {
         try {
-            log.debug("Fayl diskə yazılır: {}", targetPath);
+            log.debug("Writing file to disk: {}", targetPath);
             Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            log.error("Fayl diskə yazılanda xəta baş verdi: {}", e.getMessage(), e);
+            log.error("Error occurred while writing file to disk: {}", e.getMessage(), e);
             throw new FileStorageException(FileConstants.ERROR_FILE_SAVE_FAILED, e);
         }
     }
 
     /**
-     * Faylı diskdən silir
+     * Deletes a file from disk.
      *
-     * @param filePath silinəcək faylın yolu
-     * @throws IOException fayl silinərkən xəta baş verdikdə
-     * @throws FileStorageException yol düzgün olmadıqda
+     * @param filePath the path of the file to be deleted
+     * @throws IOException if an error occurs while deleting the file
+     * @throws FileStorageException if the path is invalid
      */
     @Override
     public void deleteFile(String filePath) throws IOException {
-        log.info("Faylın silinməsi sorğusu: {}", filePath);
+        log.info("File deletion request: {}", filePath);
 
-        // Fayl yolunu validate et
+        // Validate the file path
         if (!FileOperationUtil.isValidFilePath(filePath)) {
-            log.error("Düzgün olmayan fayl yolu: {}", filePath);
+            log.error("Invalid file path: {}", filePath);
             throw new FileStorageException(FileConstants.ERROR_INVALID_FILE_PATH);
         }
 
@@ -108,7 +108,7 @@ public class FileStorageServiceImpl implements FileStorageService {
                 log.warn(FileConstants.LOG_FILE_NOT_FOUND, filePath);
             }
         } catch (IOException e) {
-            log.error("Fayl silinərkən xəta baş verdi: {}", e.getMessage(), e);
+            log.error("Error occurred while deleting file: {}", e.getMessage(), e);
             throw new FileStorageException(FileConstants.ERROR_FILE_DELETE_FAILED, e);
         }
     }

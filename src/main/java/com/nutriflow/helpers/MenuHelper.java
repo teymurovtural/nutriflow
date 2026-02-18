@@ -19,8 +19,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Menu və MenuBatch əməliyyatları üçün helper sinif.
- * Menu filtering, batch selection və business logic.
+ * Helper class for Menu and MenuBatch operations.
+ * Menu filtering, batch selection and business logic.
  */
 @Component
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class MenuHelper {
     private final DeliveryRepository deliveryRepository;
 
     /**
-     * User-in cari ayın menyusunu tapır.
+     * Finds the current month's menu for a user.
      *
      * @param userId User ID
      * @return MenuEntity (optional)
@@ -43,11 +43,11 @@ public class MenuHelper {
     }
 
     /**
-     * User-in müəyyən ay və ilin menyusunu tapır.
+     * Finds a user's menu for a specific year and month.
      *
      * @param userId User ID
-     * @param year   İl
-     * @param month  Ay
+     * @param year   Year
+     * @param month  Month
      * @return MenuEntity (optional)
      */
     public Optional<MenuEntity> getMenuByYearAndMonth(Long userId, int year, int month) {
@@ -55,10 +55,10 @@ public class MenuHelper {
     }
 
     /**
-     * MenuEntity-dən aktiv batch-i (APPROVED və ya SUBMITTED) tapır.
+     * Finds the active batch (APPROVED or SUBMITTED) from a MenuEntity.
      *
      * @param menu MenuEntity
-     * @return Aktiv batch (optional)
+     * @return Active batch (optional)
      */
     public Optional<MenuBatchEntity> getActiveBatch(MenuEntity menu) {
         if (menu == null || menu.getBatches() == null || menu.getBatches().isEmpty()) {
@@ -71,10 +71,10 @@ public class MenuHelper {
     }
 
     /**
-     * MenuEntity-dən ən son batch-i tapır (status fərqli olmadan).
+     * Finds the latest batch from a MenuEntity (regardless of status).
      *
      * @param menu MenuEntity
-     * @return Ən son batch (optional)
+     * @return Latest batch (optional)
      */
     public Optional<MenuBatchEntity> getLatestBatch(MenuEntity menu) {
         if (menu == null || menu.getBatches() == null || menu.getBatches().isEmpty()) {
@@ -86,7 +86,7 @@ public class MenuHelper {
     }
 
     /**
-     * User-in təsdiq gözləyən (SUBMITTED) batch-ini tapır.
+     * Finds the user's batch pending approval (SUBMITTED).
      *
      * @param userEmail User email
      * @return SUBMITTED batch (optional)
@@ -96,10 +96,10 @@ public class MenuHelper {
     }
 
     /**
-     * MenuBatch-dən müəyyən günün item-lərini çıxarır və sıralayır.
+     * Retrieves and sorts items for a specific day from a MenuBatch.
      *
      * @param batch MenuBatch
-     * @param day   Gün
+     * @param day   Day
      * @return Sorted menu items
      */
     public List<MenuItemEntity> getMenuItemsForDay(MenuBatchEntity batch, Integer day) {
@@ -114,7 +114,7 @@ public class MenuHelper {
     }
 
     /**
-     * MenuBatch-in bütün item-lərini gün və meal type-a görə sıralayır.
+     * Sorts all items in a MenuBatch by day and meal type.
      *
      * @param batch MenuBatch
      * @return Sorted menu items
@@ -131,19 +131,19 @@ public class MenuHelper {
     }
 
     /**
-     * MenuBatch-in statusunu təyin edir.
+     * Sets the status of a MenuBatch.
      *
      * @param batch  MenuBatch
-     * @param status Yeni status
+     * @param status New status
      */
     public void updateBatchStatus(MenuBatchEntity batch, MenuStatus status) {
         batch.setStatus(status);
         menuBatchRepository.save(batch);
-        log.info("Batch status yeniləndi: BatchId={}, NewStatus={}", batch.getId(), status);
+        log.info("Batch status updated: BatchId={}, NewStatus={}", batch.getId(), status);
     }
 
     /**
-     * MenuBatch-i reject edir və səbəb əlavə edir.
+     * Rejects a MenuBatch and adds a reason.
      *
      * @param batch  MenuBatch
      * @param reason Rejection reason
@@ -153,39 +153,40 @@ public class MenuHelper {
         batch.setRejectionReason(reason);
         menuBatchRepository.save(batch);
 
-        // Delivery-ləri sil
+        // Delete deliveries
         deliveryRepository.deleteAllByBatchId(batch.getId());
 
-        log.info("Batch reject edildi: BatchId={}, Reason={}", batch.getId(), reason);
+        log.info("Batch rejected: BatchId={}, Reason={}", batch.getId(), reason);
     }
+
     /**
-     * MenuBatch-i approve edir.
+     * Approves a MenuBatch.
      *
      * @param batch MenuBatch
      */
     public void approveBatch(MenuBatchEntity batch) {
         batch.setStatus(MenuStatus.APPROVED);
         menuBatchRepository.save(batch);
-        log.info("Batch təsdiqləndi: BatchId={}", batch.getId());
+        log.info("Batch approved: BatchId={}", batch.getId());
     }
 
     /**
-     * User-in bütün menu-larını tapır (bütün aylar).
+     * Finds all menus for a user (all months).
      *
      * @param userId User ID
      * @return Menu list
      */
     public List<MenuEntity> getAllMenusForUser(Long userId) {
-        // Bu metod repository-də tətbiq edilməli
-        log.warn("getAllMenusForUser: Repository metodunu implement edin");
+        // This method should be implemented in the repository
+        log.warn("getAllMenusForUser: Please implement the repository method");
         return List.of();
     }
 
     /**
-     * Cari ayın statusunu təyin edir.
+     * Determines the current month's menu status.
      *
      * @param user User
-     * @return Cari ayın menu statusu
+     * @return Current month's menu status
      */
     public MenuStatus getCurrentMonthMenuStatus(UserEntity user) {
         Optional<MenuEntity> currentMenu = getCurrentMonthMenu(user.getId());
@@ -202,10 +203,10 @@ public class MenuHelper {
     }
 
     /**
-     * MenuBatch-də unikal günlərin sayını hesablayır.
+     * Calculates the number of unique days in a MenuBatch.
      *
      * @param batch MenuBatch
-     * @return Unikal gün sayı
+     * @return Unique day count
      */
     public long getUniqueDaysCount(MenuBatchEntity batch) {
         if (batch == null || batch.getItems() == null) {
@@ -219,10 +220,10 @@ public class MenuHelper {
     }
 
     /**
-     * MenuBatch-də ümumi kalori hesablayır.
+     * Calculates total calories in a MenuBatch.
      *
      * @param batch MenuBatch
-     * @return Ümumi kalori
+     * @return Total calories
      */
     public double getTotalCalories(MenuBatchEntity batch) {
         if (batch == null || batch.getItems() == null) {
@@ -236,11 +237,11 @@ public class MenuHelper {
     }
 
     /**
-     * MenuBatch-də müəyyən gündə neçə meal olduğunu hesablayır.
+     * Calculates the number of meals for a specific day in a MenuBatch.
      *
      * @param batch MenuBatch
-     * @param day   Gün
-     * @return Meal sayı
+     * @param day   Day
+     * @return Meal count
      */
     public long getMealCountForDay(MenuBatchEntity batch, Integer day) {
         if (batch == null || batch.getItems() == null || day == null) {
@@ -253,11 +254,11 @@ public class MenuHelper {
     }
 
     /**
-     * MenuBatch-in tam olub-olmadığını yoxlayır (hər gün üçün itemlər var).
+     * Checks whether a MenuBatch is complete (items exist for every day).
      *
      * @param batch      MenuBatch
-     * @param totalDays  Ayın ümumi günü
-     * @return true əgər tamdırsa
+     * @param totalDays  Total days in the month
+     * @return true if complete
      */
     public boolean isBatchComplete(MenuBatchEntity batch, int totalDays) {
         if (batch == null || batch.getItems() == null) {
@@ -269,14 +270,14 @@ public class MenuHelper {
     }
 
     /**
-     * Batch-in reject səbəbini qaytarır.
+     * Returns the rejection reason for a Batch.
      *
      * @param batch MenuBatch
-     * @return Rejection reason və ya default mesaj
+     * @return Rejection reason or default message
      */
     public String getRejectionReason(MenuBatchEntity batch) {
         if (batch == null || batch.getRejectionReason() == null) {
-            return "Səbəb göstərilməyib";
+            return "No reason provided";
         }
         return batch.getRejectionReason();
     }

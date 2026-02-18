@@ -8,8 +8,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 /**
- * Tarix əməliyyatları üçün yardımçı sinif.
- * Date calculations, formatting və validation.
+ * Utility class for date operations.
+ * Date calculations, formatting and validation.
  */
 @Slf4j
 public class DateUtils {
@@ -21,39 +21,39 @@ public class DateUtils {
 
     public static long daysBetween(LocalDate startDate, LocalDate endDate) {
         if (startDate == null || endDate == null) {
-            log.warn("daysBetween: null tarix dəyəri göndərilib");
+            log.warn("daysBetween: null date value provided");
             return 0;
         }
         return ChronoUnit.DAYS.between(startDate, endDate);
     }
 
     /**
-     * İki tarix arasındaki həftələrin sayını hesablayır.
+     * Calculates the number of weeks between two dates.
      *
-     * @param startDate Başlanğıc tarixi
-     * @param endDate   Son tarix
-     * @return Həftələrin sayı
+     * @param startDate Start date
+     * @param endDate   End date
+     * @return Number of weeks
      */
     public static long weeksBetween(LocalDate startDate, LocalDate endDate) {
         return ChronoUnit.WEEKS.between(startDate, endDate);
     }
 
     /**
-     * İki tarix arasındaki ayların sayını hesablayır.
+     * Calculates the number of months between two dates.
      *
-     * @param startDate Başlanğıc tarixi
-     * @param endDate   Son tarix
-     * @return Ayların sayı
+     * @param startDate Start date
+     * @param endDate   End date
+     * @return Number of months
      */
     public static long monthsBetween(LocalDate startDate, LocalDate endDate) {
         return ChronoUnit.MONTHS.between(startDate, endDate);
     }
 
     /**
-     * Tarixi "dd-MM-yyyy" formatında String-ə çevirir.
+     * Formats a date to "dd-MM-yyyy" String.
      *
-     * @param date Tarix
-     * @return Formatlanmış tarix string
+     * @param date Date
+     * @return Formatted date string
      */
     public static String formatDate(LocalDate date) {
         if (date == null) return "N/A";
@@ -61,10 +61,10 @@ public class DateUtils {
     }
 
     /**
-     * DateTime-ı "dd-MM-yyyy HH:mm:ss" formatında String-ə çevirir.
+     * Formats a DateTime to "dd-MM-yyyy HH:mm:ss" String.
      *
      * @param dateTime DateTime
-     * @return Formatlanmış datetime string
+     * @return Formatted datetime string
      */
     public static String formatDateTime(LocalDateTime dateTime) {
         if (dateTime == null) return "N/A";
@@ -72,10 +72,10 @@ public class DateUtils {
     }
 
     /**
-     * Vaxtı "HH:mm" formatında String-ə çevirir.
+     * Formats time to "HH:mm" String.
      *
      * @param dateTime DateTime
-     * @return Formatlanmış vaxt string
+     * @return Formatted time string
      */
     public static String formatTime(LocalDateTime dateTime) {
         if (dateTime == null) return "N/A";
@@ -83,9 +83,9 @@ public class DateUtils {
     }
 
     /**
-     * Tarixi parse edib LocalDate-ə çevirir.
+     * Parses a String and converts it to LocalDate.
      *
-     * @param dateString "dd-MM-yyyy" formatında tarix
+     * @param dateString Date in "dd-MM-yyyy" format
      * @return LocalDate
      */
     public static LocalDate parseDate(String dateString) {
@@ -95,15 +95,15 @@ public class DateUtils {
         try {
             return LocalDate.parse(dateString, DATE_FORMATTER);
         } catch (Exception e) {
-            log.error("Tarix parse edilə bilmədi: {}", dateString);
+            log.error("Failed to parse date: {}", dateString);
             return null;
         }
     }
 
     /**
-     * Tarixi parse edib LocalDateTime-ə çevirir.
+     * Parses a String and converts it to LocalDateTime.
      *
-     * @param dateTimeString "dd-MM-yyyy HH:mm:ss" formatında datetime
+     * @param dateTimeString DateTime in "dd-MM-yyyy HH:mm:ss" format
      * @return LocalDateTime
      */
     public static LocalDateTime parseDateTime(String dateTimeString) {
@@ -113,16 +113,16 @@ public class DateUtils {
         try {
             return LocalDateTime.parse(dateTimeString, DATETIME_FORMATTER);
         } catch (Exception e) {
-            log.error("DateTime parse edilə bilmədi: {}", dateTimeString);
+            log.error("Failed to parse datetime: {}", dateTimeString);
             return null;
         }
     }
 
     /**
-     * Verilən tarixi bugünkü tarixlə müqayisə edir.
+     * Checks if the given date is before today.
      *
-     * @param date Müqayisə ediləcək tarix
-     * @return true əgər tarix bugündən əvvəldirsə
+     * @param date Date to compare
+     * @return true if the date is before today
      */
     public static boolean isBeforeToday(LocalDate date) {
         if (date == null) return false;
@@ -130,10 +130,10 @@ public class DateUtils {
     }
 
     /**
-     * Verilən tarixi bugünkü tarixlə müqayisə edir.
+     * Checks if the given date is after today.
      *
-     * @param date Müqayisə ediləcək tarix
-     * @return true əgər tarix bugündən sonradırsa
+     * @param date Date to compare
+     * @return true if the date is after today
      */
     public static boolean isAfterToday(LocalDate date) {
         if (date == null) return false;
@@ -141,10 +141,10 @@ public class DateUtils {
     }
 
     /**
-     * Tarixi bugünkü tarixlə müqayisə edir.
+     * Checks if the given date is today.
      *
-     * @param date Müqayisə ediləcək tarix
-     * @return true əgər tarix bugündürsə
+     * @param date Date to compare
+     * @return true if the date is today
      */
     public static boolean isToday(LocalDate date) {
         if (date == null) return false;
@@ -152,12 +152,12 @@ public class DateUtils {
     }
 
     /**
-     * Abunəlik progress hesablayır.
+     * Calculates subscription progress.
      *
-     * @param startDate      Başlanğıc tarixi
-     * @param endDate        Bitmə tarixi
-     * @param completedCount Tamamlanmış çatdırılma sayı
-     * @return Progress faizi (0-100)
+     * @param startDate      Start date
+     * @param endDate        End date
+     * @param completedCount Number of completed deliveries
+     * @return Progress percentage (0-100)
      */
     public static double calculateSubscriptionProgress(LocalDate startDate, LocalDate endDate, long completedCount) {
         if (startDate == null || endDate == null) {
@@ -170,28 +170,28 @@ public class DateUtils {
         }
 
         double progress = (completedCount * 100.0) / totalDays;
-        return Math.min(Math.round(progress * 10.0) / 10.0, 100.0); // Max 100%
+        return Math.min(Math.round(progress * 10.0) / 10.0, 100.0);
     }
 
     /**
-     * Abunəliyin qalan günlərini hesablayır.
+     * Calculates the remaining days of a subscription.
      *
-     * @param endDate Bitmə tarixi
-     * @return Qalan günlərin sayı
+     * @param endDate End date
+     * @return Number of remaining days
      */
     public static long getRemainingDays(LocalDate endDate) {
         if (endDate == null) return 0;
 
         long remaining = daysBetween(LocalDate.now(), endDate);
-        return Math.max(remaining, 0); // Neqativ olmaz
+        return Math.max(remaining, 0);
     }
 
     /**
-     * Tarixi müəyyən gün sonrasına aparır.
+     * Advances a date by a certain number of days.
      *
-     * @param date Başlanğıc tarixi
-     * @param days Əlavə ediləcək günlərin sayı
-     * @return Yeni tarix
+     * @param date Start date
+     * @param days Number of days to add
+     * @return New date
      */
     public static LocalDate addDays(LocalDate date, long days) {
         if (date == null) return null;
@@ -199,11 +199,11 @@ public class DateUtils {
     }
 
     /**
-     * Tarixi müəyyən həftə sonrasına aparır.
+     * Advances a date by a certain number of weeks.
      *
-     * @param date  Başlanğıc tarixi
-     * @param weeks Əlavə ediləcək həftələrin sayı
-     * @return Yeni tarix
+     * @param date  Start date
+     * @param weeks Number of weeks to add
+     * @return New date
      */
     public static LocalDate addWeeks(LocalDate date, long weeks) {
         if (date == null) return null;
@@ -211,11 +211,11 @@ public class DateUtils {
     }
 
     /**
-     * Tarixi müəyyən ay sonrasına aparır.
+     * Advances a date by a certain number of months.
      *
-     * @param date   Başlanğıc tarixi
-     * @param months Əlavə ediləcək ayların sayı
-     * @return Yeni tarix
+     * @param date   Start date
+     * @param months Number of months to add
+     * @return New date
      */
     public static LocalDate addMonths(LocalDate date, long months) {
         if (date == null) return null;
@@ -223,22 +223,22 @@ public class DateUtils {
     }
 
     /**
-     * Ayın ilk gününü qaytarır.
+     * Returns the first day of the given month.
      *
-     * @param year  İl
-     * @param month Ay (1-12)
-     * @return Ayın ilk günü
+     * @param year  Year
+     * @param month Month (1-12)
+     * @return First day of the month
      */
     public static LocalDate getFirstDayOfMonth(int year, int month) {
         return LocalDate.of(year, month, 1);
     }
 
     /**
-     * Ayın son gününü qaytarır.
+     * Returns the last day of the given month.
      *
-     * @param year  İl
-     * @param month Ay (1-12)
-     * @return Ayın son günü
+     * @param year  Year
+     * @param month Month (1-12)
+     * @return Last day of the month
      */
     public static LocalDate getLastDayOfMonth(int year, int month) {
         LocalDate firstDay = LocalDate.of(year, month, 1);
@@ -246,12 +246,12 @@ public class DateUtils {
     }
 
     /**
-     * İki tarix arasında olub-olmadığını yoxlayır (inclusive).
+     * Checks if a date is between two dates (inclusive).
      *
-     * @param date      Yoxlanılacaq tarix
-     * @param startDate Başlanğıc tarixi
-     * @param endDate   Son tarix
-     * @return true əgər tarix aralıqdadırsa
+     * @param date      Date to check
+     * @param startDate Start date
+     * @param endDate   End date
+     * @return true if the date is within the range
      */
     public static boolean isBetween(LocalDate date, LocalDate startDate, LocalDate endDate) {
         if (date == null || startDate == null || endDate == null) {

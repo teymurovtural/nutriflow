@@ -8,10 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class MenuRejectionDetailResponse {
+
     private Long batchId;
     private Long userId;
     private String userFullName;
     private String userEmail;
     private String phoneNumber;
     private String rejectionReason;
+
 }

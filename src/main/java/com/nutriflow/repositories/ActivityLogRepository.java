@@ -8,5 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ActivityLogRepository extends JpaRepository<ActivityLogEntity, Long> {
+
     Page<ActivityLogEntity> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
 }

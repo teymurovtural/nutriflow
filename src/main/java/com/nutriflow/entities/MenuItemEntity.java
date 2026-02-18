@@ -40,4 +40,5 @@ public class MenuItemEntity extends BaseEntity {
 
     @Column(name = "fats")
     private Double fats;
+
 }

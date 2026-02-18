@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 /**
  * Caterer Service Implementation (Refactored).
- * SecurityUtils və DeliveryHelper istifadə edərək təmiz kod.
+ * Clean code using SecurityUtils and DeliveryHelper.
  */
 @Service
 @RequiredArgsConstructor
@@ -50,12 +50,12 @@ public class CatererServiceImpl implements CatererService {
     @Override
     @Transactional(readOnly = true)
     public List<DeliveryDetailResponse> getDailyDeliveries(String name, String district, LocalDate date) {
-        // SecurityUtils ilə current caterer ID-sini al
+        // Get current caterer ID via SecurityUtils
         Long catererId = SecurityUtils.getCurrentUserId();
 
-        log.info("Günlük delivery-lər istənilir: CatererId={}, Date={}", catererId, date);
+        log.info("Daily deliveries requested: CatererId={}, Date={}", catererId, date);
 
-        // Helper ilə deliverylə tap
+        // Find deliveries via Helper
         List<DeliveryEntity> deliveries = deliveryHelper.getDeliveriesByCatererAndDate(
                 catererId, date, name, district
         );
@@ -65,7 +65,7 @@ public class CatererServiceImpl implements CatererService {
                 .map(delivery -> {
                     LocalDate deliveryDate = delivery.getDate();
 
-                    // Helper ilə həmin günün menu items-ini tap
+                    // Find menu items for the given day via Helper
                     List<MenuItemEntity> itemsOfSelectedDay = deliveryHelper.getMenuItemsForDay(
                             delivery.getBatch(),
                             deliveryDate.getDayOfMonth()
@@ -82,12 +82,12 @@ public class CatererServiceImpl implements CatererService {
         Long catererId = SecurityUtils.getCurrentUserId();
         LocalDate today = LocalDate.now();
 
-        log.info("Dashboard statistikası hesablanır: CatererId={}", catererId);
+        log.info("Calculating dashboard statistics: CatererId={}", catererId);
 
-        // Helper ilə statistikası hesabla
+        // Calculate statistics via Helper
         DeliveryHelper.CatererStatsData stats = deliveryHelper.calculateCatererStats(catererId, today);
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return catererMapper.toStatsResponse(stats);
     }
 
@@ -96,20 +96,20 @@ public class CatererServiceImpl implements CatererService {
     public void updateDeliveryStatus(Long deliveryId, DeliveryStatus newStatus, String note) {
         Long catererId = SecurityUtils.getCurrentUserId();
 
-        log.info("Delivery status yenilənir: DeliveryId={}, NewStatus={}, CatererId={}",
+        log.info("Updating delivery status: DeliveryId={}, NewStatus={}, CatererId={}",
                 deliveryId, newStatus, catererId);
 
-        // Delivery-ni tap
+        // Find delivery
         DeliveryEntity delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new IdNotFoundException("Sifariş tapılmadı!"));
+                .orElseThrow(() -> new IdNotFoundException("Order not found!"));
 
-        // Təhlükəsizlik yoxlaması
+        // Security check
         validateCatererAccess(delivery, catererId);
 
-        // Helper ilə status yenilə
+        // Update status via Helper
         deliveryHelper.updateDeliveryStatus(delivery, newStatus, note);
 
-        log.info("Delivery status uğurla yeniləndi");
+        log.info("Delivery status updated successfully");
     }
 
     @Override
@@ -117,12 +117,12 @@ public class CatererServiceImpl implements CatererService {
     public CatererResponse getProfile() {
         Long catererId = SecurityUtils.getCurrentUserId();
 
-        log.info("Caterer profili istənilir: CatererId={}", catererId);
+        log.info("Caterer profile requested: CatererId={}", catererId);
 
         CatererEntity caterer = catererRepository.findById(catererId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profil tapılmadı"));
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
 
-        // Mapper ilə response-a çevir
+        // Convert to response via Mapper
         return catererMapper.toResponse(caterer);
     }
 
@@ -131,10 +131,10 @@ public class CatererServiceImpl implements CatererService {
     public String updateProfile(CatererProfileUpdateRequest request) {
         Long catererId = SecurityUtils.getCurrentUserId();
 
-        log.info("Caterer profili yenilənir: CatererId={}", catererId);
+        log.info("Updating caterer profile: CatererId={}", catererId);
 
         CatererEntity caterer = catererRepository.findById(catererId)
-                .orElseThrow(() -> new UserNotFoundException("Profil tapılmadı"));
+                .orElseThrow(() -> new UserNotFoundException("Profile not found"));
 
         // Update fields
         if (request.getName() != null) caterer.setName(request.getName());
@@ -151,8 +151,8 @@ public class CatererServiceImpl implements CatererService {
 
         catererRepository.save(caterer);
 
-        log.info("Profil uğurla yeniləndi");
-        return "Profil məlumatlarınız uğurla yeniləndi";
+        log.info("Profile updated successfully");
+        return "Your profile information has been updated successfully";
     }
 
     @Override
@@ -160,19 +160,19 @@ public class CatererServiceImpl implements CatererService {
     public void updateEstimatedTime(Long deliveryId, String estimatedTime) {
         Long catererId = SecurityUtils.getCurrentUserId();
 
-        log.info("Estimated time yenilənir: DeliveryId={}, Time={}", deliveryId, estimatedTime);
+        log.info("Updating estimated time: DeliveryId={}, Time={}", deliveryId, estimatedTime);
 
-        // Delivery-ni tap
+        // Find delivery
         DeliveryEntity delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new IdNotFoundException("Sifariş tapılmadı!"));
+                .orElseThrow(() -> new IdNotFoundException("Order not found!"));
 
-        // Təhlükəsizlik yoxlaması
+        // Security check
         validateCatererAccess(delivery, catererId);
 
-        // Helper ilə yenilə
+        // Update via Helper
         deliveryHelper.updateEstimatedTime(delivery, estimatedTime);
 
-        log.info("Estimated time uğurla yeniləndi");
+        log.info("Estimated time updated successfully");
     }
 
     @Override
@@ -180,19 +180,19 @@ public class CatererServiceImpl implements CatererService {
     public void markDeliveryAsFailed(DeliveryFailureRequest request) {
         Long catererId = SecurityUtils.getCurrentUserId();
 
-        log.info("Çatdırılma uğursuz işarələnir: DeliveryId={}, CatererId={}, Səbəb={}",
+        log.info("Marking delivery as failed: DeliveryId={}, CatererId={}, Reason={}",
                 request.getDeliveryId(), catererId, request.getFailureReason());
 
         DeliveryEntity delivery = deliveryRepository.findById(request.getDeliveryId())
-                .orElseThrow(() -> new IdNotFoundException("Çatdırılma tapılmadı!"));
+                .orElseThrow(() -> new IdNotFoundException("Delivery not found!"));
 
         validateCatererAccess(delivery, catererId);
 
         if (delivery.getStatus() == DeliveryStatus.FAILED) {
-            throw new BusinessException("Bu çatdırılma artıq uğursuz kimi işarələnib!");
+            throw new BusinessException("This delivery has already been marked as failed!");
         }
         if (delivery.getStatus() == DeliveryStatus.DELIVERED) {
-            throw new BusinessException("Çatdırılmış sifarişin statusu dəyişdirilə bilməz!");
+            throw new BusinessException("The status of a delivered order cannot be changed!");
         }
 
         delivery.setStatus(DeliveryStatus.FAILED);
@@ -200,18 +200,18 @@ public class CatererServiceImpl implements CatererService {
                 (request.getNote() != null ? " | " + request.getNote() : ""));
         deliveryRepository.save(delivery);
 
-        log.info("Çatdırılma uğursuz kimi işarələndi: DeliveryId={}", request.getDeliveryId());
+        log.info("Delivery marked as failed: DeliveryId={}", request.getDeliveryId());
     }
 
     // ==================== Private Helper Methods ====================
 
     /**
-     * Caterer-in delivery-yə access hüququnu yoxlayır.
+     * Validates whether the caterer has access to the given delivery.
      */
     private void validateCatererAccess(DeliveryEntity delivery, Long catererId) {
         if (!delivery.getCaterer().getId().equals(catererId)) {
             log.warn("Caterer access denied: CatererId={}, DeliveryId={}", catererId, delivery.getId());
-            throw new ResourceNotAvailableException("Bu sifarişə müdaxilə icazəniz yoxdur!");
+            throw new ResourceNotAvailableException("You do not have permission to access this order!");
         }
     }
 }

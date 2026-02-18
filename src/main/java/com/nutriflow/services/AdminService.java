@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AdminService {
-    // Yaradılma və Təyinat metodları
+    // Creation and Assignment methods
     AdminActionResponse createDietitian(DietitianCreateRequest request, SecurityUser currentUser);
     AdminActionResponse createCaterer(CatererCreateRequest request, SecurityUser currentUser);
     AdminActionResponse createUser(RegisterRequestForAdmin request, SecurityUser currentUser);
@@ -21,15 +21,15 @@ public interface AdminService {
     AdminActionResponse assignCatererToUser(Long userId, Long catererId, SecurityUser currentUser);
     AdminDashboardResponse getDashboardStatistics(LocalDateTime start, LocalDateTime end, SecurityUser currentUser);
 
-    // Siyahılama (DTO ilə yeniləndi)
+    // Listing (updated with DTO)
     Page<UserSummaryResponse> getAllUsers(Pageable pageable);
     Page<DietitianProfileResponse> getAllDietitians(Pageable pageable);
     Page<CatererResponse> getAllCaterers(Pageable pageable);
-    Page<AdminSummaryResponse> getAllSubAdmins(Pageable pageable); // AdminAuthResponse deyil, Summary istifadə edirik
+    Page<AdminSummaryResponse> getAllSubAdmins(Pageable pageable); // Using Summary instead of AdminAuthResponse
     Page<UserSummaryResponse> searchUsers(String query, Pageable pageable);
     Page<DietitianProfileResponse> searchDietitians(String query, Pageable pageable);
 
-    // Silmə və Status əməliyyatları
+    // Delete and Status operations
     AdminActionResponse toggleDietitianStatus(Long id, SecurityUser currentUser);
     AdminActionResponse toggleUserStatus(Long id, SecurityUser currentUser);
     AdminActionResponse toggleCatererStatus(Long id, SecurityUser currentUser);
@@ -39,12 +39,12 @@ public interface AdminService {
     AdminActionResponse deleteCaterer(Long id, SecurityUser currentUser);
     AdminActionResponse deleteSubAdmin(Long id, SecurityUser currentUser);
 
-    // Ödənişlər və Loqlar (Hələlik Entity olaraq qala bilər, amma DTO tövsiyə olunur)
+    // Payments and Logs (can remain as Entity for now, but DTO is recommended)
     Page<PaymentAdminResponse> getAllPayments(Pageable pageable);
     Page<ActivityLogResponse> getAllActivityLogs(Pageable pageable);
     PaymentAdminResponse getPaymentDetails(Long paymentId);
 
-    // Digər
+    // Other
     AdminActionResponse updateAdminProfile(AdminProfileUpdateRequest request, SecurityUser currentUser);
     PendingAssignmentResponse getPendingDietitianAssignments();
     PendingAssignmentResponse getPendingCatererAssignments();

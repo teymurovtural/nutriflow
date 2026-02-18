@@ -33,7 +33,7 @@ import java.util.Map;
 
 /**
  * Payment Service Implementation (Refactored).
- * Subscription Helper istifadə edərək assignment logic-i ayrılıb.
+ * Assignment logic separated using Subscription Helper.
  */
 @Service
 @RequiredArgsConstructor
@@ -56,14 +56,14 @@ public class PaymentServiceImpl implements PaymentService {
     @PostConstruct
     public void init() {
         Stripe.apiKey = stripeApiKey;
-        log.info("✅ Stripe API uğurla inisializasiya olundu");
+        log.info("✅ Stripe API initialized successfully");
     }
 
     @Override
     public String createCheckoutSession(Long userId) throws StripeException {
-        log.info("Stripe Checkout Session yaradılması başladı: UserId={}", userId);
+        log.info("Stripe Checkout Session creation started: UserId={}", userId);
 
-        // Metadata-da userId saxla
+        // Store userId in metadata
         Map<String, String> metadata = new HashMap<>();
         metadata.put("userId", String.valueOf(userId));
 
@@ -77,11 +77,11 @@ public class PaymentServiceImpl implements PaymentService {
                                 .setPriceData(
                                         SessionCreateParams.LineItem.PriceData.builder()
                                                 .setCurrency("azn")
-                                                .setUnitAmount(150000L) // 1500 AZN = 150000 qəpik
+                                                .setUnitAmount(150000L) // 1500 AZN = 150000 qepik
                                                 .setProductData(
                                                         SessionCreateParams.LineItem.PriceData.ProductData.builder()
                                                                 .setName("Premium Plan")
-                                                                .setDescription("Aylıq Premium Abunəlik")
+                                                                .setDescription("Monthly Premium Subscription")
                                                                 .build()
                                                 )
                                                 .build()
@@ -92,7 +92,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         Session session = Session.create(params);
-        log.info("✅ Stripe Session yaradıldı: ID={}, URL={}", session.getId(), session.getUrl());
+        log.info("✅ Stripe Session created: ID={}, URL={}", session.getId(), session.getUrl());
 
         return session.getUrl();
     }
@@ -100,32 +100,32 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void handleStripeWebhook(String payload, String sigHeader) {
-        log.info("📩 Stripe-dan Webhook bildirişi alındı");
+        log.info("📩 Webhook notification received from Stripe");
 
         Event event;
         try {
             event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
-            log.info("✅ Webhook eventi doğrulandı: EventId={}, Type={}", event.getId(), event.getType());
+            log.info("✅ Webhook event verified: EventId={}, Type={}", event.getId(), event.getType());
         } catch (SignatureVerificationException e) {
-            log.error("❌ Webhook signature doğrulanmadı: {}", e.getMessage());
+            log.error("❌ Webhook signature verification failed: {}", e.getMessage());
             throw new WebhookProcessingException("Invalid signature");
         }
 
-        // Event tipinə görə işləmə
+        // Process based on event type
         switch (event.getType()) {
             case "checkout.session.completed" -> {
-                log.info("💳 Ödəniş uğurla tamamlanıb (checkout.session.completed)");
+                log.info("💳 Payment completed successfully (checkout.session.completed)");
                 handleCheckoutSessionCompleted(event);
             }
             case "payment_intent.succeeded", "charge.succeeded", "payment_intent.created" ->
-                    log.debug("ℹ️ Bu event növü üçün xüsusi emal tələb olunmur: {}", event.getType());
+                    log.debug("ℹ️ No special processing required for this event type: {}", event.getType());
             default ->
-                    log.warn("⚠️ Naməlum event tipi: {}", event.getType());
+                    log.warn("⚠️ Unknown event type: {}", event.getType());
         }
     }
 
     /**
-     * Checkout session completed event-ini işləyir.
+     * Handles the checkout session completed event.
      */
     private void handleCheckoutSessionCompleted(Event event) {
         try {
@@ -135,55 +135,55 @@ public class PaymentServiceImpl implements PaymentService {
             if (dataObjectDeserializer.getObject().isPresent()) {
                 stripeObject = dataObjectDeserializer.getObject().get();
             } else {
-                log.warn("⚠️ Deserializer obyekti tapmadı, manual casting edilir");
+                log.warn("⚠️ Deserializer could not find object, performing manual casting");
                 stripeObject = (StripeObject) event.getData().getObject();
             }
 
             Session session = (Session) stripeObject;
 
-            // Metadata-dan userId al
+            // Get userId from metadata
             Map<String, String> metadata = session.getMetadata();
             Long userId = Long.parseLong(metadata.get("userId"));
             String stripeSessionId = session.getId();
 
-            log.info("📋 Metadata oxundu: UserId={}, StripeSessionId={}", userId, stripeSessionId);
+            log.info("📋 Metadata read: UserId={}, StripeSessionId={}", userId, stripeSessionId);
 
-            // Subscription finalize et
+            // Finalize subscription
             finalizeSubscription(userId, stripeSessionId);
 
         } catch (Exception e) {
-            log.error("❌ Webhook emalı zamanı gözlənilməz xəta: {}", e.getMessage(), e);
+            log.error("❌ Unexpected error during webhook processing: {}", e.getMessage(), e);
             throw new RuntimeException("Webhook processing failed: " + e.getMessage(), e);
         }
     }
 
     @Transactional
     public void finalizeSubscription(Long userId, String stripeSessionId) {
-        log.info("========== SUBSCRIPTION FİNALİZATİON BAŞLADI ==========");
+        log.info("========== SUBSCRIPTION FINALIZATION STARTED ==========");
         log.info("UserId: {}, StripeSessionId: {}", userId, stripeSessionId);
 
-        // Duplicate payment yoxlaması
+        // Duplicate payment check
         if (paymentRepository.existsByTransactionRef(stripeSessionId)) {
-            log.warn("⚠️ Bu Stripe session artıq işlənilib, təkrar emal edilmir: {}", stripeSessionId);
+            log.warn("⚠️ This Stripe session has already been processed, skipping: {}", stripeSessionId);
             return;
         }
 
-        // User-i tap
+        // Find user
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("İstifadəçi tapılmadı"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        // Duplicate subscription yoxlaması
+        // Duplicate subscription check
         if (subscriptionRepository.findByUser(user).isPresent()) {
-            log.warn("⚠️ İstifadəçinin artıq aktiv subscription-ı var: UserId={}", userId);
+            log.warn("⚠️ User already has an active subscription: UserId={}", userId);
             return;
         }
 
-        // 🚀 HELPER-dən qayıdan abunəliyi alırıq
+        // 🚀 Get subscription returned from HELPER
         SubscriptionEntity savedSubscription = subscriptionHelper.finalizeSubscriptionWithResources(user, "Premium", 1500.0, 1);
 
-        // ✅ Payment yaradarkən birbaşa savedSubscription istifadə edirik
+        // ✅ Use savedSubscription directly when creating payment
         PaymentEntity payment = PaymentEntity.builder()
-                .subscription(savedSubscription) // <-- user.getSubscription() yerinə bunu yazdıq
+                .subscription(savedSubscription) // <-- used instead of user.getSubscription()
                 .amount(1500.0)
                 .provider("stripe")
                 .status(PaymentStatus.SUCCESS)
@@ -193,8 +193,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         paymentRepository.save(payment);
-        log.info("✅ Ödəniş rekordu yaradıldı: TransactionRef={}", payment.getTransactionRef());
+        log.info("✅ Payment record created: TransactionRef={}", payment.getTransactionRef());
 
-        log.info("========== SUBSCRIPTION FİNALİZATİON TAMAMLANDI ==========");
+        log.info("========== SUBSCRIPTION FINALIZATION COMPLETED ==========");
     }
 }

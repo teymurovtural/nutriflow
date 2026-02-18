@@ -8,6 +8,7 @@ import com.nutriflow.enums.MealType;
 import java.util.List;
 
 public interface DietitianService {
+
     List<UserSummaryResponse> getMyAssignedUsers(String dietitianEmail);
     void createMonthlyMenu(String dietitianEmail, MenuCreateRequest request);
     String submitMenu(Long batchId);
@@ -23,4 +24,5 @@ public interface DietitianService {
     void updateMenu(Long batchId, MenuCreateRequest request);
     MenuResponse getMonthlyMenu(Long userId, Integer year, Integer month);
     String deleteMenuContent(Long batchId, Integer day, MealType mealType);
+
 }

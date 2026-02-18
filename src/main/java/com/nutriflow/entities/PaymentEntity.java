@@ -20,7 +20,7 @@ public class PaymentEntity extends BaseEntity {
     private SubscriptionEntity subscription;
 
     @Column(name = "provider", nullable = false)
-    private String provider; // Məs: "BANK_CARD", "CASH"
+    private String provider; // E.g: "BANK_CARD", "CASH"
 
     @Column(name = "amount", nullable = false)
     private Double amount;
@@ -36,5 +36,5 @@ public class PaymentEntity extends BaseEntity {
     private LocalDateTime paymentDate;
 
     @Column(name = "description", columnDefinition = "TEXT")
-    private String description; // Xəta mesajları və ya qeydlər üçün
+    private String description; // For error messages or notes
 }

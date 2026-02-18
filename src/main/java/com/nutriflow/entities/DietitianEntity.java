@@ -24,7 +24,7 @@ public class DietitianEntity extends BaseEntity {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    // Login üçün şifrə
+    // Password for login
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -32,7 +32,7 @@ public class DietitianEntity extends BaseEntity {
     private String phone;
 
     @Column(name = "specialization")
-    private String specialization;  // Məs: "Vegan diet specialist"
+    private String specialization;  // E.g: "Vegan diet specialist"
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
@@ -42,13 +42,12 @@ public class DietitianEntity extends BaseEntity {
     @Column(name = "is_active")
     private boolean isActive = true;
 
-    // Dietitian-ın məsuləyyətində olan user-lər
+    // Users under this dietitian's responsibility
     @OneToMany(mappedBy = "dietitian", fetch = FetchType.LAZY)
     private List<UserEntity> users;
 
-    //  Yaratmış menüləri
+    // Menus created by this dietitian
     @OneToMany(mappedBy = "dietitian", cascade = CascadeType.ALL)
     private List<MenuEntity> menus;
-
 
 }

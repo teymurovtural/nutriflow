@@ -18,7 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j // Loglama üçün əlavə edildi
+@Slf4j // Added for logging
 public class JwtService {
 
     @Value("${nutriflow.jwt.secret}")
@@ -31,12 +31,12 @@ public class JwtService {
     private long refreshExpiration;
 
     public String extractUsername(String token) {
-        log.debug("Token-dən istifadəçi adı çıxarılır...");
+        log.debug("Extracting username from token...");
         try {
             return extractClaim(token, Claims::getSubject);
         } catch (Exception e) {
-            log.error("Username çıxarılarkən xəta: {}", e.getMessage());
-            throw new InvalidTokenException("Token-dən username çıxarıla bilmədi: " + e.getMessage());
+            log.error("Error while extracting username: {}", e.getMessage());
+            throw new InvalidTokenException("Could not extract username from token: " + e.getMessage());
         }
     }
 
@@ -46,7 +46,7 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        log.info("Yeni Access Token yaradılır: {}", userDetails.getUsername());
+        log.info("Generating new Access Token: {}", userDetails.getUsername());
         Map<String, Object> extraClaims = new HashMap<>();
 
         extraClaims.put("authorities", userDetails.getAuthorities().stream()
@@ -57,7 +57,7 @@ public class JwtService {
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        log.info("Yeni Refresh Token yaradılır: {}", userDetails.getUsername());
+        log.info("Generating new Refresh Token: {}", userDetails.getUsername());
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
@@ -77,16 +77,16 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        log.debug("Token etibarlılığı yoxlanılır: {}", userDetails.getUsername());
+        log.debug("Checking token validity: {}", userDetails.getUsername());
         try {
             final String username = extractUsername(token);
             boolean isValid = (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
             if (!isValid) {
-                log.warn("Token etibarsızdır: Username uyğunsuzluğu və ya vaxtı bitib. User: {}", userDetails.getUsername());
+                log.warn("Token is invalid: Username mismatch or expired. User: {}", userDetails.getUsername());
             }
             return isValid;
         } catch (Exception e) {
-            log.error("Token doğrulanarkən xəta baş verdi: {}", e.getMessage());
+            log.error("Error occurred while validating token: {}", e.getMessage());
             return false;
         }
     }
@@ -95,7 +95,7 @@ public class JwtService {
         Date expiration = extractExpiration(token);
         boolean isExpired = expiration.before(new Date());
         if (isExpired) {
-            log.warn("Token-in vaxtı bitib. Expiration date: {}", expiration);
+            log.warn("Token has expired. Expiration date: {}", expiration);
         }
         return isExpired;
     }
@@ -105,7 +105,7 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        log.trace("JWT Claims parse edilir...");
+        log.trace("Parsing JWT Claims...");
         try {
             return Jwts
                     .parserBuilder()
@@ -114,20 +114,20 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
-            log.warn("JWT token-in vaxtı bitib: {}", e.getMessage());
-            throw new InvalidTokenException("JWT token-in müddəti bitib");
+            log.warn("JWT token has expired: {}", e.getMessage());
+            throw new InvalidTokenException("JWT token has expired");
         } catch (UnsupportedJwtException e) {
-            log.error("Desteklenmeyen JWT formatı: {}", e.getMessage());
-            throw new InvalidTokenException("JWT token dəstəklənmir");
+            log.error("Unsupported JWT format: {}", e.getMessage());
+            throw new InvalidTokenException("JWT token is not supported");
         } catch (MalformedJwtException e) {
-            log.error("JWT formatı zədələnib (Malformed): {}", e.getMessage());
-            throw new InvalidTokenException("JWT token eybəcdir");
+            log.error("JWT format is malformed: {}", e.getMessage());
+            throw new InvalidTokenException("JWT token is malformed");
         } catch (SignatureException e) {
-            log.error("JWT imza uyğunsuzluğu: {}", e.getMessage());
-            throw new InvalidTokenException("JWT imzası yanlışdır");
+            log.error("JWT signature mismatch: {}", e.getMessage());
+            throw new InvalidTokenException("JWT signature is invalid");
         } catch (IllegalArgumentException e) {
-            log.error("JWT claim-ləri boşdur: {}", e.getMessage());
-            throw new InvalidTokenException("JWT claim-i boşdur");
+            log.error("JWT claims are empty: {}", e.getMessage());
+            throw new InvalidTokenException("JWT claim is empty");
         }
     }
 

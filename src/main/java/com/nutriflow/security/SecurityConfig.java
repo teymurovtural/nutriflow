@@ -37,12 +37,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/v1/payments/webhook") // Webhook üçün CSRF-i söndürürük
-                        .disable() // Əgər bütünlükdə disable etmək istəyirsənsə belə qalsın
+                        .ignoringRequestMatchers("/api/v1/payments/webhook") // Disable CSRF for Webhook
+                        .disable() // Leave as is if you want to disable entirely
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/payments/webhook").permitAll() // Webhook-u hamı üçün açırıq
+                        .requestMatchers("/api/v1/payments/webhook").permitAll() // Open webhook for everyone
                         .requestMatchers("/api/v1/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/v1/health-profile/**").hasRole("USER")
                         .requestMatchers("/api/admin/scheduler-test/**").permitAll()
@@ -56,30 +56,31 @@ public class SecurityConfig {
 
         return http.build();
     }
-    // CORS konfiguratsiyası - Güvənli!
+
+    // CORS configuration - Secure!
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ Spesifik origin-lər (WILDCARD deyil!)
+        // ✅ Specific origins (not WILDCARD!)
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:4200",
                 "http://localhost:3001"
-                // Production-da sənin frontend URL-ini əlavə et
+                // Add your frontend URL in production
                 // "https://yourdomain.com"
         ));
 
-        // İzin verilən HTTP metodları
+        // Allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // İzin verilən headers
+        // Allowed headers
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
 
-        // Credentials ilə istəklər
+        // Requests with credentials
         configuration.setAllowCredentials(true);
 
-        // Preflight cache müddəti
+        // Preflight cache duration
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

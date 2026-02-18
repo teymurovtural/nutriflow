@@ -12,6 +12,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminDashboardResponse {
+
     private long totalUsers;
     private long totalDietitians;
     private long totalCaterers;
@@ -25,4 +26,5 @@ public class AdminDashboardResponse {
     private long rejectedMenus;
     private long newUsersThisMonth;
     private Map<String, Double> chartData;
+
 }

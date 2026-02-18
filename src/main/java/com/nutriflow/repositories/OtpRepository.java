@@ -9,9 +9,9 @@ import java.util.Optional;
 @Repository
 public interface OtpRepository extends JpaRepository<OtpEntity, Long> {
 
-    // Email və koda görə tapmaq (verify zamanı SQL statusunu yeniləmək üçün)
+    // Find by email and code (used to update SQL status during verification)
     Optional<OtpEntity> findByEmailAndCode(String email, String code);
 
-    // İstəsən gələcəkdə bu email-ə aid olan sonuncu aktiv kodu tapmaq üçün istifadə edə bilərsən
+    // Can be used in the future to find the last active code for this email
     Optional<OtpEntity> findFirstByEmailOrderByCreatedAtDesc(String email);
 }

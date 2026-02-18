@@ -12,7 +12,9 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResponse extends BaseAuthResponse {
+
     private String email;
     private UserStatus status;
     private Role role;
+
 }

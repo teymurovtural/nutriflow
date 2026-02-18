@@ -13,7 +13,7 @@ public interface UserService {
 
     MenuResponse getMyCurrentMenu(String email);
 
-    void rejectMenu(Long batchId, String reason); // BatchId ilə yeniləndi
+    void rejectMenu(Long batchId, String reason); // Updated with BatchId
 
     void approveMenu(String email, MenuApproveRequest request);
 

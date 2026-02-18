@@ -16,11 +16,11 @@ import java.time.format.DateTimeFormatter;
 public class EmailNotificationService {
 
     private final JavaMailSender mailSender;
-    // ✅ Əgər repository lazımdırsa əlavə edin (amma bu service-də lazım deyil)
+    // ✅ Add if repository is needed (not required in this service)
     // private final SubscriptionRepository subscriptionRepository;
 
     /**
-     * Abunəlik 7 gün sonra bitəcək xəbərdarlığı
+     * Subscription expiration warning - 7 days remaining
      */
     public void sendSubscriptionExpirationWarning(SubscriptionEntity subscription) {
         try {
@@ -32,20 +32,20 @@ public class EmailNotificationService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("tural57535@gmail.com");
             message.setTo(userEmail);
-            message.setSubject("⚠️ NutriFlow Premium Abunəliyiniz Tezliklə Bitir");
+            message.setSubject("⚠️ Your NutriFlow Premium Subscription is Expiring Soon");
             message.setText(buildExpirationWarningEmail(userName, endDate));
 
             mailSender.send(message);
 
-            log.info("✅ [EMAIL] Abunəlik xəbərdarlığı göndərildi: {}", userEmail);
+            log.info("✅ [EMAIL] Subscription expiration warning sent: {}", userEmail);
 
         } catch (Exception e) {
-            log.error("❌ [EMAIL] Email göndərilmədi: {}", e.getMessage(), e);
+            log.error("❌ [EMAIL] Email could not be sent: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * Abunəlik bitdi bildirişi
+     * Subscription expired notification
      */
     public void sendSubscriptionExpiredNotification(SubscriptionEntity subscription) {
         try {
@@ -55,89 +55,89 @@ public class EmailNotificationService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("tural57535@gmail.com");
             message.setTo(userEmail);
-            message.setSubject("❌ NutriFlow Premium Abunəliyiniz Bitdi");
+            message.setSubject("❌ Your NutriFlow Premium Subscription Has Expired");
             message.setText(buildExpiredEmail(userName));
 
             mailSender.send(message);
 
-            log.info("✅ [EMAIL] Abunəlik bitdi bildirişi göndərildi: {}", userEmail);
+            log.info("✅ [EMAIL] Subscription expired notification sent: {}", userEmail);
 
         } catch (Exception e) {
-            log.error("❌ [EMAIL] Email göndərilmədi: {}", e.getMessage(), e);
+            log.error("❌ [EMAIL] Email could not be sent: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * Admin üçün həftəlik report
+     * Weekly report for admin
      */
     public void sendWeeklyReportToAdmin(long activeCount, long expiredCount, long cancelledCount) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("tural57535@gmail.com");
             message.setTo("admin@nutriflow.com");
-            message.setSubject("📊 NutriFlow - Həftəlik Subscription Report");
+            message.setSubject("📊 NutriFlow - Weekly Subscription Report");
             message.setText(buildWeeklyReportEmail(activeCount, expiredCount, cancelledCount));
 
             mailSender.send(message);
 
-            log.info("✅ [EMAIL] Həftəlik report admin-ə göndərildi");
+            log.info("✅ [EMAIL] Weekly report sent to admin");
 
         } catch (Exception e) {
-            log.error("❌ [EMAIL] Admin report göndərilmədi: {}", e.getMessage(), e);
+            log.error("❌ [EMAIL] Admin report could not be sent: {}", e.getMessage(), e);
         }
     }
 
-    // ============== EMAIL TEMPLATE-LƏRİ ==============
+    // ============== EMAIL TEMPLATES ==============
 
     private String buildExpirationWarningEmail(String userName, String endDate) {
         return String.format("""
-                Hörmətli %s,
+                Dear %s,
                 
-                NutriFlow Premium abunəliyiniz tezliklə bitəcək! ⏰
+                Your NutriFlow Premium subscription is expiring soon! ⏰
                 
-                📅 Abunəlik bitiş tarixi: %s
+                📅 Subscription end date: %s
                 
-                Premium xüsusiyyətlərinizi itirməmək üçün abunəliyi yeniləyin:
+                Renew your subscription to keep your Premium features:
                 
-                ✅ Qida planlarına sınırsız giriş
-                ✅ Dietoloqla birbaşa əlaqə
-                ✅ Peşəkar menyu planları
-                ✅ Çatdırılma xidməti
+                ✅ Unlimited access to nutrition plans
+                ✅ Direct contact with your dietitian
+                ✅ Professional menu plans
+                ✅ Delivery service
                 
-                Abunəliyi yeniləmək üçün: https://nutriflow.com/subscription
+                To renew your subscription: https://nutriflow.com/subscription
                 
-                Hörmətlə,
-                NutriFlow Komandası
+                Best regards,
+                NutriFlow Team
                 """, userName, endDate);
     }
 
     private String buildExpiredEmail(String userName) {
         return String.format("""
-                Hörmətli %s,
+                Dear %s,
                 
-                NutriFlow Premium abunəliyiniz bitdi. 😔
+                Your NutriFlow Premium subscription has expired. 😔
                 
-                Premium xüsusiyyətlərinizə giriş dayandırılıb.
+                Access to your Premium features has been suspended.
                 
-                Yenidən premium xidmətlərdən istifadə etmək üçün abunəliyi yeniləyin:
+                To use premium services again, please renew your subscription:
                 https://nutriflow.com/subscription
                 
-                Hörmətlə,
-                NutriFlow Komandası
+                Best regards,
+                NutriFlow Team
                 """, userName);
     }
 
     private String buildWeeklyReportEmail(long activeCount, long expiredCount, long cancelledCount) {
         long totalCount = activeCount + expiredCount + cancelledCount;
         return String.format("""
-                📊 HƏFTƏLIK SUBSCRIPTION REPORT
+                📊 WEEKLY SUBSCRIPTION REPORT
                 ================================
                 
-                ✅ Aktiv Abunəliklər: %d
-                ❌ Bitmiş Abunəliklər: %d
-                🚫 Ləğv Edilmiş: %d
+                ✅ Active Subscriptions: %d
+                ❌ Expired Subscriptions: %d
+                🚫 Cancelled: %d
                 
-                📈 Toplam: %d
+                📈 Total: %d
                 
                 ---
                 NutriFlow Admin Panel

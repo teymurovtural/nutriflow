@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class UserDashboardResponse {
+
     private String planName;
     private SubscriptionStatus subscriptionStatus;
     private LocalDate nextRenewalDate;
@@ -17,4 +18,5 @@ public class UserDashboardResponse {
     private Long completedDeliveries;
     private Integer totalDays;
     private Double progressPercentage;
+
 }

@@ -19,15 +19,15 @@ public class EnhancedLoggingAspect {
     private static final String SYMBOL_END = "←";
     private static final String SYMBOL_ERROR = "✗";
     private static final int MAX_LOG_LENGTH = 200;
-    private static final long SLOW_METHOD_THRESHOLD = 1000; // 1 saniyə
-    private static final long VERY_SLOW_METHOD_THRESHOLD = 5000; // 5 saniyə
+    private static final long SLOW_METHOD_THRESHOLD = 1000; // 1 second
+    private static final long VERY_SLOW_METHOD_THRESHOLD = 5000; // 5 seconds
     private static final String[] SENSITIVE_FIELDS = {
             "password", "token", "secret", "apiKey", "accessToken",
             "refreshToken", "sessionId", "creditCard", "cvv"
     };
 
     /**
-     * Service layer-dəki bütün metodları log edir
+     * Logs all methods in the Service layer
      */
     @Around("execution(* com.nutriflow.services.impl..*(..))")
     public Object logServiceMethods(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -35,7 +35,7 @@ public class EnhancedLoggingAspect {
     }
 
     /**
-     * Controller layer-dəki bütün metodları log edir
+     * Logs all methods in the Controller layer
      */
     @Around("execution(* com.nutriflow.controllers..*(..))")
     public Object logControllerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -43,7 +43,7 @@ public class EnhancedLoggingAspect {
     }
 
     /**
-     * Repository layer-dəki custom metodları log edir
+     * Logs custom methods in the Repository layer
      */
     @Around("@within(org.springframework.stereotype.Repository) && " +
             "!execution(* org.springframework.data.repository..*(..))")
@@ -52,7 +52,7 @@ public class EnhancedLoggingAspect {
     }
 
     /**
-     * Method icra məntiqini log edir və performance monitor edir
+     * Logs method execution logic and monitors performance
      */
     private Object logMethodExecution(ProceedingJoinPoint joinPoint, String layer) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
@@ -60,8 +60,8 @@ public class EnhancedLoggingAspect {
         String methodName = signature.getName();
         Object[] args = joinPoint.getArgs();
 
-        // Method başladı
-        log.info("{} [{}] {}.{} başladı | Parametrlər: {}",
+        // Method started
+        log.info("{} [{}] {}.{} started | Parameters: {}",
                 SYMBOL_START, layer, className, methodName, formatArguments(args));
 
         long startTime = System.currentTimeMillis();
@@ -70,7 +70,7 @@ public class EnhancedLoggingAspect {
         Throwable exception = null;
 
         try {
-            // Actual method icra olunur
+            // Actual method execution
             result = joinPoint.proceed();
             return result;
 
@@ -79,7 +79,7 @@ public class EnhancedLoggingAspect {
             exception = e;
 
             // Exception log (detailed)
-            log.error("{} [{}] {}.{} xəta baş verdi | Exception: {} | Mesaj: {}",
+            log.error("{} [{}] {}.{} an error occurred | Exception: {} | Message: {}",
                     SYMBOL_ERROR, layer, className, methodName,
                     e.getClass().getSimpleName(), e.getMessage(), e);
 
@@ -89,13 +89,13 @@ public class EnhancedLoggingAspect {
             long duration = System.currentTimeMillis() - startTime;
 
             if (success) {
-                // Uğurlu completion
-                log.info("{} [{}] {}.{} tamamlandı | Müddət: {}ms | Return: {}",
+                // Successful completion
+                log.info("{} [{}] {}.{} completed | Duration: {}ms | Return: {}",
                         SYMBOL_END, layer, className, methodName,
                         duration, formatReturnValue(result));
             } else {
-                // Uğursuz completion
-                log.error("{} [{}] {}.{} uğursuz oldu | Müddət: {}ms | Exception: {}",
+                // Failed completion
+                log.error("{} [{}] {}.{} failed | Duration: {}ms | Exception: {}",
                         SYMBOL_ERROR, layer, className, methodName,
                         duration, exception.getClass().getSimpleName());
             }
@@ -106,24 +106,24 @@ public class EnhancedLoggingAspect {
     }
 
     /**
-     * Performance yoxlayır və slow method-ları detect edir
+     * Checks performance and detects slow methods
      */
     private void checkPerformance(String layer, String className, String methodName, long duration) {
         if (duration > VERY_SLOW_METHOD_THRESHOLD) {
-            log.warn("⚠️ [PERFORMANCE] ÇOX YAVAŞ METHOD | [{}] {}.{} | Müddət: {}ms | Limit: {}ms",
+            log.warn("⚠️ [PERFORMANCE] VERY SLOW METHOD | [{}] {}.{} | Duration: {}ms | Limit: {}ms",
                     layer, className, methodName, duration, VERY_SLOW_METHOD_THRESHOLD);
         } else if (duration > SLOW_METHOD_THRESHOLD) {
-            log.warn("⚠️ [PERFORMANCE] Yavaş method | [{}] {}.{} | Müddət: {}ms | Limit: {}ms",
+            log.warn("⚠️ [PERFORMANCE] Slow method | [{}] {}.{} | Duration: {}ms | Limit: {}ms",
                     layer, className, methodName, duration, SLOW_METHOD_THRESHOLD);
         }
     }
 
     /**
-     * Method parametrlərini format edir və sensitive data-nı gizlədir
+     * Formats method arguments and masks sensitive data
      */
     private String formatArguments(Object[] args) {
         if (args == null || args.length == 0) {
-            return "yoxdur";
+            return "none";
         }
 
         Object[] sanitizedArgs = Arrays.stream(args)
@@ -134,7 +134,7 @@ public class EnhancedLoggingAspect {
     }
 
     /**
-     * Return value-ni format edir
+     * Formats return value
      */
     private String formatReturnValue(Object result) {
         if (result == null) {
@@ -143,7 +143,7 @@ public class EnhancedLoggingAspect {
 
         String resultStr = sanitizeSensitiveData(result).toString();
 
-        // Çox uzun response-ları qısalt
+        // Truncate very long responses
         if (resultStr.length() > MAX_LOG_LENGTH) {
             return resultStr.substring(0, MAX_LOG_LENGTH) + "... (truncated)";
         }
@@ -152,7 +152,7 @@ public class EnhancedLoggingAspect {
     }
 
     /**
-     * Sensitive məlumatları gizlədir
+     * Masks sensitive information
      */
     private Object sanitizeSensitiveData(Object obj) {
         if (obj == null) {
@@ -161,16 +161,16 @@ public class EnhancedLoggingAspect {
 
         String objStr = obj.toString();
 
-        // Sensitive field-ləri gizlət
+        // Mask sensitive fields
         for (String field : SENSITIVE_FIELDS) {
             objStr = objStr.replaceAll(field + "=[^,\\]\\)\\s]+", field + "=***");
         }
 
-        // Credit card nömrələrini gizlət
+        // Mask credit card numbers
         objStr = objStr.replaceAll("\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b",
                 "****-****-****-****");
 
-        // Email-ləri partial gizlət (ilk 3 hərf qalır)
+        // Partially mask emails (keep first 3 characters)
         objStr = objStr.replaceAll("([a-zA-Z0-9]{3})[a-zA-Z0-9._-]+@", "$1***@");
 
         return objStr;

@@ -17,7 +17,7 @@ public class DeliveryMapper {
 
         return DeliveryDetailResponse.builder()
                 .deliveryId(entity.getId())
-                // --- YENİ ƏLAVƏLƏR ---
+                // --- NEW ADDITIONS ---
                 .deliveryDate(entity.getDate())
                 .dayNumber(entity.getDate() != null ? entity.getDate().getDayOfMonth() : null)
                 // ---------------------

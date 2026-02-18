@@ -15,7 +15,7 @@ public interface DietitianRepository extends JpaRepository<DietitianEntity, Long
 
     Optional<DietitianEntity> findByEmail(String email);
 
-    // Aktiv olan və ən az pasiyenti (user-i) olan dietoloqu tapmaq üçün
+    // Find the active dietitian with the fewest patients (users)
     @Query("SELECT d FROM DietitianEntity d WHERE d.isActive = true ORDER BY size(d.users) ASC")
     Optional<DietitianEntity> findFirstByIsActiveTrueOrderByUsersSizeAsc();
 
@@ -30,6 +30,4 @@ public interface DietitianRepository extends JpaRepository<DietitianEntity, Long
             "LOWER(d.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(d.specialization) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<DietitianEntity> searchDietitians(@Param("query") String query, Pageable pageable);
-
-
 }

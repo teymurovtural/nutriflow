@@ -13,20 +13,20 @@ import java.util.List;
 @AllArgsConstructor
 public class MenuCreateRequest {
 
-    @NotNull(message = "İstifadəçi ID-si mütləqdir")
+    @NotNull(message = "User ID is required")
     private Long userId;
 
-    @NotNull(message = "İl qeyd olunmalıdır")
-    @Min(value = 2024, message = "Keçmiş illərə menyu yazıla bilməz")
+    @NotNull(message = "Year must be specified")
+    @Min(value = 2024, message = "Cannot create a menu for past years")
     private Integer year;
 
-    @NotNull(message = "Ay qeyd olunmalıdır")
+    @NotNull(message = "Month must be specified")
     @Min(1) @Max(12)
     private Integer month;
 
     private String dietaryNotes;
 
-    @NotEmpty(message = "Menyu boş ola bilməz. Ən azı bir yemək planı daxil edilməlidir")
+    @NotEmpty(message = "Menu cannot be empty. At least one meal plan must be provided")
     @Valid
     private List<MenuItemRequest> items;
 }

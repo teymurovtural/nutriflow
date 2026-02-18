@@ -29,13 +29,13 @@ import java.util.Optional;
 /**
  * Admin Service Implementation - REFACTORED
  *
- * Refactoring Dəyişikliklər:
- * ✅ String formatting → LoggingUtil istifadə edir
- * ✅ Hardcoded constants → ActionType istifadə edir
- * ✅ Hardcoded messages → LogMessages istifadə edir
- * ✅ İP extraction → IpAddressUtil istifadə edir (ActivityLogService-də)
+ * Refactoring Changes:
+ * ✅ String formatting → Uses LoggingUtil
+ * ✅ Hardcoded constants → Uses ActionType
+ * ✅ Hardcoded messages → Uses LogMessages
+ * ✅ IP extraction → Uses IpAddressUtil (via ActivityLogService)
  *
- * Bütün 27 metodun refactoringləşdirilmiş versiyası
+ * Refactored version of all 27 methods
  */
 @Service
 @RequiredArgsConstructor
@@ -79,7 +79,7 @@ public class AdminServiceImpl implements AdminService {
 
         if (existing.isPresent()) {
             dietitian = existing.get();
-            oldData = adminMapper.formatDietitianData(dietitian); // Mapper-dən format
+            oldData = adminMapper.formatDietitianData(dietitian); // Format from Mapper
             dietitianMapper.updateEntityFromRequest(dietitian, request);
             actionType = ActionType.UPDATE_DIETITIAN;
         } else {
@@ -97,11 +97,11 @@ public class AdminServiceImpl implements AdminService {
         activityLogService.logAction(
                 Role.ADMIN, currentUser.getId(), actionType, "DIETITIAN", saved.getId(),
                 oldData,
-                adminMapper.formatDietitianData(saved), // Mapper-dən format
+                adminMapper.formatDietitianData(saved), // Format from Mapper
                 existing.isPresent() ? LogMessages.DIETITIAN_UPDATED : LogMessages.DIETITIAN_CREATED
         );
 
-        return dietitianMapper.toAdminActionResponse(saved, existing.isPresent() ? "Dietoloq yeniləndi" : "Yeni dietoloq yaradıldı");
+        return dietitianMapper.toAdminActionResponse(saved, existing.isPresent() ? "Dietitian updated" : "New dietitian created");
     }
 
     @Override
@@ -113,7 +113,7 @@ public class AdminServiceImpl implements AdminService {
 
         if (existing.isPresent()) {
             caterer = existing.get();
-            oldData = adminMapper.formatCatererData(caterer); // Mapper-dən format
+            oldData = adminMapper.formatCatererData(caterer); // Format from Mapper
             catererMapper.updateEntityFromRequest(caterer, request);
             actionType = ActionType.UPDATE_CATERER_ADMIN;
         } else {
@@ -131,18 +131,18 @@ public class AdminServiceImpl implements AdminService {
         activityLogService.logAction(
                 Role.ADMIN, currentUser.getId(), actionType, "CATERER", saved.getId(),
                 oldData,
-                adminMapper.formatCatererData(saved), // Mapper-dən format
+                adminMapper.formatCatererData(saved), // Format from Mapper
                 existing.isPresent() ? LogMessages.CATERER_UPDATED : LogMessages.CATERER_CREATED
         );
 
-        return catererMapper.toAdminActionResponse(saved, existing.isPresent() ? "Mətbəx yeniləndi" : "Mətbəx yaradıldı");
+        return catererMapper.toAdminActionResponse(saved, existing.isPresent() ? "Caterer updated" : "Caterer created");
     }
 
     @Override
     @Transactional
     public AdminActionResponse createUser(RegisterRequestForAdmin request, SecurityUser currentUser) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException("Məlumat xətası: " + request.getEmail() + " artıq istifadə olunur!");
+            throw new BusinessException("Data error: " + request.getEmail() + " is already in use!");
         }
 
         UserEntity user = userMapper.toEntity(request);
@@ -158,11 +158,11 @@ public class AdminServiceImpl implements AdminService {
         activityLogService.logAction(
                 Role.ADMIN, currentUser.getId(), ActionType.CREATE_USER, "USER", saved.getId(),
                 LogMessages.NEW_RECORD,
-                adminMapper.formatUserData(saved), // Mapper-dən format
+                adminMapper.formatUserData(saved), // Format from Mapper
                 LogMessages.USER_CREATED
         );
 
-        return userMapper.toAdminActionResponse(saved, "İstifadəçi və sağlamlıq profili uğurla yaradıldı");
+        return userMapper.toAdminActionResponse(saved, "User and health profile created successfully");
     }
 
     @Override
@@ -174,7 +174,7 @@ public class AdminServiceImpl implements AdminService {
 
         if (existingAdmin.isPresent()) {
             subAdmin = existingAdmin.get();
-            oldData = adminMapper.formatAdminData(subAdmin); // Mapper-dən format
+            oldData = adminMapper.formatAdminData(subAdmin); // Format from Mapper
             adminMapper.updateEntityFromRequest(subAdmin, request);
             actionType = ActionType.UPDATE_PROFILE;
         } else {
@@ -192,11 +192,11 @@ public class AdminServiceImpl implements AdminService {
         activityLogService.logAction(
                 Role.ADMIN, currentUser.getId(), actionType, "ADMIN", saved.getId(),
                 oldData,
-                adminMapper.formatAdminData(saved), // Mapper-dən format
-                existingAdmin.isPresent() ? "Sub-Admin məlumatları yeniləndi" : LogMessages.ADMIN_CREATED
+                adminMapper.formatAdminData(saved), // Format from Mapper
+                existingAdmin.isPresent() ? "Sub-Admin data updated" : LogMessages.ADMIN_CREATED
         );
 
-        String msg = existingAdmin.isPresent() ? "Admin məlumatları yeniləndi" : "Yeni admin uğurla yaradıldı";
+        String msg = existingAdmin.isPresent() ? "Admin data updated" : "New admin created successfully";
         return adminMapper.toAdminActionResponse(saved, msg);
     }
 
@@ -209,12 +209,12 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public AdminActionResponse assignDietitianToUser(Long userId, Long dietitianId, SecurityUser currentUser) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException("İstifadəçi tapılmadı"));
+                .orElseThrow(() -> new BusinessException("User not found"));
 
         DietitianEntity dietitian = dietitianRepository.findById(dietitianId)
-                .orElseThrow(() -> new BusinessException("Dietoloq tapılmadı"));
+                .orElseThrow(() -> new BusinessException("Dietitian not found"));
 
-        // Log məlumatlarını Mapper-dən alırıq
+        // Retrieve log data from Mapper
         String oldData = adminMapper.formatUserAssignmentOldData(user);
         String newData = adminMapper.formatDietitianAssignmentNewData(dietitian);
 
@@ -229,22 +229,22 @@ public class AdminServiceImpl implements AdminService {
                 savedUser.getId(),
                 oldData,
                 newData,
-                String.format("İstifadəçiyə (%s) yeni dietoloq təyin edildi", savedUser.getEmail())
+                String.format("A new dietitian was assigned to user (%s)", savedUser.getEmail())
         );
 
-        return userMapper.toAdminActionResponse(savedUser, "Dietoloq uğurla təyin edildi");
+        return userMapper.toAdminActionResponse(savedUser, "Dietitian assigned successfully");
     }
 
     @Override
     @Transactional
     public AdminActionResponse assignCatererToUser(Long userId, Long catererId, SecurityUser currentUser) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException("İstifadəçi tapılmadı"));
+                .orElseThrow(() -> new BusinessException("User not found"));
 
         CatererEntity caterer = catererRepository.findById(catererId)
-                .orElseThrow(() -> new BusinessException("Mətbəx tapılmadı"));
+                .orElseThrow(() -> new BusinessException("Caterer not found"));
 
-        // Log məlumatlarını Mapper-dən alırıq
+        // Retrieve log data from Mapper
         String oldData = adminMapper.formatUserAssignmentOldData(user);
         String newData = adminMapper.formatCatererAssignmentNewData(caterer);
 
@@ -259,10 +259,10 @@ public class AdminServiceImpl implements AdminService {
                 savedUser.getId(),
                 oldData,
                 newData,
-                String.format("İstifadəçiyə (%s) yeni mətbəx təyin edildi", savedUser.getEmail())
+                String.format("A new caterer was assigned to user (%s)", savedUser.getEmail())
         );
 
-        return userMapper.toAdminActionResponse(savedUser, "Mətbəx uğurla təyin edildi");
+        return userMapper.toAdminActionResponse(savedUser, "Caterer assigned successfully");
     }
 
 
@@ -273,11 +273,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public AdminDashboardResponse getDashboardStatistics(LocalDateTime start, LocalDateTime end, SecurityUser currentUser) {
-        // 1. Vaxt intervallarının təyin edilməsi
+        // 1. Set time intervals
         LocalDateTime finalStart = (start != null) ? start : LocalDateTime.now().minusMonths(6);
         LocalDateTime finalEnd = (end != null) ? end : LocalDateTime.now();
 
-        // 2. Maliyyə məlumatlarının toplanması
+        // 2. Collect financial data
         Double totalRevenue = paymentRepository.getTotalRevenueByStatus(PaymentStatus.SUCCESS);
         if (totalRevenue == null) totalRevenue = 0.0;
 
@@ -290,7 +290,7 @@ public class AdminServiceImpl implements AdminService {
             chartData.put(month, amount);
         }
 
-        // 3. Loglama (AdminMapper-dən gələn formatla)
+        // 3. Logging (using format from AdminMapper)
         activityLogService.logAction(
                 Role.ADMIN,
                 currentUser.getId(),
@@ -299,11 +299,11 @@ public class AdminServiceImpl implements AdminService {
                 null,
                 adminMapper.formatDashboardFilterLog(finalStart, finalEnd),
                 adminMapper.formatDashboardResultLog(totalRevenue, userRepository.count()),
-                "Admin tərəfindən dashboard statistikalarına baxıldı"
+                "Dashboard statistics viewed by admin"
         );
 
-        // 4. Response-un Mapper vasitəsilə qaytarılması
-        // Ayın başlanğıcı və sonu
+        // 4. Return response via Mapper
+        // Start and end of the current month
         LocalDateTime monthStart = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime monthEnd = LocalDateTime.now();
 
@@ -386,7 +386,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public AdminActionResponse toggleDietitianStatus(Long id, SecurityUser currentUser) {
         DietitianEntity dietitian = dietitianRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Dietoloq tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("Dietitian not found!"));
 
         String oldData = adminMapper.formatDietitianData(dietitian);
         boolean newStatus = !dietitian.isActive();
@@ -398,17 +398,17 @@ public class AdminServiceImpl implements AdminService {
                 Role.ADMIN, currentUser.getId(),
                 newStatus ? ActionType.ACTIVATE_DIETITIAN : "DEACTIVATE_DIETITIAN",
                 "DIETITIAN", id, oldData, adminMapper.formatDietitianData(saved),
-                String.format("%s statusu %s edildi.", saved.getEmail(), newStatus ? "AKTİV" : "DEAKTİV")
+                String.format("%s status set to %s.", saved.getEmail(), newStatus ? "ACTIVE" : "INACTIVE")
         );
 
-        return adminMapper.toAdminActionResponse(id, "Dietoloq statusu uğurla dəyişdirildi.");
+        return adminMapper.toAdminActionResponse(id, "Dietitian status updated successfully.");
     }
 
     @Override
     @Transactional
     public AdminActionResponse toggleUserStatus(Long id, SecurityUser currentUser) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("İstifadəçi tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("User not found!"));
 
         String oldData = adminMapper.formatUserData(user);
         UserStatus newStatus = (user.getStatus() == UserStatus.ACTIVE) ? UserStatus.EXPIRED : UserStatus.ACTIVE;
@@ -419,17 +419,17 @@ public class AdminServiceImpl implements AdminService {
         activityLogService.logAction(
                 Role.ADMIN, currentUser.getId(), ActionType.UPDATE_USER,
                 "USER", id, oldData, adminMapper.formatUserData(saved),
-                String.format("%s üçün status %s -> %s dəyişdirildi.", saved.getEmail(), oldData.contains("ACTIVE") ? "ACTIVE" : "EXPIRED", newStatus)
+                String.format("Status changed for %s: %s -> %s.", saved.getEmail(), oldData.contains("ACTIVE") ? "ACTIVE" : "EXPIRED", newStatus)
         );
 
-        return adminMapper.toUserStatusResponse(id, newStatus, "İstifadəçi statusu uğurla yeniləndi.");
+        return adminMapper.toUserStatusResponse(id, newStatus, "User status updated successfully.");
     }
 
     @Override
     @Transactional
     public AdminActionResponse toggleCatererStatus(Long id, SecurityUser currentUser) {
         CatererEntity caterer = catererRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Mətbəx tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("Caterer not found!"));
 
         String oldData = adminMapper.formatCatererData(caterer);
         CatererStatus newStatus = (caterer.getStatus() == CatererStatus.ACTIVE) ? CatererStatus.INACTIVE : CatererStatus.ACTIVE;
@@ -441,24 +441,24 @@ public class AdminServiceImpl implements AdminService {
                 Role.ADMIN, currentUser.getId(),
                 newStatus == CatererStatus.ACTIVE ? ActionType.ACTIVATE_CATERER : "DEACTIVATE_CATERER",
                 "CATERER", id, oldData, adminMapper.formatCatererData(saved),
-                String.format("%s mətbəxinin statusu %s edildi.", saved.getName(), newStatus)
+                String.format("Status of caterer %s set to %s.", saved.getName(), newStatus)
         );
 
-        return adminMapper.toAdminActionResponse(id, "Mətbəx statusu uğurla yeniləndi.");
+        return adminMapper.toAdminActionResponse(id, "Caterer status updated successfully.");
     }
 
     @Override
     @Transactional
     public AdminActionResponse toggleSubAdminStatus(Long id, SecurityUser currentUser) {
         if (id.equals(currentUser.getId())) {
-            throw new BusinessException("Xəta: Öz admin hesabınızı silə bilməzsiniz!");
+            throw new BusinessException("Error: You cannot deactivate your own admin account!");
         }
         if (!currentUser.isSuperAdmin()) {
-            throw new BusinessException("Bu əməliyyat üçün Super Admin yetkisi lazımdır!");
+            throw new BusinessException("Super Admin privileges are required for this operation!");
         }
 
         AdminEntity admin = adminRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Admin tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("Admin not found!"));
 
         String oldData = adminMapper.formatAdminData(admin);
         boolean newStatus = !admin.isActive();
@@ -470,10 +470,10 @@ public class AdminServiceImpl implements AdminService {
                 Role.ADMIN, currentUser.getId(),
                 newStatus ? ActionType.ACTIVATE_ADMIN : "DEACTIVATE_ADMIN",
                 "ADMIN", id, oldData, adminMapper.formatAdminData(saved),
-                String.format("%s admin statusu %s edildi.", saved.getEmail(), newStatus ? "AKTİV" : "DEAKTİV")
+                String.format("Admin status of %s set to %s.", saved.getEmail(), newStatus ? "ACTIVE" : "INACTIVE")
         );
 
-        return adminMapper.toAdminActionResponse(id, "Admin statusu uğurla dəyişdirildi.");
+        return adminMapper.toAdminActionResponse(id, "Admin status updated successfully.");
     }
 
 
@@ -485,7 +485,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public AdminActionResponse deleteUser(Long id, SecurityUser currentUser) {
         UserEntity user = userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("İstifadəçi tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("User not found!"));
 
         String oldData = adminMapper.formatUserData(user);
 
@@ -496,18 +496,18 @@ public class AdminServiceImpl implements AdminService {
                 "USER", id, oldData, LogMessages.DELETED, LogMessages.USER_DELETED
         );
 
-        return adminMapper.toAdminActionResponse(id, "İstifadəçi sistemdən silindi.");
+        return adminMapper.toAdminActionResponse(id, "User removed from the system.");
     }
 
     @Override
     @Transactional
     public AdminActionResponse deleteDietitian(Long id, SecurityUser currentUser) {
         DietitianEntity dietitian = dietitianRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Dietoloq tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("Dietitian not found!"));
 
         String oldData = adminMapper.formatDietitianData(dietitian);
 
-        // Əlaqəli user-ləri təmizləyirik
+        // Remove references from associated users
         userRepository.findAllByDietitianId(id).forEach(user -> {
             user.setDietitian(null);
             userRepository.save(user);
@@ -520,18 +520,18 @@ public class AdminServiceImpl implements AdminService {
                 "DIETITIAN", id, oldData, LogMessages.DELETED, LogMessages.DIETITIAN_DELETED
         );
 
-        return adminMapper.toAdminActionResponse(id, "Dietoloq uğurla silindi.");
+        return adminMapper.toAdminActionResponse(id, "Dietitian deleted successfully.");
     }
 
     @Override
     @Transactional
     public AdminActionResponse deleteCaterer(Long id, SecurityUser currentUser) {
         CatererEntity caterer = catererRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Mətbəx tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("Caterer not found!"));
 
         String oldData = adminMapper.formatCatererData(caterer);
 
-        // Əlaqəli user-ləri təmizləyirik
+        // Remove references from associated users
         userRepository.findAllByCatererId(id).forEach(user -> {
             user.setCaterer(null);
             userRepository.save(user);
@@ -544,18 +544,18 @@ public class AdminServiceImpl implements AdminService {
                 "CATERER", id, oldData, LogMessages.DELETED, LogMessages.CATERER_DELETED
         );
 
-        return adminMapper.toAdminActionResponse(id, "Mətbəx uğurla silindi.");
+        return adminMapper.toAdminActionResponse(id, "Caterer deleted successfully.");
     }
 
     @Override
     @Transactional
     public AdminActionResponse deleteSubAdmin(Long id, SecurityUser currentUser) {
         if (id.equals(currentUser.getId())) {
-            throw new BusinessException("Xəta: Öz admin hesabınızı silə bilməzsiniz!");
+            throw new BusinessException("Error: You cannot delete your own admin account!");
         }
 
         AdminEntity admin = adminRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Admin tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("Admin not found!"));
 
         String oldData = adminMapper.formatAdminData(admin);
 
@@ -566,7 +566,7 @@ public class AdminServiceImpl implements AdminService {
                 "ADMIN", id, oldData, LogMessages.DELETED, LogMessages.ADMIN_DELETED
         );
 
-        return adminMapper.toAdminActionResponse(id, "Admin hesabı uğurla silindi.");
+        return adminMapper.toAdminActionResponse(id, "Admin account deleted successfully.");
     }
 
 
@@ -578,30 +578,30 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public AdminActionResponse updateAdminProfile(AdminProfileUpdateRequest request, SecurityUser currentUser) {
         AdminEntity admin = adminRepository.findById(currentUser.getId())
-                .orElseThrow(() -> new BusinessException("Admin tapılmadı!"));
+                .orElseThrow(() -> new BusinessException("Admin not found!"));
 
-        // Köhnə data loq üçün formatlanır
+        // Format old data for logging
         String oldData = adminMapper.formatAdminData(admin);
 
-        // 1. Email dəyişikliyi yoxlanışı
+        // 1. Check for email change
         if (!admin.getEmail().equalsIgnoreCase(request.getEmail())) {
             adminRepository.findByEmail(request.getEmail()).ifPresent(a -> {
-                throw new BusinessException("Bu email artıq istifadə olunur!");
+                throw new BusinessException("This email is already in use!");
             });
             admin.setEmail(request.getEmail());
         }
 
-        // 2. Sahələrin Mapper vasitəsilə yenilənməsi
+        // 2. Update fields via Mapper
         adminMapper.updateAdminProfileFromRequest(admin, request);
 
-        // 3. Şifrə yenilənməsi
+        // 3. Update password
         if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
             admin.setPassword(passwordEncoder.encode(request.getNewPassword()));
         }
 
         AdminEntity saved = adminRepository.save(admin);
 
-        // 4. Loqlama
+        // 4. Logging
         activityLogService.logAction(
                 Role.ADMIN,
                 currentUser.getId(),
@@ -613,8 +613,8 @@ public class AdminServiceImpl implements AdminService {
                 LogMessages.ADMIN_PROFILE_UPDATED
         );
 
-        // 5. Response (Daha əvvəl yaratdığımız toAdminActionResponse metodunu istifadə edirik)
-        return adminMapper.toAdminActionResponse(saved.getId(), "Profil məlumatlarınız uğurla yeniləndi.");
+        // 5. Return response (using the previously created toAdminActionResponse method)
+        return adminMapper.toAdminActionResponse(saved.getId(), "Your profile information has been updated successfully.");
     }
 
 
@@ -632,7 +632,7 @@ public class AdminServiceImpl implements AdminService {
         return PendingAssignmentResponse.builder()
                 .data(list)
                 .count(list.size())
-                .message(list.isEmpty() ? "Hazırda dietoloq gözləyən istifadəçi yoxdur." : list.size() + " istifadəçi dietoloq gözləyir.")
+                .message(list.isEmpty() ? "There are no users currently waiting for a dietitian." : list.size() + " user(s) are waiting for a dietitian.")
                 .build();
     }
 
@@ -646,7 +646,7 @@ public class AdminServiceImpl implements AdminService {
         return PendingAssignmentResponse.builder()
                 .data(list)
                 .count(list.size())
-                .message(list.isEmpty() ? "Hazırda caterer gözləyən istifadəçi yoxdur." : list.size() + " istifadəçi caterer gözləyir.")
+                .message(list.isEmpty() ? "There are no users currently waiting for a caterer." : list.size() + " user(s) are waiting for a caterer.")
                 .build();
     }
 
@@ -668,7 +668,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public PaymentAdminResponse getPaymentDetails(Long paymentId) {
         PaymentEntity payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new BusinessException("Ödəniş tapılmadı: " + paymentId));
+                .orElseThrow(() -> new BusinessException("Payment not found: " + paymentId));
 
         return adminMapper.toPaymentResponse(payment);
     }

@@ -10,14 +10,14 @@ import com.nutriflow.helpers.DeliveryHelper;
 import org.springframework.stereotype.Component;
 
 /**
- * Caterer Entity və DTO-lar arasında mapping.
- * Enhanced version - response building mapper-də.
+ * Mapping between Caterer Entity and DTOs.
+ * Enhanced version - response building in mapper.
  */
 @Component
 public class CatererMapper {
 
     /**
-     * CatererCreateRequest-dən CatererEntity yaradır.
+     * Creates CatererEntity from CatererCreateRequest.
      */
     public CatererEntity toEntity(CatererCreateRequest request) {
         if (request == null) return null;
@@ -32,7 +32,7 @@ public class CatererMapper {
     }
 
     /**
-     * CatererEntity-dən CatererResponse yaradır.
+     * Creates CatererResponse from CatererEntity.
      */
     public CatererResponse toResponse(CatererEntity caterer) {
         if (caterer == null) return null;
@@ -48,8 +48,8 @@ public class CatererMapper {
     }
 
     /**
-     * CatererStatsData-dan CatererStatsResponse yaradır.
-     * Helper-dən gələn data strukturunu response-a map edir.
+     * Creates CatererStatsResponse from CatererStatsData.
+     * Maps the data structure coming from Helper to response.
      */
     public CatererStatsResponse toStatsResponse(DeliveryHelper.CatererStatsData stats) {
         if (stats == null) return null;
@@ -64,10 +64,8 @@ public class CatererMapper {
                 .build();
     }
 
-    // CatererMapper.java daxilinə əlavə et
-
     /**
-     * Entity-nin sahələrini request-dən gələn məlumatlarla yeniləyir.
+     * Updates entity fields with data from the request.
      */
     public void updateEntityFromRequest(CatererEntity entity, CatererCreateRequest request) {
         if (request == null || entity == null) return;
@@ -78,7 +76,7 @@ public class CatererMapper {
     }
 
     /**
-     * Prosesin nəticəsini standart AdminActionResponse formatına salır.
+     * Formats the operation result into standard AdminActionResponse format.
      */
     public AdminActionResponse toAdminActionResponse(CatererEntity entity, String message) {
         if (entity == null) return null;

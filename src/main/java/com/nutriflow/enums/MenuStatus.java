@@ -1,10 +1,10 @@
 package com.nutriflow.enums;
 
 public enum MenuStatus {
-    DRAFT,        // Qaralama (dietitian-ın hazırlama mərhələsi)
-    SUBMITTED,    // Təqdim olundu (ama onay gözlənilir)
+    DRAFT,        // Draft (dietitian's preparation stage)
+    SUBMITTED,    // Submitted (awaiting approval)
     PREPARING,
-    APPROVED,     // Təsdiqlədi (user-ə göstəriləcək)
-    REJECTED,     // Rədd olundu (səbəb: rejectionReason)
-    CANCELLED     // Ləğv olundu
+    APPROVED,     // Approved (will be shown to user)
+    REJECTED,     // Rejected (reason: rejectionReason)
+    CANCELLED     // Cancelled
 }

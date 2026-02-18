@@ -4,10 +4,10 @@ import com.nutriflow.entities.*;
 import lombok.experimental.UtilityClass;
 
 /**
- * Fəaliyyət loqlarında istifadə olunan məlumatları formatlayan utility sınıfı.
- * Service-lərdən string formatting loqikasını ayırır.
+ * Utility class for formatting data used in activity logs.
+ * Separates string formatting logic from services.
  *
- * İstifadə:
+ * Usage:
  * String oldData = LoggingUtil.formatDietitianData(dietitian);
  */
 @UtilityClass
@@ -16,33 +16,33 @@ public class LoggingUtils {
     // ============= DIETITIAN =============
 
     /**
-     * Dietitian məlumatlarını loqlama üçün formatlar
+     * Formats dietitian data for logging
      */
     public String formatDietitianData(DietitianEntity entity) {
         if (entity == null) {
-            return "Məlumat yoxdur";
+            return "No data available";
         }
         return String.format(
-                "Ad: %s %s, Email: %s, Rol: %s, Status: %s",
+                "Name: %s %s, Email: %s, Role: %s, Status: %s",
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),
                 entity.getRole(),
-                entity.isActive() ? "AKTİV" : "DEAKTİV"
+                entity.isActive() ? "ACTIVE" : "INACTIVE"
         );
     }
 
     // ============= CATERER =============
 
     /**
-     * Caterer məlumatlarını loqlama üçün formatlar
+     * Formats caterer data for logging
      */
     public String formatCatererData(CatererEntity entity) {
         if (entity == null) {
-            return "Məlumat yoxdur";
+            return "No data available";
         }
         return String.format(
-                "Mətbəx: %s, Email: %s, Rol: %s, Status: %s",
+                "Kitchen: %s, Email: %s, Role: %s, Status: %s",
                 entity.getName(),
                 entity.getEmail(),
                 entity.getRole(),
@@ -53,14 +53,14 @@ public class LoggingUtils {
     // ============= USER =============
 
     /**
-     * User məlumatlarını loqlama üçün formatlar
+     * Formats user data for logging
      */
     public String formatUserData(UserEntity entity) {
         if (entity == null) {
-            return "Məlumat yoxdur";
+            return "No data available";
         }
         return String.format(
-                "Ad: %s %s, Email: %s, Rol: %s, Status: %s",
+                "Name: %s %s, Email: %s, Role: %s, Status: %s",
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),
@@ -72,32 +72,32 @@ public class LoggingUtils {
     // ============= ADMIN =============
 
     /**
-     * Admin məlumatlarını loqlama üçün formatlar
+     * Formats admin data for logging
      */
     public String formatAdminData(AdminEntity entity) {
         if (entity == null) {
-            return "Məlumat yoxdur";
+            return "No data available";
         }
         return String.format(
-                "Ad: %s %s, Email: %s, Rol: ADMIN, Status: %s",
+                "Name: %s %s, Email: %s, Role: ADMIN, Status: %s",
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),
-                entity.isActive() ? "AKTİV" : "DEAKTİV"
+                entity.isActive() ? "ACTIVE" : "INACTIVE"
         );
     }
 
     // ============= PAYMENT =============
 
     /**
-     * Payment məlumatlarını loqlama üçün formatlar
+     * Formats payment data for logging
      */
     public String formatPaymentData(PaymentEntity entity) {
         if (entity == null) {
-            return "Məlumat yoxdur";
+            return "No data available";
         }
         return String.format(
-                "Məbləğ: %.2f %s, Status: %s, Tarix: %s",
+                "Amount: %.2f %s, Status: %s, Date: %s",
                 entity.getAmount(),
                 "AZN",
                 entity.getStatus(),
@@ -108,18 +108,18 @@ public class LoggingUtils {
     // ============= DELETION =============
 
     /**
-     * Silmə əməliyyatında istifadə olunan sabit mətn
+     * Constant message used in delete operations
      */
     public String deletedMessage() {
-        return "SİLİNDİ";
+        return "DELETED";
     }
 
     // ============= NEW RECORD =============
 
     /**
-     * Yeni qeyd yaradılması üçün sabit mətn
+     * Constant message used when a new record is created
      */
     public String newRecordMessage() {
-        return "YENİ QEYDİYYAT";
+        return "NEW RECORD";
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 @Builder
 public class PatientMedicalProfileResponse {
+
     private String firstName;
     private String lastName;
     private Double height;
@@ -16,4 +17,5 @@ public class PatientMedicalProfileResponse {
     private String notes;
     private Double bmi;
     private List<MedicalFileResponse> files;
+
 }

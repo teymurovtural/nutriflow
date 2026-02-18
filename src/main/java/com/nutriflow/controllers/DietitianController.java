@@ -32,27 +32,27 @@ public class DietitianController {
     }
 
     /**
-     * Yeni menyu yaradılması zamanı mütləq @Valid istifadə olunmalıdır.
-     * MenuCreateRequest daxilindəki yemək siyahıları və günlər yoxlanılır.
+     * @Valid must be used when creating a new menu.
+     * Meal lists and days inside MenuCreateRequest are validated.
      */
     @PostMapping("/create-menu")
     public ResponseEntity<String> createMenu(
             Authentication authentication,
-            @Valid @RequestBody MenuCreateRequest request) { // @Valid əlavə edildi
+            @Valid @RequestBody MenuCreateRequest request) { // @Valid added
 
         String email = authentication.getName();
         dietitianService.createMonthlyMenu(email, request);
 
-        return ResponseEntity.ok("Menyu uğurla yaradıldı.");
+        return ResponseEntity.ok("Menu created successfully.");
     }
 
     /**
-     * Dietoloq profilini yeniləyərkən daxil edilən ad, telefon və s. yoxlanılır.
+     * Name, phone, etc. entered when updating the dietitian profile are validated.
      */
     @PutMapping("/profile")
     public ResponseEntity<String> updateProfile(
             Principal principal,
-            @Valid @RequestBody DietitianUpdateRequest request) { // @Valid əlavə edildi
+            @Valid @RequestBody DietitianUpdateRequest request) { // @Valid added
 
         String message = dietitianService.updateProfile(principal.getName(), request);
         return ResponseEntity.ok(message);
@@ -85,14 +85,14 @@ public class DietitianController {
             @RequestParam Integer year,
             @RequestParam Integer month) {
 
-        log.info("Aylıq menyu sorğusu: UserID: {}, Tarix: {}/{}", userId, month, year);
+        log.info("Monthly menu query: UserID: {}, Date: {}/{}", userId, month, year);
         MenuResponse menu = dietitianService.getMonthlyMenu(userId, year, month);
         return ResponseEntity.ok(menu);
     }
 
     @PatchMapping("/batch/{batchId}/submit")
     public ResponseEntity<String> submitMenu(@PathVariable Long batchId) {
-        log.info("Menyu paketi istifadəçiyə göndərilir. BatchID: {}", batchId);
+        log.info("Menu batch being submitted to user. BatchID: {}", batchId);
         String result = dietitianService.submitMenu(batchId);
         return ResponseEntity.ok(result);
     }
@@ -120,14 +120,14 @@ public class DietitianController {
     }
 
     /**
-     * Mövcud menyunu redaktə edərkən yeni dataların doğruluğu mütləq yoxlanmalıdır.
+     * New data validity must be checked when editing an existing menu.
      */
     @PutMapping("/batch/{batchId}/update")
     public ResponseEntity<String> updateMenu(
             @PathVariable Long batchId,
-            @Valid @RequestBody MenuCreateRequest request) { // @Valid əlavə edildi
+            @Valid @RequestBody MenuCreateRequest request) { // @Valid added
         dietitianService.updateMenu(batchId, request);
-        return ResponseEntity.ok("Menyu uğurla yeniləndi və yenidən göndərilməyə hazırdır.");
+        return ResponseEntity.ok("Menu updated successfully and ready for resubmission.");
     }
 
     @DeleteMapping("/batch/{batchId}/delete-content")
@@ -136,7 +136,7 @@ public class DietitianController {
             @RequestParam(required = false) Integer day,
             @RequestParam(required = false) MealType mealType) {
 
-        log.info("Silme işlemi: Batch: {}, Gün: {}, Öğün: {}", batchId, day, mealType);
+        log.info("Delete operation: Batch: {}, Day: {}, Meal: {}", batchId, day, mealType);
         String message = dietitianService.deleteMenuContent(batchId, day, mealType);
         return ResponseEntity.ok(message);
     }

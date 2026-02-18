@@ -6,9 +6,9 @@ import lombok.*;
 
 @Entity
 @Table(name = "activity_logs", indexes = {
-    @Index(name = "idx_actor", columnList = "actor_type,actor_id"),
-    @Index(name = "idx_entity", columnList = "entity_type,entity_id"),
-    @Index(name = "idx_created_at", columnList = "created_at")
+        @Index(name = "idx_actor", columnList = "actor_type,actor_id"),
+        @Index(name = "idx_entity", columnList = "entity_type,entity_id"),
+        @Index(name = "idx_created_at", columnList = "created_at")
 })
 @Getter
 @Setter
@@ -24,26 +24,26 @@ public class ActivityLogEntity extends BaseEntity {
     @Column(name = "actor_id", nullable = false)
     private Long actorId;
 
-    @Column(name = "action", nullable = false)  
-    // Məs: "menu_submitted", "payment_success", "delivery_updated", vəs
+    @Column(name = "action", nullable = false)
+    // E.g: "menu_submitted", "payment_success", "delivery_updated", etc.
     private String action;
 
-    @Column(name = "entity_type")  // Menu, Delivery, Subscription, vəs
+    @Column(name = "entity_type")  // Menu, Delivery, Subscription, etc.
     private String entityType;
 
     @Column(name = "entity_id")
     private Long entityId;
 
     @Column(name = "old_value", columnDefinition = "TEXT")
-    private String oldValue;  // Dəyişikliyin əvvəlki qiyməti (JSON olaraq)
+    private String oldValue;  // Previous value of the change (as JSON)
 
     @Column(name = "new_value", columnDefinition = "TEXT")
-    private String newValue;  // Dəyişikliyin yeni qiyməti (JSON olaraq)
+    private String newValue;  // New value of the change (as JSON)
 
     @Column(name = "ip_address")
     private String ipAddress;
 
     @Column(name = "details", columnDefinition = "TEXT")
-    private String details;  // Əlavə məlumatlar
+    private String details;  // Additional information
 
 }

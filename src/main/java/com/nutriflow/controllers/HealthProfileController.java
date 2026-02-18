@@ -31,17 +31,17 @@ public class HealthProfileController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) throws IOException {
 
-        log.info("=== CONTROLLER: Health profile submit endpoint çağrıldı ===");
+        log.info("=== CONTROLLER: Health profile submit endpoint called ===");
         log.info("User email: {}", userDetails.getUsername());
-        log.info("Files parametri null? {}", files == null);
+        log.info("Files parameter null? {}", files == null);
 
         if (files != null) {
-            log.info("Files sayı: {}", files.size());
+            log.info("File count: {}", files.size());
             for (int i = 0; i < files.size(); i++) {
                 log.info("File #{}: {}, size: {}", i, files.get(i).getOriginalFilename(), files.get(i).getSize());
             }
         } else {
-            log.warn("!!! CONTROLLER: FAYLLAR NULL GƏLDİ !!!");
+            log.warn("!!! CONTROLLER: FILES CAME AS NULL !!!");
         }
 
         String email = userDetails.getUsername();

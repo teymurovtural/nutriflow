@@ -11,24 +11,24 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 /**
- * Fayl əməliyyatları üçün utility class
+ * Utility class for file operations
  */
 @Slf4j
 public final class FileOperationUtil {
 
     private FileOperationUtil() {
-        throw new UnsupportedOperationException("Bu utility class-dır, instantiate edilə bilməz");
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
     /**
-     * Unikal fayl adı yaradır
+     * Generates a unique file name
      *
-     * @param originalFileName orijinal fayl adı
-     * @return UUID ilə birlikdə yeni unikal fayl adı
+     * @param originalFileName original file name
+     * @return new unique file name combined with UUID
      */
     public static String generateUniqueFileName(String originalFileName) {
         if (originalFileName == null || originalFileName.isEmpty()) {
-            log.warn("Original fayl adı boşdur, default ad istifadə olunur");
+            log.warn("Original file name is empty, using default name");
             originalFileName = "file";
         }
 
@@ -36,15 +36,15 @@ public final class FileOperationUtil {
                 + FileConstants.FILE_NAME_SEPARATOR
                 + originalFileName;
 
-        log.debug("Unikal fayl adı yaradıldı: {}", uniqueFileName);
+        log.debug("Unique file name generated: {}", uniqueFileName);
         return uniqueFileName;
     }
 
     /**
-     * Qovluğun mövcudluğunu yoxlayır, yoxdursa yaradır
+     * Checks if a directory exists, creates it if not
      *
-     * @param directoryPath qovluq yolu
-     * @throws FileStorageException qovluq yaradıla bilmədikdə
+     * @param directoryPath directory path
+     * @throws FileStorageException if the directory cannot be created
      */
     public static void ensureDirectoryExists(String directoryPath) {
         Path path = Paths.get(directoryPath);
@@ -53,19 +53,19 @@ public final class FileOperationUtil {
             try {
                 log.info(FileConstants.LOG_UPLOAD_DIR_CREATED, directoryPath);
                 Files.createDirectories(path);
-                log.debug("Qovluq uğurla yaradıldı: {}", directoryPath);
+                log.debug("Directory created successfully: {}", directoryPath);
             } catch (IOException e) {
-                log.error("Qovluq yaradılarkən xəta: {}", e.getMessage());
-                throw new FileStorageException("Qovluq yaradıla bilmədi: " + directoryPath, e);
+                log.error("Error while creating directory: {}", e.getMessage());
+                throw new FileStorageException("Directory could not be created: " + directoryPath, e);
             }
         }
     }
 
     /**
-     * Fayl yolunun düzgün olub olmadığını yoxlayır
+     * Checks if a file path is valid
      *
-     * @param filePath fayl yolu
-     * @return true - düzgün yol, false - yanlış yol
+     * @param filePath file path
+     * @return true - valid path, false - invalid path
      */
     public static boolean isValidFilePath(String filePath) {
         if (filePath == null || filePath.trim().isEmpty()) {
@@ -74,20 +74,19 @@ public final class FileOperationUtil {
 
         try {
             Path path = Paths.get(filePath);
-            // Path normalization ilə yoxlama
             path.normalize();
             return true;
         } catch (Exception e) {
-            log.warn("Yanlış fayl yolu: {}", filePath);
+            log.warn("Invalid file path: {}", filePath);
             return false;
         }
     }
 
     /**
-     * Faylın mövcud olub olmadığını yoxlayır
+     * Checks if a file exists
      *
-     * @param filePath fayl yolu
-     * @return true - fayl mövcuddur, false - fayl yoxdur
+     * @param filePath file path
+     * @return true - file exists, false - file does not exist
      */
     public static boolean fileExists(String filePath) {
         if (!isValidFilePath(filePath)) {
@@ -99,10 +98,10 @@ public final class FileOperationUtil {
     }
 
     /**
-     * Fayl adından extension-ı əldə edir
+     * Extracts the extension from a file name
      *
-     * @param fileName fayl adı
-     * @return extension (məs: .pdf, .jpg) və ya boş string
+     * @param fileName file name
+     * @return extension (e.g. .pdf, .jpg) or empty string
      */
     public static String getFileExtension(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
@@ -118,15 +117,15 @@ public final class FileOperationUtil {
     }
 
     /**
-     * Fayl yolunu Path obyektinə çevirir
+     * Converts a file path to a Path object
      *
-     * @param filePath fayl yolu
-     * @return Path obyekti
-     * @throws FileStorageException yol düzgün olmadıqda
+     * @param filePath file path
+     * @return Path object
+     * @throws FileStorageException if the path is invalid
      */
     public static Path toPath(String filePath) {
         if (!isValidFilePath(filePath)) {
-            log.error("Düzgün olmayan fayl yolu: {}", filePath);
+            log.error("Invalid file path: {}", filePath);
             throw new FileStorageException(FileConstants.ERROR_INVALID_FILE_PATH);
         }
 

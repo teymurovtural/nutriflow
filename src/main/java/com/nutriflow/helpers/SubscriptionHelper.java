@@ -20,8 +20,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Subscription və resource assignment üçün helper sinif.
- * Dietitian və Caterer təyinatı, subscription yaratma.
+ * Helper class for Subscription and resource assignment.
+ * Dietitian and Caterer assignment, subscription creation.
  */
 @Component
 @RequiredArgsConstructor
@@ -34,22 +34,22 @@ public class SubscriptionHelper {
     private final UserRepository userRepository;
 
     /**
-     * User üçün yeni subscription yaradır.
+     * Creates a new subscription for a user.
      *
-     * @param user      User entity
-     * @param planName  Plan adı
-     * @param price     Qiymət
-     * @param durationMonths Müddət (ay)
-     * @return Yaradılmış subscription
+     * @param user            User entity
+     * @param planName        Plan name
+     * @param price           Price
+     * @param durationMonths  Duration (months)
+     * @return Created subscription
      */
     @Transactional
     public SubscriptionEntity createSubscription(UserEntity user, String planName, Double price, int durationMonths) {
-        log.info("Yeni subscription yaradılır: UserId={}, Plan={}, Price={}", user.getId(), planName, price);
+        log.info("Creating new subscription: UserId={}, Plan={}, Price={}", user.getId(), planName, price);
 
-        // Əvvəlcə user-in subscription-ı var mı yoxla
+        // Check if user already has a subscription
         if (user.getSubscription() != null) {
-            log.warn("User-in artıq subscription-ı var: UserId={}", user.getId());
-            throw new IllegalStateException("User-in artıq aktiv subscription-ı var");
+            log.warn("User already has a subscription: UserId={}", user.getId());
+            throw new IllegalStateException("User already has an active subscription");
         }
 
         LocalDate startDate = LocalDate.now();
@@ -65,104 +65,103 @@ public class SubscriptionHelper {
                 .build();
 
         subscription = subscriptionRepository.save(subscription);
-        log.info("Subscription yaradıldı: ID={}, EndDate={}", subscription.getId(), endDate);
+        log.info("Subscription created: ID={}, EndDate={}", subscription.getId(), endDate);
 
         return subscription;
     }
 
     /**
-     * User üçün ən az yüklü dietitian təyin edir.
+     * Assigns the least busy dietitian to a user.
      *
      * @param user User entity
-     * @return Təyin edilmiş dietitian
+     * @return Assigned dietitian
      */
     @Transactional
     public DietitianEntity assignDietitian(UserEntity user) {
-        log.info("User üçün dietitian axtarılır: UserId={}", user.getId());
+        log.info("Searching for a dietitian for user: UserId={}", user.getId());
 
         List<DietitianEntity> dietitians = dietitianRepository.findAll();
 
         DietitianEntity assignedDietitian = dietitians.stream()
                 .filter(DietitianEntity::isActive)
                 .min(Comparator.comparingInt(d -> d.getUsers().size()))
-                .orElseThrow(() -> new ResourceNotAvailableException("Aktiv dietitian tapılmadı"));
+                .orElseThrow(() -> new ResourceNotAvailableException("No active dietitian found"));
 
         user.setDietitian(assignedDietitian);
         userRepository.save(user);
 
-        log.info("Dietitian təyin edildi: DietitianId={}, UserCount={}",
+        log.info("Dietitian assigned: DietitianId={}, UserCount={}",
                 assignedDietitian.getId(), assignedDietitian.getUsers().size());
 
         return assignedDietitian;
     }
 
     /**
-     * User üçün aktiv caterer təyin edir.
+     * Assigns an active caterer to a user.
      *
      * @param user User entity
-     * @return Təyin edilmiş caterer
+     * @return Assigned caterer
      */
     @Transactional
     public CatererEntity assignCaterer(UserEntity user) {
-        log.info("User üçün caterer təyin edilir: UserId={}", user.getId());
+        log.info("Assigning caterer for user: UserId={}", user.getId());
 
         CatererEntity caterer = catererRepository.findFirstByStatus(CatererStatus.ACTIVE)
-                .orElseThrow(() -> new ResourceNotAvailableException("Aktiv caterer tapılmadı"));
+                .orElseThrow(() -> new ResourceNotAvailableException("No active caterer found"));
 
         user.setCaterer(caterer);
         userRepository.save(user);
 
-        log.info("Caterer təyin edildi: CatererId={}, Name={}", caterer.getId(), caterer.getName());
+        log.info("Caterer assigned: CatererId={}, Name={}", caterer.getId(), caterer.getName());
 
         return caterer;
     }
 
     /**
-     * Subscription və resource assignment-i birlikdə yerinə yetirir.
-     * Payment uğurlu olduqdan sonra bu metod çağrılır.
+     * Performs subscription and resource assignment together.
+     * This method is called after a successful payment.
      *
-     * @param user User entity
-     * @param planName Plan adı
-     * @param price Qiymət
-     * @param durationMonths Müddət
+     * @param user            User entity
+     * @param planName        Plan name
+     * @param price           Price
+     * @param durationMonths  Duration
      */
     @Transactional
     public SubscriptionEntity finalizeSubscriptionWithResources(UserEntity user, String planName, Double price, int durationMonths) {
-        log.info("========== SUBSCRIPTION FİNALİZATİON BAŞLADI ==========");
+        log.info("========== SUBSCRIPTION FINALIZATION STARTED ==========");
         log.info("UserId: {}, Plan: {}, Price: {}", user.getId(), planName, price);
 
         try {
-            // 1. Subscription yarat
+            // 1. Create subscription
             SubscriptionEntity subscription = createSubscription(user, planName, price, durationMonths);
 
-            // 2. Dietitian təyin et
+            // 2. Assign dietitian
             DietitianEntity dietitian = assignDietitian(user);
 
-            // 3. Caterer təyin et
+            // 3. Assign caterer
             CatererEntity caterer = assignCaterer(user);
 
-            // 4. User statusunu ACTIVE et və abunəliyi obyektə bağla
+            // 4. Set user status to ACTIVE and link the subscription object
             user.setStatus(UserStatus.ACTIVE);
-            user.setSubscription(subscription); // <-- Bu sətir çox vacibdir!
+            user.setSubscription(subscription); // <-- This line is critical!
 
             userRepository.save(user);
 
-            log.info("========== SUBSCRIPTION FİNALİZATİON TAMAMLANDI ==========");
+            log.info("========== SUBSCRIPTION FINALIZATION COMPLETED ==========");
             log.info("SubscriptionId: {}, DietitianId: {}, CatererId: {}",
                     subscription.getId(), dietitian.getId(), caterer.getId());
 
-            return subscription; // <-- Artıq metod yaranmış obyekti geri qaytarır
+            return subscription; // <-- Method now returns the created object
 
         } catch (Exception e) {
-            log.error("Subscription finalization zamanı xəta: {}", e.getMessage(), e);
-            throw new RuntimeException("Subscription finalization uğursuz oldu", e);
+            log.error("Error during subscription finalization: {}", e.getMessage(), e);
+            throw new RuntimeException("Subscription finalization failed", e);
         }
     }
 
-
     @Transactional
     public void cancelSubscription(UserEntity user) {
-        log.info("Subscription cancel edilir: UserId={}", user.getId());
+        log.info("Cancelling subscription: UserId={}", user.getId());
 
         SubscriptionEntity subscription = user.getSubscription();
         if (subscription != null) {
@@ -173,22 +172,22 @@ public class SubscriptionHelper {
         user.setStatus(UserStatus.EXPIRED);
         userRepository.save(user);
 
-        log.info("Subscription cancel edildi və user EXPIRED statusuna keçdi");
+        log.info("Subscription cancelled and user transitioned to EXPIRED status");
     }
 
     /**
-     * Subscription-ı yeniləyir (renew).
+     * Renews a subscription.
      *
-     * @param user User entity
-     * @param additionalMonths Əlavə ay sayı
+     * @param user              User entity
+     * @param additionalMonths  Additional months to add
      */
     @Transactional
     public void renewSubscription(UserEntity user, int additionalMonths) {
-        log.info("Subscription yenilənir: UserId={}, Additional Months={}", user.getId(), additionalMonths);
+        log.info("Renewing subscription: UserId={}, Additional Months={}", user.getId(), additionalMonths);
 
         SubscriptionEntity subscription = user.getSubscription();
         if (subscription == null) {
-            throw new IllegalStateException("User-in subscription-ı yoxdur");
+            throw new IllegalStateException("User has no subscription");
         }
 
         LocalDate newEndDate = DateUtils.addMonths(subscription.getEndDate(), additionalMonths);
@@ -200,14 +199,14 @@ public class SubscriptionHelper {
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
 
-        log.info("Subscription yeniləndi. Yeni EndDate: {}", newEndDate);
+        log.info("Subscription renewed. New EndDate: {}", newEndDate);
     }
 
     /**
-     * Subscription-ın müddətinin bitib-bitmədiyini yoxlayır.
+     * Checks whether a subscription has expired.
      *
      * @param subscription Subscription entity
-     * @return true əgər müddət bitibsə
+     * @return true if expired
      */
     public boolean isSubscriptionExpired(SubscriptionEntity subscription) {
         if (subscription == null || subscription.getEndDate() == null) {
@@ -217,10 +216,10 @@ public class SubscriptionHelper {
     }
 
     /**
-     * Subscription-ın qalan günlərini hesablayır.
+     * Calculates the remaining days of a subscription.
      *
      * @param subscription Subscription entity
-     * @return Qalan günlər
+     * @return Remaining days
      */
     public long getRemainingDays(SubscriptionEntity subscription) {
         if (subscription == null || subscription.getEndDate() == null) {
@@ -230,11 +229,11 @@ public class SubscriptionHelper {
     }
 
     /**
-     * Subscription progress-i hesablayır.
+     * Calculates subscription progress.
      *
-     * @param subscription   Subscription entity
-     * @param completedCount Tamamlanmış çatdırılma sayı
-     * @return Progress faizi
+     * @param subscription    Subscription entity
+     * @param completedCount  Number of completed deliveries
+     * @return Progress percentage
      */
     public double calculateSubscriptionProgress(SubscriptionEntity subscription, long completedCount) {
         if (subscription == null) {
@@ -248,10 +247,10 @@ public class SubscriptionHelper {
     }
 
     /**
-     * User-in subscription-ının aktiv olub-olmadığını yoxlayır.
+     * Checks whether a user has an active subscription.
      *
      * @param user User entity
-     * @return true əgər aktiv subscription varsa
+     * @return true if active subscription exists
      */
     public boolean hasActiveSubscription(UserEntity user) {
         if (user == null || user.getSubscription() == null) {
@@ -264,9 +263,9 @@ public class SubscriptionHelper {
     }
 
     /**
-     * Ən az yüklü dietitian-ı tapır (təyin etmədən).
+     * Finds the least busy dietitian (without assigning).
      *
-     * @return Ən az yüklü dietitian
+     * @return Least busy dietitian
      */
     public DietitianEntity findLeastBusyDietitian() {
         List<DietitianEntity> dietitians = dietitianRepository.findAll();
@@ -274,18 +273,18 @@ public class SubscriptionHelper {
         return dietitians.stream()
                 .filter(DietitianEntity::isActive)
                 .min(Comparator.comparingInt(d -> d.getUsers().size()))
-                .orElseThrow(() -> new ResourceNotAvailableException("Aktiv dietitian tapılmadı"));
+                .orElseThrow(() -> new ResourceNotAvailableException("No active dietitian found"));
     }
 
     /**
-     * Müəyyən dietitian-ın neçə aktiv müştərisi olduğunu hesablayır.
+     * Calculates the number of active patients for a given dietitian.
      *
      * @param dietitianId Dietitian ID
-     * @return Aktiv müştəri sayı
+     * @return Active patient count
      */
     public long getActivePatientsCount(Long dietitianId) {
         DietitianEntity dietitian = dietitianRepository.findById(dietitianId)
-                .orElseThrow(() -> new ResourceNotAvailableException("Dietitian tapılmadı"));
+                .orElseThrow(() -> new ResourceNotAvailableException("Dietitian not found"));
 
         return dietitian.getUsers().stream()
                 .filter(user -> user.getStatus() == UserStatus.ACTIVE)

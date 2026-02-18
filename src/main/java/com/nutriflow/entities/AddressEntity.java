@@ -17,14 +17,14 @@ public class AddressEntity extends BaseEntity {
     private UserEntity user;
 
     @Column(name = "address_details", nullable = false, columnDefinition = "TEXT")
-    private String addressDetails; // Tam küçə, bina, mənzil məlumatı
+    private String addressDetails; // Full street, building, apartment details
 
     @Column(name = "city", nullable = false)
-    private String city; // Şəhər (məs: Bakı)
+    private String city; // City (e.g: Baku)
 
     @Column(name = "district", nullable = false)
-    private String district; // Rayon (məs: Nəsimi)
+    private String district; // District (e.g: Nasimi)
 
     @Column(name = "delivery_notes", columnDefinition = "TEXT")
-    private String deliveryNotes; // Kuryer üçün xüsusi qeydlər
+    private String deliveryNotes; // Special notes for the courier
 }

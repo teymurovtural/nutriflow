@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class DeliveryFailureRequest {
 
-    @NotNull(message = "Çatdırılma ID-si məcburidir!")
+    @NotNull(message = "Delivery ID is required!")
     private Long deliveryId;
 
-    @NotBlank(message = "Uğursuzluq səbəbi məcburidir!")
+    @NotBlank(message = "Failure reason is required!")
     private String failureReason;
 
     private String note;

@@ -25,29 +25,29 @@ public class SubscriptionScheduler {
     private final EmailNotificationService emailNotificationService;
 
     /**
-     * ✅ YENİ: Backend başlayanda keçmiş tarixi yoxla
-     * Əgər backend uzun müddət qapanıbsa, missed notification-ları göndər
+     * ✅ NEW: Check past dates when backend starts
+     * If the backend was down for a long time, send missed notifications
      */
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void onStartup() {
-        log.info("🚀 [STARTUP] Backend başladı, keçmiş notification-ları yoxlayırıq...");
+        log.info("🚀 [STARTUP] Backend started, checking past notifications...");
 
         try {
-            // Bitmiş subscription-ları deaktiv et
+            // Deactivate expired subscriptions
             deactivateExpiredSubscriptions();
 
-            // 7 gün və ya daha az qalmış subscription-lara email göndər
+            // Send emails to subscriptions with 7 or fewer days remaining
             checkAndNotifyUpcomingExpirations();
 
         } catch (Exception e) {
-            log.error("❌ [STARTUP] Startup check zamanı xəta: {}", e.getMessage(), e);
+            log.error("❌ [STARTUP] Error during startup check: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * Bitmiş abunəlikləri deaktiv edir
-     * Hər gün saat 01:00 + Backend startup zamanı
+     * Deactivates expired subscriptions
+     * Every day at 01:00 + on backend startup
      */
     @Scheduled(cron = "0 0 1 * * ?")
     @Transactional
@@ -55,14 +55,14 @@ public class SubscriptionScheduler {
         LocalDateTime startTime = LocalDateTime.now();
         LocalDate today = LocalDate.now();
 
-        log.info("🔄 [SUBSCRIPTION] Bitmiş abunəliklərin yoxlanılması başladı");
+        log.info("🔄 [SUBSCRIPTION] Checking for expired subscriptions started");
 
         try {
             List<SubscriptionEntity> expiredSubscriptions = subscriptionRepository
                     .findByStatusAndEndDateBefore(SubscriptionStatus.ACTIVE, today);
 
             if (expiredSubscriptions.isEmpty()) {
-                log.info("✅ [SUBSCRIPTION] Bitmiş abunəlik tapılmadı");
+                log.info("✅ [SUBSCRIPTION] No expired subscriptions found");
                 return;
             }
 
@@ -72,36 +72,36 @@ public class SubscriptionScheduler {
                 subscriptionRepository.save(subscription);
                 deactivatedCount++;
 
-                log.info("⚠️ [SUBSCRIPTION] Abunəlik deaktiv edildi | User ID: {} | End Date: {}",
+                log.info("⚠️ [SUBSCRIPTION] Subscription deactivated | User ID: {} | End Date: {}",
                         subscription.getUser().getId(), subscription.getEndDate());
 
-                // Email göndər
+                // Send email
                 emailNotificationService.sendSubscriptionExpiredNotification(subscription);
             }
 
             long durationMs = java.time.Duration.between(startTime, LocalDateTime.now()).toMillis();
 
-            log.info("✅ [SUBSCRIPTION] Deaktivasiya tamamlandı | Deaktiv edilən: {} | Müddət: {}ms",
+            log.info("✅ [SUBSCRIPTION] Deactivation completed | Deactivated: {} | Duration: {}ms",
                     deactivatedCount, durationMs);
 
         } catch (Exception e) {
-            log.error("❌ [SUBSCRIPTION] Deaktivasiya zamanı xəta: {}", e.getMessage(), e);
+            log.error("❌ [SUBSCRIPTION] Error during deactivation: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * ✅ YENİ: 7 gün və ya daha az qalmış subscription-ları yoxla
-     * Startup zamanı işləyir
+     * ✅ NEW: Check subscriptions with 7 or fewer days remaining
+     * Runs on startup
      */
     @Transactional(readOnly = true)
     public void checkAndNotifyUpcomingExpirations() {
         LocalDate today = LocalDate.now();
         LocalDate sevenDaysLater = today.plusDays(7);
 
-        log.info("📧 [SUBSCRIPTION] Yaxınlaşan bitişlər yoxlanılır (0-7 gün arası)");
+        log.info("📧 [SUBSCRIPTION] Checking upcoming expirations (0-7 days)");
 
         try {
-            // 0-7 gün arası bitəcək bütün subscription-ları tap
+            // Find all subscriptions expiring within 0-7 days
             List<SubscriptionEntity> upcomingExpirations = subscriptionRepository
                     .findAll()
                     .stream()
@@ -111,83 +111,83 @@ public class SubscriptionScheduler {
                     .toList();
 
             if (upcomingExpirations.isEmpty()) {
-                log.info("✅ [SUBSCRIPTION] 7 gün ərzində bitəcək abunəlik yoxdur");
+                log.info("✅ [SUBSCRIPTION] No subscriptions expiring within 7 days");
                 return;
             }
 
             for (SubscriptionEntity subscription : upcomingExpirations) {
                 long daysLeft = java.time.temporal.ChronoUnit.DAYS.between(today, subscription.getEndDate());
 
-                log.info("📧 [SUBSCRIPTION] Xəbərdarlıq göndərilir | User: {} | {} gün qalıb | End Date: {}",
+                log.info("📧 [SUBSCRIPTION] Sending warning | User: {} | {} days remaining | End Date: {}",
                         subscription.getUser().getEmail(), daysLeft, subscription.getEndDate());
 
                 emailNotificationService.sendSubscriptionExpirationWarning(subscription);
             }
 
-            log.info("✅ [SUBSCRIPTION] Xəbərdarlıqlar göndərildi | Toplam: {}",
+            log.info("✅ [SUBSCRIPTION] Warnings sent | Total: {}",
                     upcomingExpirations.size());
 
         } catch (Exception e) {
-            log.error("❌ [SUBSCRIPTION] Xəbərdarlıq zamanı xəta: {}", e.getMessage(), e);
+            log.error("❌ [SUBSCRIPTION] Error during warning: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * Yaxınlaşan subscription bitişləri üçün xəbərdarlıq (7 gün qalmış)
-     * Hər gün saat 10:00
+     * Warning for upcoming subscription expirations (exactly 7 days remaining)
+     * Every day at 10:00
      */
     @Scheduled(cron = "0 0 10 * * ?")
     @Transactional(readOnly = true)
     public void notifyUpcomingExpirations() {
         LocalDate sevenDaysLater = LocalDate.now().plusDays(7);
 
-        log.info("📧 [SUBSCRIPTION] Bitəcək abunəliklər yoxlanılır (dəqiq 7 gün)");
+        log.info("📧 [SUBSCRIPTION] Checking expiring subscriptions (exactly 7 days)");
 
         try {
             List<SubscriptionEntity> expiringSubscriptions = subscriptionRepository
                     .findByStatusAndEndDate(SubscriptionStatus.ACTIVE, sevenDaysLater);
 
             if (expiringSubscriptions.isEmpty()) {
-                log.info("✅ [SUBSCRIPTION] Dəqiq 7 gün ərzində bitəcək abunəlik yoxdur");
+                log.info("✅ [SUBSCRIPTION] No subscriptions expiring in exactly 7 days");
                 return;
             }
 
             for (SubscriptionEntity subscription : expiringSubscriptions) {
-                log.info("📧 [SUBSCRIPTION] Xəbərdarlıq göndərilir | User: {} | End Date: {}",
+                log.info("📧 [SUBSCRIPTION] Sending warning | User: {} | End Date: {}",
                         subscription.getUser().getEmail(), subscription.getEndDate());
 
                 emailNotificationService.sendSubscriptionExpirationWarning(subscription);
             }
 
-            log.info("✅ [SUBSCRIPTION] Xəbərdarlıqlar göndərildi | Toplam: {}",
+            log.info("✅ [SUBSCRIPTION] Warnings sent | Total: {}",
                     expiringSubscriptions.size());
 
         } catch (Exception e) {
-            log.error("❌ [SUBSCRIPTION] Xəbərdarlıq zamanı xəta: {}", e.getMessage(), e);
+            log.error("❌ [SUBSCRIPTION] Error during warning: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * Subscription statistikası (hər həftə)
+     * Subscription statistics (every week)
      */
     @Scheduled(cron = "0 0 9 * * MON")
     @Transactional(readOnly = true)
     public void generateWeeklySubscriptionReport() {
-        log.info("📊 [SUBSCRIPTION-REPORT] Həftəlik report hazırlanır...");
+        log.info("📊 [SUBSCRIPTION-REPORT] Preparing weekly report...");
 
         try {
             long activeCount = subscriptionRepository.countByStatus(SubscriptionStatus.ACTIVE);
             long expiredCount = subscriptionRepository.countByStatus(SubscriptionStatus.EXPIRED);
             long cancelledCount = subscriptionRepository.countByStatus(SubscriptionStatus.CANCELLED);
 
-            log.info("📊 [SUBSCRIPTION-REPORT] Aktiv: {} | Bitmiş: {} | Ləğv edilmiş: {} | Toplam: {}",
+            log.info("📊 [SUBSCRIPTION-REPORT] Active: {} | Expired: {} | Cancelled: {} | Total: {}",
                     activeCount, expiredCount, cancelledCount,
                     activeCount + expiredCount + cancelledCount);
 
             emailNotificationService.sendWeeklyReportToAdmin(activeCount, expiredCount, cancelledCount);
 
         } catch (Exception e) {
-            log.error("❌ [SUBSCRIPTION-REPORT] Report hazırlanarkən xəta: {}", e.getMessage(), e);
+            log.error("❌ [SUBSCRIPTION-REPORT] Error while preparing report: {}", e.getMessage(), e);
         }
     }
 }

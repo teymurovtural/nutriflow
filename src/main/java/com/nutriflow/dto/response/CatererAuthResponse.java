@@ -12,9 +12,11 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CatererAuthResponse extends BaseAuthResponse {
+
     private String email;
     private String companyName;
     private String phone;
     private CatererStatus status;
     private Role role;
+
 }

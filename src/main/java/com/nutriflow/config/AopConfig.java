@@ -8,6 +8,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AopConfig {
 
-    // Konfiqurasiya annotation ilə hazırdır, əlavə kod lazım deyil
+    // Configuration is ready with annotations, no additional code needed
 
 }

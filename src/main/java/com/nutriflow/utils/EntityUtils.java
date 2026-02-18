@@ -8,21 +8,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Entity obyektləri ilə işləmək üçün yardımçı sinif.
- * Entity-lərdən məlumat çıxarma, null check və s.
+ * Utility class for working with entity objects.
+ * Entity data extraction, null checks, etc.
  */
 @Slf4j
 public class EntityUtils {
 
     /**
-     * User-in tam adını qaytarır.
+     * Returns the full name of a user.
      *
      * @param user User entity
-     * @return Tam ad (Ad + Soyad)
+     * @return Full name (First name + Last name)
      */
     public static String getUserFullName(UserEntity user) {
         if (user == null) {
-            return "Məlumat yoxdur";
+            return "No data available";
         }
         String firstName = user.getFirstName() != null ? user.getFirstName() : "";
         String lastName = user.getLastName() != null ? user.getLastName() : "";
@@ -30,14 +30,14 @@ public class EntityUtils {
     }
 
     /**
-     * Dietitian-ın tam adını qaytarır.
+     * Returns the full name of a dietitian.
      *
      * @param dietitian Dietitian entity
-     * @return Tam ad
+     * @return Full name
      */
     public static String getDietitianFullName(DietitianEntity dietitian) {
         if (dietitian == null) {
-            return "Təyin olunmayıb";
+            return "Not assigned";
         }
         String firstName = dietitian.getFirstName() != null ? dietitian.getFirstName() : "";
         String lastName = dietitian.getLastName() != null ? dietitian.getLastName() : "";
@@ -45,10 +45,10 @@ public class EntityUtils {
     }
 
     /**
-     * Admin-in tam adını qaytarır.
+     * Returns the full name of an admin.
      *
      * @param admin Admin entity
-     * @return Tam ad
+     * @return Full name
      */
     public static String getAdminFullName(AdminEntity admin) {
         if (admin == null) {
@@ -60,14 +60,14 @@ public class EntityUtils {
     }
 
     /**
-     * User-in tam ünvanını qaytarır.
+     * Returns the full address of a user.
      *
      * @param address Address entity
-     * @return Formatlanmış ünvan
+     * @return Formatted address
      */
     public static String getFullAddress(AddressEntity address) {
         if (address == null) {
-            return "Ünvan məlumatı yoxdur";
+            return "No address information available";
         }
 
         StringBuilder fullAddress = new StringBuilder();
@@ -86,64 +86,64 @@ public class EntityUtils {
             fullAddress.append(address.getCity());
         }
 
-        return fullAddress.length() > 0 ? fullAddress.toString() : "Ünvan məlumatı yoxdur";
+        return fullAddress.length() > 0 ? fullAddress.toString() : "No address information available";
     }
 
     /**
-     * User-in aktiv statusunu yoxlayır.
+     * Checks if a user is active.
      *
      * @param user User entity
-     * @return true əgər aktiv statusdadırsa
+     * @return true if the user is active
      */
     public static boolean isUserActive(UserEntity user) {
         return user != null && user.getStatus() == UserStatus.ACTIVE;
     }
 
     /**
-     * Subscription-ın aktiv olub-olmadığını yoxlayır.
+     * Checks if a subscription is active.
      *
      * @param subscription Subscription entity
-     * @return true əgər aktivsə
+     * @return true if the subscription is active
      */
     public static boolean isSubscriptionActive(SubscriptionEntity subscription) {
         return subscription != null && subscription.getStatus() == SubscriptionStatus.ACTIVE;
     }
 
     /**
-     * Delivery-nin tamamlanıb-tamamlanmadığını yoxlayır.
+     * Checks if a delivery is completed.
      *
      * @param delivery Delivery entity
-     * @return true əgər tamamlanıbsa
+     * @return true if the delivery is completed
      */
     public static boolean isDeliveryCompleted(DeliveryEntity delivery) {
         return delivery != null && delivery.getStatus() == DeliveryStatus.DELIVERED;
     }
 
     /**
-     * Menu batch-in təsdiqlənib-təsdiqlənmədiyini yoxlayır.
+     * Checks if a menu batch is approved.
      *
      * @param batch MenuBatch entity
-     * @return true əgər təsdiqlənibsə
+     * @return true if the menu batch is approved
      */
     public static boolean isMenuApproved(MenuBatchEntity batch) {
         return batch != null && batch.getStatus() == MenuStatus.APPROVED;
     }
 
     /**
-     * Payment-in uğurlu olub-olmadığını yoxlayır.
+     * Checks if a payment is successful.
      *
      * @param payment Payment entity
-     * @return true əgər uğurludursa
+     * @return true if the payment is successful
      */
     public static boolean isPaymentSuccessful(PaymentEntity payment) {
         return payment != null && payment.getStatus() == PaymentStatus.SUCCESS;
     }
 
     /**
-     * HealthProfile-dan BMI hesablayır.
+     * Calculates BMI from a health profile.
      *
      * @param healthProfile HealthProfile entity
-     * @return BMI dəyəri
+     * @return BMI value
      */
     public static double calculateBMI(HealthProfileEntity healthProfile) {
         if (healthProfile == null || healthProfile.getHeight() == null || healthProfile.getWeight() == null) {
@@ -156,45 +156,45 @@ public class EntityUtils {
         }
 
         double bmi = healthProfile.getWeight() / (heightInMeters * heightInMeters);
-        return Math.round(bmi * 10.0) / 10.0; // 1 onluq dəqiqliklə
+        return Math.round(bmi * 10.0) / 10.0;
     }
 
     /**
-     * User-in email-inin təsdiqlənib-təsdiqlənmədiyini yoxlayır.
+     * Checks if a user's email is verified.
      *
      * @param user User entity
-     * @return true əgər təsdiqlənibsə
+     * @return true if the email is verified
      */
     public static boolean isEmailVerified(UserEntity user) {
         return user != null && user.isEmailVerified();
     }
 
     /**
-     * Dietitian-ın aktiv olub-olmadığını yoxlayır.
+     * Checks if a dietitian is active.
      *
      * @param dietitian Dietitian entity
-     * @return true əgər aktivsə
+     * @return true if the dietitian is active
      */
     public static boolean isDietitianActive(DietitianEntity dietitian) {
         return dietitian != null && dietitian.isActive();
     }
 
     /**
-     * Caterer-in aktiv olub-olmadığını yoxlayır.
+     * Checks if a caterer is active.
      *
      * @param caterer Caterer entity
-     * @return true əgər aktivsə
+     * @return true if the caterer is active
      */
     public static boolean isCatererActive(CatererEntity caterer) {
         return caterer != null && caterer.getStatus() == CatererStatus.ACTIVE;
     }
 
     /**
-     * MenuBatch-dən müəyyən gün üçün yemək itemlərini çıxarır.
+     * Extracts menu items for a specific day from a menu batch.
      *
      * @param batch MenuBatch entity
-     * @param day   Gün
-     * @return Həmin günün menu itemləri
+     * @param day   Day number
+     * @return Menu items for the given day
      */
     public static List<MenuItemEntity> getMenuItemsByDay(MenuBatchEntity batch, Integer day) {
         if (batch == null || batch.getItems() == null || day == null) {
@@ -207,10 +207,10 @@ public class EntityUtils {
     }
 
     /**
-     * User-in aktiv subscription-ını qaytarır.
+     * Returns the active subscription of a user.
      *
      * @param user User entity
-     * @return Aktiv subscription və ya null
+     * @return Active subscription or null
      */
     public static SubscriptionEntity getActiveSubscription(UserEntity user) {
         if (user == null || user.getSubscription() == null) {
@@ -222,23 +222,23 @@ public class EntityUtils {
     }
 
     /**
-     * Subscription-ın plan adını qaytarır.
+     * Returns the plan name of a subscription.
      *
      * @param subscription Subscription entity
-     * @return Plan adı
+     * @return Plan name
      */
     public static String getPlanName(SubscriptionEntity subscription) {
         if (subscription == null || subscription.getPlanName() == null) {
-            return "Plan yoxdur";
+            return "No plan available";
         }
         return subscription.getPlanName();
     }
 
     /**
-     * Medical file-ların sayını qaytarır.
+     * Returns the number of medical files.
      *
      * @param healthProfile HealthProfile entity
-     * @return File sayı
+     * @return Number of files
      */
     public static int getMedicalFileCount(HealthProfileEntity healthProfile) {
         if (healthProfile == null || healthProfile.getMedicalFiles() == null) {
@@ -248,50 +248,50 @@ public class EntityUtils {
     }
 
     /**
-     * User-in health profile-ına sahib olub-olmadığını yoxlayır.
+     * Checks if a user has a health profile.
      *
      * @param user User entity
-     * @return true əgər profile varsa
+     * @return true if the user has a health profile
      */
     public static boolean hasHealthProfile(UserEntity user) {
         return user != null && user.getHealthProfile() != null;
     }
 
     /**
-     * User-in address-inə sahib olub-olmadığını yoxlayır.
+     * Checks if a user has an address.
      *
      * @param user User entity
-     * @return true əgər address varsa
+     * @return true if the user has an address
      */
     public static boolean hasAddress(UserEntity user) {
         return user != null && user.getAddress() != null;
     }
 
     /**
-     * Enum-u safe şəkildə String-ə çevirir.
+     * Safely converts an enum to a String.
      *
-     * @param enumValue Enum dəyəri
-     * @return String representation və ya "N/A"
+     * @param enumValue Enum value
+     * @return String representation or "N/A"
      */
     public static String enumToString(Enum<?> enumValue) {
         return enumValue != null ? enumValue.name() : "N/A";
     }
 
     /**
-     * User-in dietitian-a təyin edilib-edilmədiyini yoxlayır.
+     * Checks if a user has an assigned dietitian.
      *
      * @param user User entity
-     * @return true əgər dietitian təyin ediləcəksə
+     * @return true if a dietitian is assigned
      */
     public static boolean hasDietitian(UserEntity user) {
         return user != null && user.getDietitian() != null;
     }
 
     /**
-     * User-in caterer-ə təyin edilib-edilmədiyini yoxlayır.
+     * Checks if a user has an assigned caterer.
      *
      * @param user User entity
-     * @return true əgər caterer təyin ediləcəksə
+     * @return true if a caterer is assigned
      */
     public static boolean hasCaterer(UserEntity user) {
         return user != null && user.getCaterer() != null;

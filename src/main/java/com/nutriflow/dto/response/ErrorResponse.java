@@ -10,8 +10,10 @@ import java.util.Map;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
+
     private LocalDateTime timestamp;
     private int httpStatus;
     private String message;
     private Map<String, String> errors;
+
 }

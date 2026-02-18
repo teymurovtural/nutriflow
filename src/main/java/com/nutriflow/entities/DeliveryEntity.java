@@ -31,10 +31,10 @@ public class DeliveryEntity extends BaseEntity {
     @JoinColumn(name = "address_id", nullable = false)
     private AddressEntity address;
 
-    // --- YENİ ƏLAVƏ ETDİYİMİZ HİSSƏ ---
+    // --- NEWLY ADDED SECTION ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "batch_id", nullable = false)
-    private MenuBatchEntity batch; // Çatdırılmanın hansı paketə aid olduğunu bilmək üçün
+    private MenuBatchEntity batch; // To know which batch the delivery belongs to
     // ---------------------------------
 
     @Column(name = "delivery_date", nullable = false)

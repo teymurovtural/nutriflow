@@ -7,4 +7,3 @@ public enum Role {
     DIETITIAN,
     CATERER
 }
-

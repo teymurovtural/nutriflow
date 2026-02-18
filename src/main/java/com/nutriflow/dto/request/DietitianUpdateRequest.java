@@ -12,18 +12,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DietitianUpdateRequest {
 
-    @Size(min = 2, max = 50, message = "Ad 2-50 simvol aralığında olmalıdır")
+    @Size(min = 2, max = 50, message = "First name must be between 2-50 characters")
     private String firstName;
 
-    @Size(min = 2, max = 50, message = "Soyad 2-50 simvol aralığında olmalıdır")
+    @Size(min = 2, max = 50, message = "Last name must be between 2-50 characters")
     private String lastName;
 
-    @Email(message = "Email formatı düzgün deyil")
+    @Email(message = "Invalid email format")
     private String email;
 
-    @Size(min = 8, message = "Şifrə ən azı 8 simvoldan ibarət olmalıdır")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    @Size(max = 100, message = "İxtisas sahəsi 100 simvolu keçməməlidir")
+    @Size(max = 100, message = "Specialization must not exceed 100 characters")
     private String specialization;
 }

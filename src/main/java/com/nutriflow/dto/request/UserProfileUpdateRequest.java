@@ -7,46 +7,46 @@ import lombok.Data;
 @Data
 public class UserProfileUpdateRequest {
 
-    // --- Şəxsi məlumatlar ---
-    @Size(min = 2, max = 50, message = "Ad 2-50 simvol aralığında olmalıdır")
+    // --- Personal information ---
+    @Size(min = 2, max = 50, message = "First name must be between 2-50 characters")
     private String firstName;
 
-    @Size(min = 2, max = 50, message = "Soyad 2-50 simvol aralığında olmalıdır")
+    @Size(min = 2, max = 50, message = "Last name must be between 2-50 characters")
     private String lastName;
 
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Telefon nömrəsi düzgün formatda deyil (məs: +994501234567)")
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone number is not in a valid format (e.g: +994501234567)")
     private String phoneNumber;
 
-    @Size(min = 8, message = "Şifrə ən azı 8 simvoldan ibarət olmalıdır")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    // --- Ünvan məlumatları ---
-    @Size(max = 100, message = "Şəhər adı çox uzundur")
+    // --- Address information ---
+    @Size(max = 100, message = "City name is too long")
     private String city;
 
-    @Size(max = 100, message = "Rayon adı çox uzundur")
+    @Size(max = 100, message = "District name is too long")
     private String district;
 
-    @Size(max = 255, message = "Ünvan detalları 255 simvolu keçməməlidir")
+    @Size(max = 255, message = "Address details must not exceed 255 characters")
     private String addressDetails;
 
-    @Size(max = 500, message = "Çatdırılma qeydləri çox uzundur")
+    @Size(max = 500, message = "Delivery notes are too long")
     private String deliveryNotes;
 
-    // --- Sağlamlıq məlumatları ---
-    @Positive(message = "Çəki müsbət rəqəm olmalıdır")
-    @Max(value = 500, message = "Çəki miqdarı məntiqsizdir")
+    // --- Health information ---
+    @Positive(message = "Weight must be a positive number")
+    @Max(value = 500, message = "Weight value is unrealistic")
     private Double weight;
 
-    @Positive(message = "Boy müsbət rəqəm olmalıdır")
-    @Max(value = 300, message = "Boy miqdarı məntiqsizdir")
+    @Positive(message = "Height must be a positive number")
+    @Max(value = 300, message = "Height value is unrealistic")
     private Double height;
 
-    private GoalType goal; // Enum olduğu üçün adətən @NotNull kifayət edər (əgər məcburidirsə)
+    private GoalType goal; // Enum type, @NotNull is usually sufficient (if required)
 
-    @Size(max = 1000, message = "Məhdudiyyətlər qeydi 1000 simvolu keçməməlidir")
+    @Size(max = 1000, message = "Restrictions note must not exceed 1000 characters")
     private String restrictions;
 
-    @Size(max = 2000, message = "Qeydlər 2000 simvolu keçməməlidir")
+    @Size(max = 2000, message = "Notes must not exceed 2000 characters")
     private String notes;
 }

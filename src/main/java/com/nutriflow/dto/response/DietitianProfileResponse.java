@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class DietitianProfileResponse {
+
     private Long id;
     private String firstName;
     private String lastName;
@@ -13,4 +14,5 @@ public class DietitianProfileResponse {
     private String specialization;
     private String phone;
     private String role;
+
 }

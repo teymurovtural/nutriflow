@@ -2,6 +2,11 @@ databaseChangeLog:
   - changeSet:
       id: 004-create-deliveries-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: deliveries
       changes:
         - createTable:
             tableName: deliveries
@@ -120,6 +125,11 @@ databaseChangeLog:
   - changeSet:
       id: 004-create-payments-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: payments
       changes:
         - createTable:
             tableName: payments

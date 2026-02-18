@@ -15,7 +15,7 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     Optional<SubscriptionEntity> findByUser(UserEntity user);
     long countByStatus(SubscriptionStatus status);
 
-    // SubscriptionRepository.java-ya əlavə et:
+    // Add to SubscriptionRepository.java:
 
     List<SubscriptionEntity> findByStatusAndEndDateBefore(
             SubscriptionStatus status,
@@ -28,5 +28,4 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     );
 
     Optional<SubscriptionEntity> findByUserId(Long userId);
-
 }

@@ -38,5 +38,4 @@ public class AdminEntity extends BaseEntity {
     @Builder.Default
     private boolean isActive = true;
 
-
 }

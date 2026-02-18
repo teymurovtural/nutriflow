@@ -34,15 +34,15 @@ public class SchedulerController {
     @GetMapping("/status")
     public ResponseEntity<String> getSchedulerStatus() {
         return ResponseEntity.ok(
-                "✅ Scheduler Service Aktiv\n\n" +
-                        "📋 Mövcud scheduler-lər:\n" +
-                        "1. Database Cleanup (Hər ayın 1-də saat 03:00)\n" +
-                        "2. Subscription Deactivation (Hər gün saat 01:00)\n" +
-                        "3. Redis OTP Cleanup (Hər saat başı)\n" +
-                        "4. Redis Token Cleanup (Hər gün saat 04:00)\n" +
-                        "5. Redis Stats (Hər 6 saatda bir)\n" +
-                        "6. Subscription Expiration Warning (Hər gün saat 10:00)\n" +
-                        "7. Weekly Subscription Report (Bazar ertəsi saat 09:00)"
+                "✅ Scheduler Service Active\n\n" +
+                        "📋 Available schedulers:\n" +
+                        "1. Database Cleanup (1st of every month at 03:00)\n" +
+                        "2. Subscription Deactivation (Every day at 01:00)\n" +
+                        "3. Redis OTP Cleanup (Every hour)\n" +
+                        "4. Redis Token Cleanup (Every day at 04:00)\n" +
+                        "5. Redis Stats (Every 6 hours)\n" +
+                        "6. Subscription Expiration Warning (Every day at 10:00)\n" +
+                        "7. Weekly Subscription Report (Monday at 09:00)"
         );
     }
 
@@ -51,12 +51,12 @@ public class SchedulerController {
     @PostMapping("/database-cleanup")
     public ResponseEntity<String> testDatabaseCleanup() {
         try {
-            log.info("📋 Manual database cleanup test başladı");
+            log.info("📋 Manual database cleanup test started");
             databaseCleanupScheduler.cleanupOldDeliveries();
-            return ResponseEntity.ok("✅ Database cleanup uğurla icra edildi");
+            return ResponseEntity.ok("✅ Database cleanup executed successfully");
         } catch (Exception e) {
-            log.error("❌ Database cleanup xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Database cleanup error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
@@ -65,24 +65,24 @@ public class SchedulerController {
     @PostMapping("/subscription-deactivate")
     public ResponseEntity<String> testSubscriptionDeactivate() {
         try {
-            log.info("📋 Manual subscription deactivation test başladı");
+            log.info("📋 Manual subscription deactivation test started");
             subscriptionScheduler.deactivateExpiredSubscriptions();
-            return ResponseEntity.ok("✅ Subscription deactivation uğurla icra edildi");
+            return ResponseEntity.ok("✅ Subscription deactivation executed successfully");
         } catch (Exception e) {
-            log.error("❌ Subscription deactivation xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Subscription deactivation error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
     @PostMapping("/test-subscription-warning")
     public ResponseEntity<String> testSubscriptionWarning() {
         try {
-            log.info("📋 Manual subscription warning test başladı");
+            log.info("📋 Manual subscription warning test started");
             subscriptionScheduler.notifyUpcomingExpirations();
-            return ResponseEntity.ok("✅ Subscription warning uğurla icra edildi");
+            return ResponseEntity.ok("✅ Subscription warning executed successfully");
         } catch (Exception e) {
-            log.error("❌ Subscription warning xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Subscription warning error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
@@ -91,12 +91,12 @@ public class SchedulerController {
     @PostMapping("/redis-stats")
     public ResponseEntity<String> testRedisStats() {
         try {
-            log.info("📋 Manual Redis stats test başladı");
+            log.info("📋 Manual Redis stats test started");
             redisCleanupScheduler.logRedisStatistics();
-            return ResponseEntity.ok("✅ Redis stats uğurla icra edildi");
+            return ResponseEntity.ok("✅ Redis stats executed successfully");
         } catch (Exception e) {
-            log.error("❌ Redis stats xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Redis stats error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
@@ -107,15 +107,15 @@ public class SchedulerController {
     public ResponseEntity<String> testEmail() {
         try {
             var testSubscription = subscriptionRepository.findById(1L)
-                    .orElseThrow(() -> new RuntimeException("ID=1 subscription tapılmadı"));
+                    .orElseThrow(() -> new RuntimeException("Subscription with ID=1 not found"));
 
             var userEmail = testSubscription.getUser().getEmail();
             emailNotificationService.sendSubscriptionExpirationWarning(testSubscription);
 
-            return ResponseEntity.ok("✅ Test email göndərildi: " + userEmail);
+            return ResponseEntity.ok("✅ Test email sent: " + userEmail);
         } catch (Exception e) {
-            log.error("❌ Test email xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Test email error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
@@ -128,10 +128,10 @@ public class SchedulerController {
 
             emailNotificationService.sendWeeklyReportToAdmin(activeCount, expiredCount, cancelledCount);
 
-            return ResponseEntity.ok("✅ Admin report email göndərildi");
+            return ResponseEntity.ok("✅ Admin report email sent");
         } catch (Exception e) {
-            log.error("❌ Admin report email xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Admin report email error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
@@ -143,9 +143,9 @@ public class SchedulerController {
         try {
             var testUser = userRepository.findAll().stream()
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Database-də user yoxdur"));
+                    .orElseThrow(() -> new RuntimeException("No user found in database"));
 
-            // ✅ FIX: Köhnəni sil deyil, UPDATE et
+            // ✅ FIX: Do not delete old, UPDATE instead
             var existingSub = subscriptionRepository.findByUserId(testUser.getId());
 
             if (existingSub.isPresent()) {
@@ -157,7 +157,7 @@ public class SchedulerController {
                 sub.setEndDate(LocalDate.now().plusDays(30));
                 var saved = subscriptionRepository.save(sub);
 
-                return ResponseEntity.ok("✅ Test subscription UPDATE edildi: ID=" + saved.getId() +
+                return ResponseEntity.ok("✅ Test subscription UPDATED: ID=" + saved.getId() +
                         " | User: " + testUser.getEmail() +
                         " | End Date: " + saved.getEndDate());
             } else {
@@ -172,18 +172,18 @@ public class SchedulerController {
 
                 var saved = subscriptionRepository.save(subscription);
 
-                return ResponseEntity.ok("✅ Test subscription YARADILDI: ID=" + saved.getId() +
+                return ResponseEntity.ok("✅ Test subscription CREATED: ID=" + saved.getId() +
                         " | User: " + testUser.getEmail() +
                         " | End Date: " + saved.getEndDate());
             }
         } catch (Exception e) {
-            log.error("❌ Test subscription xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Test subscription error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
     /**
-     * ✅ FIX: 7 gün sonra bitəcək subscription - UPDATE et, silmə
+     * ✅ FIX: Subscription expiring in 7 days - UPDATE, do not delete
      */
     @PostMapping("/create-expiring-subscription")
     @Transactional
@@ -191,9 +191,9 @@ public class SchedulerController {
         try {
             var testUser = userRepository.findAll().stream()
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Database-də user yoxdur"));
+                    .orElseThrow(() -> new RuntimeException("No user found in database"));
 
-            // ✅ Köhnəni tap və UPDATE et
+            // ✅ Find old and UPDATE
             var existingSub = subscriptionRepository.findByUserId(testUser.getId());
 
             if (existingSub.isPresent()) {
@@ -202,10 +202,10 @@ public class SchedulerController {
                 sub.setPrice(15.0);
                 sub.setStatus(SubscriptionStatus.ACTIVE);
                 sub.setStartDate(LocalDate.now());
-                sub.setEndDate(LocalDate.now().plusDays(7)); // ✅ 7 gün
+                sub.setEndDate(LocalDate.now().plusDays(7)); // ✅ 7 days
                 var saved = subscriptionRepository.save(sub);
 
-                return ResponseEntity.ok("✅ 7 gün sonra bitəcək subscription UPDATE edildi: ID=" + saved.getId() +
+                return ResponseEntity.ok("✅ Subscription expiring in 7 days UPDATED: ID=" + saved.getId() +
                         " | User: " + testUser.getEmail() +
                         " | End Date: " + saved.getEndDate());
             } else {
@@ -220,18 +220,18 @@ public class SchedulerController {
 
                 var saved = subscriptionRepository.save(subscription);
 
-                return ResponseEntity.ok("✅ 7 gün sonra bitəcək subscription YARADILDI: ID=" + saved.getId() +
+                return ResponseEntity.ok("✅ Subscription expiring in 7 days CREATED: ID=" + saved.getId() +
                         " | User: " + testUser.getEmail() +
                         " | End Date: " + saved.getEndDate());
             }
         } catch (Exception e) {
-            log.error("❌ Expiring subscription xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Expiring subscription error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
     /**
-     * ✅ FIX: Bitmiş subscription - UPDATE et, silmə
+     * ✅ FIX: Expired subscription - UPDATE, do not delete
      */
     @PostMapping("/create-expired-subscription")
     @Transactional
@@ -239,23 +239,23 @@ public class SchedulerController {
         try {
             var testUser = userRepository.findAll().stream()
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Database-də user yoxdur"));
+                    .orElseThrow(() -> new RuntimeException("No user found in database"));
 
-            // ✅ Köhnəni tap və UPDATE et
+            // ✅ Find old and UPDATE
             var existingSub = subscriptionRepository.findByUserId(testUser.getId());
 
             if (existingSub.isPresent()) {
                 var sub = existingSub.get();
                 sub.setPlanName("Premium Test - Expired");
                 sub.setPrice(15.0);
-                sub.setStatus(SubscriptionStatus.ACTIVE); // Hələ aktiv
+                sub.setStatus(SubscriptionStatus.ACTIVE); // Still active
                 sub.setStartDate(LocalDate.now().minusDays(8));
-                sub.setEndDate(LocalDate.now().minusDays(1)); // Dünən bitib
+                sub.setEndDate(LocalDate.now().minusDays(1)); // Expired yesterday
                 var saved = subscriptionRepository.save(sub);
 
-                return ResponseEntity.ok("✅ Bitmiş subscription UPDATE edildi: ID=" + saved.getId() +
+                return ResponseEntity.ok("✅ Expired subscription UPDATED: ID=" + saved.getId() +
                         " | User: " + testUser.getEmail() +
-                        " | End Date: " + saved.getEndDate() + " (dünən)");
+                        " | End Date: " + saved.getEndDate() + " (yesterday)");
             } else {
                 var subscription = SubscriptionEntity.builder()
                         .user(testUser)
@@ -268,13 +268,13 @@ public class SchedulerController {
 
                 var saved = subscriptionRepository.save(subscription);
 
-                return ResponseEntity.ok("✅ Bitmiş subscription YARADILDI: ID=" + saved.getId() +
+                return ResponseEntity.ok("✅ Expired subscription CREATED: ID=" + saved.getId() +
                         " | User: " + testUser.getEmail() +
-                        " | End Date: " + saved.getEndDate() + " (dünən)");
+                        " | End Date: " + saved.getEndDate() + " (yesterday)");
             }
         } catch (Exception e) {
-            log.error("❌ Expired subscription xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Expired subscription error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
@@ -289,16 +289,16 @@ public class SchedulerController {
             long cancelled = subscriptionRepository.countByStatus(SubscriptionStatus.CANCELLED);
 
             return ResponseEntity.ok(String.format(
-                    "📊 Subscription Statistikası:\n" +
-                            "Toplam: %d\n" +
-                            "✅ Aktiv: %d\n" +
-                            "❌ Bitmiş: %d\n" +
-                            "🚫 Ləğv edilmiş: %d",
+                    "📊 Subscription Statistics:\n" +
+                            "Total: %d\n" +
+                            "✅ Active: %d\n" +
+                            "❌ Expired: %d\n" +
+                            "🚫 Cancelled: %d",
                     total, active, expired, cancelled
             ));
         } catch (Exception e) {
-            log.error("❌ Statistika xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Statistics error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
@@ -315,13 +315,13 @@ public class SchedulerController {
             for (var sub : testSubs) {
                 subscriptionRepository.delete(sub);
                 deletedCount++;
-                log.info("🗑️ Test subscription silindi: ID={}", sub.getId());
+                log.info("🗑️ Test subscription deleted: ID={}", sub.getId());
             }
 
-            return ResponseEntity.ok("✅ " + deletedCount + " test subscription silindi");
+            return ResponseEntity.ok("✅ " + deletedCount + " test subscriptions deleted");
         } catch (Exception e) {
-            log.error("❌ Cleanup xətası", e);
-            return ResponseEntity.status(500).body("❌ Xəta: " + e.getMessage());
+            log.error("❌ Cleanup error", e);
+            return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 }

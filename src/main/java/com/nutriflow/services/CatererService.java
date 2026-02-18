@@ -11,24 +11,22 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface CatererService {
-    // Dashboard statistika məlumatları
+    // Dashboard statistics
     CatererStatsResponse getDashboardStats();
 
-    // Bugünkü çatdırılmalar (Axtarış və Filter ilə)
+    // Today's deliveries (with Search and Filter)
     List<DeliveryDetailResponse> getDailyDeliveries(String name, String district, LocalDate date);
 
-    // Çatdırılma statusunun yenilənməsi
+    // Update delivery status
     void updateDeliveryStatus(Long deliveryId, DeliveryStatus newStatus, String note);
 
-    // Profil məlumatlarını görmək
+    // View profile information
     CatererResponse getProfile();
 
-    // Profil məlumatlarını yeniləmək (Ad, Telefon, Ünvan)
+    // Update profile information (Name, Phone, Address)
     String updateProfile(CatererProfileUpdateRequest request);
 
     void updateEstimatedTime(Long deliveryId, String estimatedTime);
 
     void markDeliveryAsFailed(DeliveryFailureRequest request);
-
-
 }

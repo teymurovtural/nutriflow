@@ -11,27 +11,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MenuItemRequest {
 
-    @NotNull(message = "Gün (1-31) mütləq qeyd olunmalıdır")
-    @Min(value = 1, message = "Gün minimum 1 ola bilər")
-    @Max(value = 31, message = "Gün maksimum 31 ola bilər")
+    @NotNull(message = "Day (1-31) must be specified")
+    @Min(value = 1, message = "Day minimum value is 1")
+    @Max(value = 31, message = "Day maximum value is 31")
     private Integer day;
 
-    @NotNull(message = "Yemək növü (MealType) mütləqdir")
+    @NotNull(message = "Meal type (MealType) is required")
     private MealType mealType;
 
-    @NotBlank(message = "Yemək təsviri boş ola bilməz")
-    @Size(min = 5, max = 1000, message = "Təsvir 5-1000 simvol aralığında olmalıdır")
+    @NotBlank(message = "Meal description cannot be blank")
+    @Size(min = 5, max = 1000, message = "Description must be between 5-1000 characters")
     private String description;
 
-    @PositiveOrZero(message = "Kalori mənfi ola bilməz")
+    @PositiveOrZero(message = "Calories cannot be negative")
     private Integer calories;
 
-    @PositiveOrZero(message = "Protein mənfi ola bilməz")
+    @PositiveOrZero(message = "Protein cannot be negative")
     private Double protein;
 
-    @PositiveOrZero(message = "Karbohidrat mənfi ola bilməz")
+    @PositiveOrZero(message = "Carbohydrates cannot be negative")
     private Double carbs;
 
-    @PositiveOrZero(message = "Yağ mənfi ola bilməz")
+    @PositiveOrZero(message = "Fats cannot be negative")
     private Double fats;
 }

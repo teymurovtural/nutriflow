@@ -9,12 +9,12 @@ import lombok.Data;
 @Data
 public class VerifyRequest {
 
-    @Email(message = "Email formatı düzgün deyil")
-    @NotBlank(message = "Email boş ola bilməz")
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email cannot be blank")
     private String email;
 
-    @NotBlank(message = "OTP kodu boş ola bilməz")
-    @Size(min = 6, max = 6, message = "OTP kodu tam olaraq 6 rəqəmdən ibarət olmalıdır")
-    @Pattern(regexp = "^[0-9]+$", message = "OTP kodu yalnız rəqəmlərdən ibarət olmalıdır")
+    @NotBlank(message = "OTP code cannot be blank")
+    @Size(min = 6, max = 6, message = "OTP code must be exactly 6 digits")
+    @Pattern(regexp = "^[0-9]+$", message = "OTP code must contain digits only")
     private String otpCode;
 }

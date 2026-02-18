@@ -7,10 +7,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Client-in real IP ünvanını müəyyən etmək üçün utility.
- * Proxy, Load Balancer və firewalls-u nəzərə alır.
+ * Utility class for determining the real IP address of a client.
+ * Takes into account Proxy, Load Balancer and firewalls.
  *
- * İstifadə:
+ * Usage:
  * @Autowired
  * private IpAddressUtil ipAddressUtil;
  *
@@ -36,9 +36,10 @@ public class IpAddressUtil {
     private static final String DEFAULT_IP = "unknown";
 
     /**
-     * Müxtəlif Proxy və Load Balancer-ləri nəzərə alaraq client-in real IP ünvanını tapır.
+     * Resolves the real IP address of the client,
+     * taking into account various Proxy and Load Balancer configurations.
      *
-     * @return Client IP ünvanı və ya "unknown" əgər tapılamazsa
+     * @return Client IP address or "unknown" if not found
      */
     public String getClientIp() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -52,19 +53,19 @@ public class IpAddressUtil {
     }
 
     /**
-     * HttpServletRequest-dən IP ünvanını çıxarır.
-     * Əvvəl header-ləri yoxlayır, sonra request-in remote address-ini istifadə edir.
+     * Extracts the IP address from an HttpServletRequest.
+     * Checks headers first, then falls back to the request's remote address.
      *
      * @param request HTTP request
-     * @return IP ünvanı
+     * @return IP address
      */
     private String getClientIpFromRequest(HttpServletRequest request) {
         for (String header : IP_HEADER_CANDIDATES) {
             String ipList = request.getHeader(header);
 
             if (isValidIp(ipList)) {
-                // X-Forwarded-For bir neçə IP qaytara bilər (vergüllə ayrılmış)
-                // Biz birincisini (client-in IP) istifadə edirik
+                // X-Forwarded-For may return multiple IPs (comma-separated)
+                // We use the first one which represents the original client IP
                 return ipList.split(",")[0].trim();
             }
         }
@@ -73,10 +74,10 @@ public class IpAddressUtil {
     }
 
     /**
-     * IP siyahısının valid olub olmadığını yoxlayır.
+     * Checks whether an IP list is valid.
      *
-     * @param ipList IP siyahısı (null, boş və ya "unknown" ola bilər)
-     * @return Valid-dirsə true
+     * @param ipList IP list (can be null, empty or "unknown")
+     * @return true if valid
      */
     private boolean isValidIp(String ipList) {
         return ipList != null

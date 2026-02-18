@@ -38,18 +38,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
 
-        // 1. İstifadəçini tapırıq və ya yoxdursa yaradırıq
+        // 1. Find the user or create one if not found
         UserEntity user = userRepository.findByEmail(email)
                 .orElseGet(() -> {
                     UserEntity newUser = UserEntity.builder()
                             .firstName(oauthUser.getAttribute("given_name"))
                             .lastName(oauthUser.getAttribute("family_name"))
                             .email(email)
-                            .password("OAUTH2_USER") // Şifrə boş qala bilməz
+                            .password("OAUTH2_USER") // Password cannot be empty
                             .role(Role.USER)
-                            .status(UserStatus.VERIFIED) // Google-dan gəldiyi üçün birbaşa verified
+                            .status(UserStatus.VERIFIED) // Directly verified since coming from Google
                             .isEmailVerified(true)
-                            .phoneNumber("+994000000000") // Müvəqqəti, profil dolduranda yenilənəcək
+                            .phoneNumber("+994000000000") // Temporary, will be updated when profile is filled
                             .build();
                     return userRepository.save(newUser);
                 });
@@ -62,11 +62,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 user.isEmailVerified()
         );
 
-        // 2. Tokenləri yaradırıq
+        // 2. Generate tokens
         String accessToken = jwtService.generateToken(securityUser);
         String refreshToken = jwtService.generateRefreshToken(securityUser);
 
-        // 3. Refresh Token-i Redis-ə atırıq
+        // 3. Store Refresh Token in Redis
         redisTemplate.opsForValue().set(
                 refreshTokenPrefix + securityUser.getUsername(),
                 refreshToken,
@@ -74,7 +74,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
-        // 4. Flow Kontrolu
+        // 4. Flow Control
         String targetUrl = determineTargetUrl(user, accessToken, refreshToken);
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
@@ -84,22 +84,22 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String baseUrl = "http://localhost:3000";
         String authParams = "?token=" + token + "&refreshToken=" + refreshToken;
 
-        // Mərhələ 1: Sağlamlıq məlumatları yoxdursa
+        // Step 1: If health data is missing
         if (user.getHealthProfile() == null) {
             return baseUrl + "/tell-us-about-yourself" + authParams;
         }
 
-        // Mərhələ 2: Məlumatlar var amma ödəniş edilməyibsə
+        // Step 2: Data exists but payment has not been made
         if (user.getStatus() == UserStatus.DATA_SUBMITTED) {
             return baseUrl + "/choose-plan" + authParams;
         }
 
-        // Mərhələ 3: Hər şey qaydasındadırsa Dashboard
+        // Step 3: Everything is in order - go to Dashboard
         if (user.getStatus() == UserStatus.ACTIVE) {
             return baseUrl + "/dashboard" + authParams;
         }
 
-        // Default olaraq ana səhifəyə və ya məlumat doldurmağa
+        // Default - go to home page or data entry
         return baseUrl + "/tell-us-about-yourself" + authParams;
     }
 }

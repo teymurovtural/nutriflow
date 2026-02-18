@@ -5,13 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.regex.Pattern;
 
 /**
- * Validation əməliyyatları üçün yardımçı sinif.
- * Email, telefon, şifrə və digər məlumatların yoxlanılması.
+ * Utility class for validation operations.
+ * Validates email, phone, password, and other data fields.
  */
 @Slf4j
 public class ValidationUtils {
 
-    // Regex pattern-lər
+    // Regex patterns
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );
@@ -25,10 +25,10 @@ public class ValidationUtils {
     );
 
     /**
-     * Email-in düzgün formatda olub-olmadığını yoxlayır.
+     * Checks whether the email is in a valid format.
      *
-     * @param email Email ünvanı
-     * @return true əgər düzgündürsə
+     * @param email Email address
+     * @return true if valid
      */
     public static boolean isValidEmail(String email) {
         if (email == null || email.isBlank()) {
@@ -38,11 +38,11 @@ public class ValidationUtils {
     }
 
     /**
-     * Telefon nömrəsinin Azərbaycan formatında olub-olmadığını yoxlayır.
-     * Format: +994XXXXXXXXX və ya 0XXXXXXXXX
+     * Checks whether the phone number is in Azerbaijani format.
+     * Format: +994XXXXXXXXX or 0XXXXXXXXX
      *
-     * @param phone Telefon nömrəsi
-     * @return true əgər düzgündürsə
+     * @param phone Phone number
+     * @return true if valid
      */
     public static boolean isValidPhone(String phone) {
         if (phone == null || phone.isBlank()) {
@@ -53,16 +53,16 @@ public class ValidationUtils {
     }
 
     /**
-     * Şifrənin güclü olub-olmadığını yoxlayır.
-     * Tələblər:
-     * - Minimum 8 simvol
-     * - Ən azı 1 rəqəm
-     * - Ən azı 1 kiçik hərf
-     * - Ən azı 1 böyük hərf
-     * - Ən azı 1 xüsusi simvol (@#$%^&+=!)
+     * Checks whether the password is strong.
+     * Requirements:
+     * - Minimum 8 characters
+     * - At least 1 digit
+     * - At least 1 lowercase letter
+     * - At least 1 uppercase letter
+     * - At least 1 special character (@#$%^&+=!)
      *
-     * @param password Şifrə
-     * @return true əgər güclüdürsə
+     * @param password Password
+     * @return true if strong
      */
     public static boolean isStrongPassword(String password) {
         if (password == null || password.isBlank()) {
@@ -72,30 +72,30 @@ public class ValidationUtils {
     }
 
     /**
-     * String-in boş olub-olmadığını yoxlayır (null və ya blank).
+     * Checks whether the string is empty (null or blank).
      *
-     * @param value Yoxlanılacaq dəyər
-     * @return true əgər boşdursa
+     * @param value Value to check
+     * @return true if empty
      */
     public static boolean isEmpty(String value) {
         return value == null || value.isBlank();
     }
 
     /**
-     * String-in boş olmadığını yoxlayır.
+     * Checks whether the string is not empty.
      *
-     * @param value Yoxlanılacaq dəyər
-     * @return true əgər boş deyilsə
+     * @param value Value to check
+     * @return true if not empty
      */
     public static boolean isNotEmpty(String value) {
         return !isEmpty(value);
     }
 
     /**
-     * Rəqəmin müsbət olub-olmadığını yoxlayır.
+     * Checks whether the number is positive.
      *
-     * @param number Yoxlanılacaq rəqəm
-     * @return true əgər müsbətdirsə
+     * @param number Number to check
+     * @return true if positive
      */
     public static boolean isPositive(Number number) {
         if (number == null) {
@@ -105,10 +105,10 @@ public class ValidationUtils {
     }
 
     /**
-     * Rəqəmin qeyri-mənfi olub-olmadığını yoxlayır (0 və ya böyük).
+     * Checks whether the number is non-negative (0 or greater).
      *
-     * @param number Yoxlanılacaq rəqəm
-     * @return true əgər qeyri-mənfidirsə
+     * @param number Number to check
+     * @return true if non-negative
      */
     public static boolean isNonNegative(Number number) {
         if (number == null) {
@@ -118,42 +118,42 @@ public class ValidationUtils {
     }
 
     /**
-     * Boy dəyərinin məntiqli aralıqda olub-olmadığını yoxlayır (100-250 cm).
+     * Checks whether the height value is within a logical range (100-250 cm).
      *
-     * @param height Boy (sm)
-     * @return true əgər düzgündürsə
+     * @param height Height (cm)
+     * @return true if valid
      */
     public static boolean isValidHeight(Double height) {
         return height != null && height >= 100 && height <= 250;
     }
 
     /**
-     * Çəki dəyərinin məntiqli aralıqda olub-olmadığını yoxlayır (30-300 kg).
+     * Checks whether the weight value is within a logical range (30-300 kg).
      *
-     * @param weight Çəki (kq)
-     * @return true əgər düzgündürsə
+     * @param weight Weight (kg)
+     * @return true if valid
      */
     public static boolean isValidWeight(Double weight) {
         return weight != null && weight >= 30 && weight <= 300;
     }
 
     /**
-     * Kalori dəyərinin məntiqli olub-olmadığını yoxlayır (0-10000).
+     * Checks whether the calorie value is logically valid (0-10000).
      *
-     * @param calories Kalori
-     * @return true əgər düzgündürsə
+     * @param calories Calories
+     * @return true if valid
      */
     public static boolean isValidCalories(Double calories) {
         return calories != null && calories >= 0 && calories <= 10000;
     }
 
     /**
-     * String-in müəyyən uzunluq aralığında olub-olmadığını yoxlayır.
+     * Checks whether the string length is within a specified range.
      *
-     * @param value     Yoxlanılacaq dəyər
-     * @param minLength Minimum uzunluq
-     * @param maxLength Maximum uzunluq
-     * @return true əgər aralıqdadırsa
+     * @param value     Value to check
+     * @param minLength Minimum length
+     * @param maxLength Maximum length
+     * @return true if within range
      */
     public static boolean isLengthBetween(String value, int minLength, int maxLength) {
         if (value == null) {
@@ -164,20 +164,20 @@ public class ValidationUtils {
     }
 
     /**
-     * BMI-nin sağlam aralıqda olub-olmadığını yoxlayır (18.5-30).
+     * Checks whether the BMI is within a healthy range (18.5-30).
      *
-     * @param bmi BMI dəyəri
-     * @return true əgər sağlam aralıqdadırsa
+     * @param bmi BMI value
+     * @return true if within healthy range
      */
     public static boolean isHealthyBMI(Double bmi) {
         return bmi != null && bmi >= 18.5 && bmi <= 30;
     }
 
     /**
-     * URL-in düzgün formatda olub-olmadığını yoxlayır.
+     * Checks whether the URL is in a valid format.
      *
      * @param url URL
-     * @return true əgər düzgündürsə
+     * @return true if valid
      */
     public static boolean isValidUrl(String url) {
         if (url == null || url.isBlank()) {
@@ -192,11 +192,11 @@ public class ValidationUtils {
     }
 
     /**
-     * Məbləğin müsbət və məntiqli olub-olmadığını yoxlayır.
+     * Checks whether the amount is positive and logically valid.
      *
-     * @param amount    Məbləğ
-     * @param maxAmount Maximum məbləğ
-     * @return true əgər düzgündürsə
+     * @param amount    Amount
+     * @param maxAmount Maximum amount
+     * @return true if valid
      */
     public static boolean isValidAmount(Double amount, Double maxAmount) {
         if (amount == null || amount <= 0) {
@@ -206,11 +206,11 @@ public class ValidationUtils {
     }
 
     /**
-     * İki şifrənin uyğun olub-olmadığını yoxlayır.
+     * Checks whether two passwords match.
      *
-     * @param password        Şifrə
-     * @param confirmPassword Təsdiq şifrəsi
-     * @return true əgər uyğundursa
+     * @param password        Password
+     * @param confirmPassword Confirmation password
+     * @return true if they match
      */
     public static boolean passwordsMatch(String password, String confirmPassword) {
         if (password == null || confirmPassword == null) {
@@ -220,41 +220,41 @@ public class ValidationUtils {
     }
 
     /**
-     * Ay rəqəminin düzgün olub-olmadığını yoxlayır (1-12).
+     * Checks whether the month number is valid (1-12).
      *
-     * @param month Ay
-     * @return true əgər düzgündürsə
+     * @param month Month
+     * @return true if valid
      */
     public static boolean isValidMonth(Integer month) {
         return month != null && month >= 1 && month <= 12;
     }
 
     /**
-     * Günün düzgün olub-olmadığını yoxlayır (1-31).
+     * Checks whether the day number is valid (1-31).
      *
-     * @param day Gün
-     * @return true əgər düzgündürsə
+     * @param day Day
+     * @return true if valid
      */
     public static boolean isValidDay(Integer day) {
         return day != null && day >= 1 && day <= 31;
     }
 
     /**
-     * İlin düzgün olub-olmadığını yoxlayır (2020-2100).
+     * Checks whether the year is valid (2020-2100).
      *
-     * @param year İl
-     * @return true əgər düzgündürsə
+     * @param year Year
+     * @return true if valid
      */
     public static boolean isValidYear(Integer year) {
         return year != null && year >= 2020 && year <= 2100;
     }
 
     /**
-     * Validation xəta mesajı yaradır.
+     * Creates a validation error message.
      *
-     * @param fieldName Sahə adı
-     * @param error     Xəta
-     * @return Xəta mesajı
+     * @param fieldName Field name
+     * @param error     Error description
+     * @return Error message
      */
     public static String validationError(String fieldName, String error) {
         return String.format("%s: %s", fieldName, error);

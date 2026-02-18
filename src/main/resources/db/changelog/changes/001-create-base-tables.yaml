@@ -2,6 +2,11 @@ databaseChangeLog:
   - changeSet:
       id: 001-create-admins-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: admins
       changes:
         - createTable:
             tableName: admins
@@ -67,6 +72,11 @@ databaseChangeLog:
   - changeSet:
       id: 001-create-otps-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: otps
       changes:
         - createTable:
             tableName: otps
@@ -114,6 +124,11 @@ databaseChangeLog:
   - changeSet:
       id: 001-create-dietitians-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: dietitians
       changes:
         - createTable:
             tableName: dietitians
@@ -177,6 +192,11 @@ databaseChangeLog:
   - changeSet:
       id: 001-create-caterers-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: caterers
       changes:
         - createTable:
             tableName: caterers

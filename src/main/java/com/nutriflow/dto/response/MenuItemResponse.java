@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuItemResponse {
+
     private Integer day;
     private String mealType;
     private String description;
@@ -17,4 +18,5 @@ public class MenuItemResponse {
     private Double protein;
     private Double carbs;
     private Double fats;
+
 }

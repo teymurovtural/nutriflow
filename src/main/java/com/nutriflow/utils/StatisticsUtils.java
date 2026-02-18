@@ -10,18 +10,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Statistika hesablamaları üçün yardımçı sinif.
- * Dashboard, reporting və analytics üçün hesablamalar.
+ * Utility class for statistical calculations.
+ * Calculations for dashboard, reporting, and analytics.
  */
 @Slf4j
 public class StatisticsUtils {
 
     /**
-     * Delivery-lərin status-a görə sayını hesablayır.
+     * Counts the number of deliveries by status.
      *
      * @param deliveries Delivery list
      * @param status     DeliveryStatus
-     * @return Həmin statusda olan delivery sayı
+     * @return Number of deliveries with the given status
      */
     public static long countByStatus(List<DeliveryEntity> deliveries, DeliveryStatus status) {
         if (deliveries == null || deliveries.isEmpty() || status == null) {
@@ -34,11 +34,11 @@ public class StatisticsUtils {
     }
 
     /**
-     * Tamamlanma faizini hesablayır.
+     * Calculates the completion percentage.
      *
-     * @param completed Tamamlanmış say
-     * @param total     Ümumi say
-     * @return Faiz (0-100)
+     * @param completed Number of completed items
+     * @param total     Total number of items
+     * @return Percentage (0-100)
      */
     public static double calculateCompletionPercentage(long completed, long total) {
         if (total == 0) {
@@ -50,10 +50,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Ortalama kalori hesablayır.
+     * Calculates the average calories.
      *
      * @param menuItems Menu item list
-     * @return Ortalama kalori
+     * @return Average calories
      */
     public static double calculateAverageCalories(List<MenuItemEntity> menuItems) {
         if (menuItems == null || menuItems.isEmpty()) {
@@ -68,10 +68,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Ümumi kalori hesablayır.
+     * Calculates the total calories.
      *
      * @param menuItems Menu item list
-     * @return Ümumi kalori
+     * @return Total calories
      */
     public static double calculateTotalCalories(List<MenuItemEntity> menuItems) {
         if (menuItems == null || menuItems.isEmpty()) {
@@ -85,10 +85,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Ümumi protein hesablayır.
+     * Calculates the total protein.
      *
      * @param menuItems Menu item list
-     * @return Ümumi protein (gram)
+     * @return Total protein (grams)
      */
     public static double calculateTotalProtein(List<MenuItemEntity> menuItems) {
         if (menuItems == null || menuItems.isEmpty()) {
@@ -102,10 +102,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Ümumi karbohidrat hesablayır.
+     * Calculates the total carbohydrates.
      *
      * @param menuItems Menu item list
-     * @return Ümumi karbohidrat (gram)
+     * @return Total carbohydrates (grams)
      */
     public static double calculateTotalCarbs(List<MenuItemEntity> menuItems) {
         if (menuItems == null || menuItems.isEmpty()) {
@@ -119,10 +119,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Ümumi yağ hesablayır.
+     * Calculates the total fats.
      *
      * @param menuItems Menu item list
-     * @return Ümumi yağ (gram)
+     * @return Total fats (grams)
      */
     public static double calculateTotalFats(List<MenuItemEntity> menuItems) {
         if (menuItems == null || menuItems.isEmpty()) {
@@ -136,7 +136,7 @@ public class StatisticsUtils {
     }
 
     /**
-     * Delivery status-larının paylanmasını hesablayır.
+     * Calculates the distribution of delivery statuses.
      *
      * @param deliveries Delivery list
      * @return Status -> Count map
@@ -154,11 +154,11 @@ public class StatisticsUtils {
     }
 
     /**
-     * Uğur nisbətini hesablayır (SUCCESS / TOTAL).
+     * Calculates the success rate (SUCCESS / TOTAL).
      *
-     * @param successCount Uğurlu say
-     * @param totalCount   Ümumi say
-     * @return Uğur nisbəti (0-1)
+     * @param successCount Number of successful items
+     * @param totalCount   Total number of items
+     * @return Success rate (0-1)
      */
     public static double calculateSuccessRate(long successCount, long totalCount) {
         if (totalCount == 0) {
@@ -166,23 +166,23 @@ public class StatisticsUtils {
         }
 
         double rate = (double) successCount / totalCount;
-        return Math.round(rate * 1000.0) / 1000.0; // 3 onluq dəqiqliklə
+        return Math.round(rate * 1000.0) / 1000.0; // 3 decimal precision
     }
 
     /**
-     * Ortalama çatdırılma vaxtını hesablayır (estimated time-lardan).
+     * Calculates the average delivery time (from estimated times).
      *
      * @param deliveries Delivery list
-     * @return Ortalama vaxt (dəqiqə)
+     * @return Average time (minutes)
      */
     public static double calculateAverageDeliveryTime(List<DeliveryEntity> deliveries) {
         if (deliveries == null || deliveries.isEmpty()) {
             return 0.0;
         }
 
-        // Burada estimated time String formatında olduğundan,
-        // daha kompleks hesablama lazım ola bilər
-        // Bu sadələşdirilmiş versiya
+        // Since estimated time is in String format,
+        // a more complex calculation may be required.
+        // This is a simplified version.
 
         long count = deliveries.stream()
                 .filter(d -> d.getEstimatedDeliveryTime() != null)
@@ -192,10 +192,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Günlük menyu çeşidliliyi hesablayır (unikal yemək sayı).
+     * Calculates daily menu variety (number of unique dishes).
      *
      * @param menuItems Menu item list
-     * @return Unikal yemək təsviri sayı
+     * @return Number of unique dish descriptions
      */
     public static long calculateMenuVariety(List<MenuItemEntity> menuItems) {
         if (menuItems == null || menuItems.isEmpty()) {
@@ -210,11 +210,11 @@ public class StatisticsUtils {
     }
 
     /**
-     * İki rəqəm arasındakı fərqi faiz olaraq hesablayır.
+     * Calculates the percentage difference between two numbers.
      *
-     * @param current  Cari dəyər
-     * @param previous Əvvəlki dəyər
-     * @return Dəyişiklik faizi
+     * @param current  Current value
+     * @param previous Previous value
+     * @return Percentage change
      */
     public static double calculatePercentageChange(double current, double previous) {
         if (previous == 0) {
@@ -226,10 +226,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Minimum dəyəri tapır və güvənli şəkildə qaytarır.
+     * Finds the minimum value and returns it safely.
      *
-     * @param values Dəyərlər
-     * @return Minimum dəyər və ya 0
+     * @param values List of values
+     * @return Minimum value or 0
      */
     public static double findMinimum(List<Double> values) {
         if (values == null || values.isEmpty()) {
@@ -243,10 +243,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Maximum dəyəri tapır və güvənli şəkildə qaytarır.
+     * Finds the maximum value and returns it safely.
      *
-     * @param values Dəyərlər
-     * @return Maximum dəyər və ya 0
+     * @param values List of values
+     * @return Maximum value or 0
      */
     public static double findMaximum(List<Double> values) {
         if (values == null || values.isEmpty()) {
@@ -260,10 +260,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Ortalamanı hesablayır.
+     * Calculates the average.
      *
-     * @param values Dəyərlər
-     * @return Ortalama və ya 0
+     * @param values List of values
+     * @return Average or 0
      */
     public static double calculateAverage(List<Double> values) {
         if (values == null || values.isEmpty()) {
@@ -278,10 +278,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Medianı hesablayır.
+     * Calculates the median.
      *
-     * @param values Dəyərlər
-     * @return Median və ya 0
+     * @param values List of values
+     * @return Median or 0
      */
     public static double calculateMedian(List<Double> values) {
         if (values == null || values.isEmpty()) {
@@ -306,10 +306,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Ümumi sayı formatlaşdırır (1000 -> 1K, 1000000 -> 1M).
+     * Formats a total count (1000 -> 1K, 1000000 -> 1M).
      *
-     * @param count Say
-     * @return Formatlanmış string
+     * @param count Count
+     * @return Formatted string
      */
     public static String formatCount(long count) {
         if (count < 1000) {
@@ -322,10 +322,10 @@ public class StatisticsUtils {
     }
 
     /**
-     * Faizi formatlaşdırır.
+     * Formats a percentage value.
      *
-     * @param percentage Faiz dəyəri
-     * @return Formatlanmış string (örn: "85.5%")
+     * @param percentage Percentage value
+     * @return Formatted string (e.g., "85.5%")
      */
     public static String formatPercentage(double percentage) {
         return String.format("%.1f%%", percentage);

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class ActivityLogResponse {
+
     private Long id;
     private LocalDateTime createdAt;
     private Role role;
@@ -19,4 +20,5 @@ public class ActivityLogResponse {
     private String newValue;
     private String ipAddress;
     private String details;
+
 }

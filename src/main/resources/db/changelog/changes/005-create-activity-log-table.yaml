@@ -2,6 +2,11 @@ databaseChangeLog:
   - changeSet:
       id: 005-create-activity-logs-table
       author: nutriflow-team
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: activity_logs
       changes:
         - createTable:
             tableName: activity_logs

@@ -6,16 +6,16 @@ import lombok.Data;
 
 @Data
 public class AdminCreateRequest {
-    @NotBlank(message = "Ad mütləqdir")
+    @NotBlank(message = "First name is required")
     private String firstName;
 
-    @NotBlank(message = "Soyad mütləqdir")
+    @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @Email(message = "Email formatı düzgün deyil")
-    @NotBlank(message = "Email mütləqdir")
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
     private String email;
 
-    @NotBlank(message = "Şifrə mütləqdir")
+    @NotBlank(message = "Password is required")
     private String password;
 }

@@ -16,16 +16,14 @@ public interface AdminRepository extends JpaRepository<AdminEntity, Long> {
     Optional<AdminEntity> findByEmail(String email);
 
     /**
-     * Admin yaradılarkən email-in unikal olub-olmadığını yoxlamaq üçün
+     * Used to check whether the email is unique when creating an admin
      */
     boolean existsByEmail(String email);
 
     /**
-     * Roluna görə adminləri gətirmək (Gələcəkdə SuperAdmin/Admin ayrımı üçün)
+     * Fetch admins by role (for future SuperAdmin/Admin separation)
      */
     List<AdminEntity> findAllByRole(Role role);
 
     Page<AdminEntity> findAllByIsSuperAdminFalse(Pageable pageable);
-
-
 }

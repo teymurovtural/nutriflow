@@ -1,7 +1,7 @@
 package com.nutriflow.exceptions;
 
 /**
- * Fayl storage əməliyyatlarında baş verən xətalar üçün exception
+ * Exception for errors occurring during file storage operations
  */
 public class FileStorageException extends RuntimeException {
 

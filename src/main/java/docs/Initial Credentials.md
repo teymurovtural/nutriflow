@@ -1,18 +1,19 @@
 # NutriFlow Project - Initial Access Credentials
 
-Bu fayl sistem ilk dəfə `DataInitializer` tərəfindən run olunanda yaranan default istifadəçilərin giriş məlumatlarını saxlayır.
+This file contains the default user credentials generated when the system
+is first initialized by `DataInitializer`.
 
-## 🔑 Giriş Məlumatları
+## 🔑 Login Credentials
 
-| Rol         | Email                   | Şifrə (Plain Text) | Qeyd                          |
-| :---        | :---                    | :---               |:------------------------------|
-| **Admin** | `admin@nutriflow.com`   | `admin123`         | Bütün sistemə nəzarət edir    |
-| **Dietitian**| `diet@nutriflow.com`    | `diet123`          | Menyu hazırlayan mütəxəssis   |
-| **Caterer** | `caterer@nutriflow.com` | `caterer123`       | Yemək hazırlayan şirkət       |
+| Role          | Email                   | Password (Plain Text) | Note                              |
+| :---          | :---                    | :---                  | :---                              |
+| **Admin**     | `admin@nutriflow.com`   | `admin123`            | Full system access                |
+| **Dietitian** | `diet@nutriflow.com`    | `diet123`             | Nutrition specialist              |
+| **Caterer**   | `caterer@nutriflow.com` | `caterer123`          | Food preparation company          |
 
 ---
 
-## 🛠 Texniki Qeydlər
-* **Şifrələmə:** Bazada bu şifrələr `BCrypt` alqoritmi ilə hash-lanmış şəkildə saxlanılır.
-* **Təhlükəsizlik:** Layihə canlıya (production) çıxmazdan əvvəl bu fayl silinməli və ya `.gitignore` faylına əlavə edilərək serverə göndərilməməlidir.
-* **Dəyişdirilmə:** `DataInitializer.java` faylındakı `passwordEncoder.encode()` hissəsini dəyişərək bu şifrələri yeniləyə bilərsiniz.
+## 🛠 Technical Notes
+* **Encryption:** Passwords are stored in the database as BCrypt hashed values.
+* **Security:** This file must be deleted or added to `.gitignore` before deploying to production.
+* **Modification:** Passwords can be updated by changing the `passwordEncoder.encode()` method in `DataInitializer.java`.

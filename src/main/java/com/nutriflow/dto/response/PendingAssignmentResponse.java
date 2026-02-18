@@ -12,7 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PendingAssignmentResponse {
+
     private List<UserSummaryResponse> data;
     private int count;
     private String message;
+
 }

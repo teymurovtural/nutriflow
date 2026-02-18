@@ -18,8 +18,8 @@ import java.util.List;
 public interface DeliveryRepository extends JpaRepository<DeliveryEntity, Long> {
 
     /**
-     * Aşpaz üçün çatdırılmaları axtarış parametrləri ilə gətirir.
-     * CAST(... AS string) - PostgreSQL-dəki 'function lower(bytea) does not exist' xətasını həll edir.
+     * Retrieves deliveries for a caterer with search parameters.
+     * CAST(... AS string) - resolves the 'function lower(bytea) does not exist' error in PostgreSQL.
      */
     @Query(value = "SELECT d.* FROM deliveries d " +
             "JOIN users u ON u.id = d.user_id " +
@@ -39,15 +39,15 @@ public interface DeliveryRepository extends JpaRepository<DeliveryEntity, Long> 
             @Param("district") String district
     );
 
-    // Statistika üçün metodlar (CatererServiceImpl-dəki çağırışlara tam uyğun)
+    // Methods for statistics (matches calls in CatererServiceImpl)
     long countByCatererIdAndDateAndStatus(Long catererId, LocalDate date, DeliveryStatus status);
 
     long countByCatererIdAndDate(Long catererId, LocalDate date);
 
-    // İstifadəçinin dashboard-u üçün tamamlanmış çatdırılma sayı
+    // Number of completed deliveries for user dashboard
     long countByUserIdAndStatus(Long userId, DeliveryStatus status);
 
-    // İstifadəçinin bütün çatdırılma tarixçəsi
+    // Full delivery history for a user
     List<DeliveryEntity> findAllByUserId(Long userId);
 
     @Modifying
@@ -60,6 +60,4 @@ public interface DeliveryRepository extends JpaRepository<DeliveryEntity, Long> 
     List<DeliveryEntity> findAllByBatchId(Long batchId);
     void deleteAllByBatchId(Long batchId);
     long countByStatus(DeliveryStatus status);
-
-
 }

@@ -38,4 +38,5 @@ public class MenuEntity extends BaseEntity {
     @Column(name = "dietary_notes", columnDefinition = "TEXT")
     private String dietaryNotes;
 
+
 }

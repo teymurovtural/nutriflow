@@ -7,10 +7,12 @@ import lombok.Data;
 @Data
 @Builder
 public class CatererResponse {
+
     private Long id;
     private String name;
     private String email;
     private String phone;
     private String address;
     private CatererStatus status;
+
 }

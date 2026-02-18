@@ -16,15 +16,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * User Entity və DTO-lar arasında mapping.
- * Enhanced version - response building logic mapper-də.
+ * Mapping between User Entity and DTOs.
+ * Enhanced version - response building logic in mapper.
  */
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
 
     /**
-     * RegisterRequest-dən UserEntity yaradır.
+     * Creates UserEntity from RegisterRequest.
      */
     public UserEntity toEntity(RegisterRequest request) {
         if (request == null) {
@@ -36,7 +36,7 @@ public class UserMapper {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
-                .password(request.getPassword()) // Şifrə Service-də encode olunacaq
+                .password(request.getPassword()) // Password will be encoded in Service
                 .role(Role.USER)
                 .status(UserStatus.REGISTERED)
                 .isEmailVerified(false)
@@ -60,9 +60,6 @@ public class UserMapper {
                 .build();
     }
 
-
-
-
     public UserDashboardResponse toDashboardResponse(
             UserEntity user,
             SubscriptionEntity subscription,
@@ -84,7 +81,7 @@ public class UserMapper {
     }
 
     /**
-     * Menu və Batch-dən MenuResponse yaradır.
+     * Creates MenuResponse from Menu and Batch.
      *
      * @param menu  Menu entity
      * @param batch MenuBatch entity
@@ -111,7 +108,7 @@ public class UserMapper {
     }
 
     /**
-     * MenuItemEntity-dən MenuItemResponse yaradır.
+     * Creates MenuItemResponse from MenuItemEntity.
      *
      * @param item MenuItemEntity
      * @return MenuItemResponse
@@ -133,7 +130,7 @@ public class UserMapper {
     }
 
     /**
-     * HealthProfile və User-dən Medical Profile Response yaradır.
+     * Creates Medical Profile Response from HealthProfile and User.
      *
      * @param user    User entity
      * @param profile HealthProfile entity
@@ -166,7 +163,7 @@ public class UserMapper {
     }
 
     /**
-     * MedicalFileEntity-dən MedicalFileResponse yaradır.
+     * Creates MedicalFileResponse from MedicalFileEntity.
      *
      * @param file MedicalFileEntity
      * @return MedicalFileResponse
@@ -184,7 +181,7 @@ public class UserMapper {
     }
 
     /**
-     * User Entity-dən UserSummaryResponse yaradır (Admin paneli üçün).
+     * Creates UserSummaryResponse from User Entity (for Admin panel).
      *
      * @param user User entity
      * @return UserSummaryResponse
@@ -205,7 +202,7 @@ public class UserMapper {
     }
 
     /**
-     * Əməliyyat nəticəsinə uyğun AdminActionResponse yaradır.
+     * Creates AdminActionResponse based on the operation result.
      */
     public AdminActionResponse toAdminActionResponse(UserEntity user, String message) {
         if (user == null) return null;
@@ -218,6 +215,4 @@ public class UserMapper {
                 .timestamp(java.time.LocalDateTime.now())
                 .build();
     }
-
-
 }

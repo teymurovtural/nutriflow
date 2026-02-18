@@ -7,13 +7,11 @@ import java.util.Optional;
 
 @Repository
 public interface MenuRepository extends JpaRepository<MenuEntity, Long> {
-    // UniqueConstraint-ə uyğun yoxlama (Bir userin eyni ayda 2 menyusu ola bilməz)
+    // Validation matching UniqueConstraint (a user cannot have 2 menus in the same month)
     Optional<MenuEntity> findByUserIdAndYearAndMonth(Long userId, Integer year, Integer month);
     void deleteByUserIdAndYearAndMonth(Long userId, Integer year, Integer month);
-    // Müəyyən bir dietoloqun neçə menyu hazırladığını tapmaq üçün
+    // Find how many menus a specific dietitian has prepared
     long countByDietitianId(Long dietitianId);
-
-    // Menyu cədvəlində olan qeydlərin sayını tapmaq üçün
+    // Find the total number of records in the menu table
     long count();
-
 }

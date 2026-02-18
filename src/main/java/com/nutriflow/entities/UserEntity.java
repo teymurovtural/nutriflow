@@ -64,12 +64,12 @@ public class UserEntity extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private SubscriptionEntity subscription;
 
-    // Menyu planları (MenuEntity içində artıq MenuBatchEntity-lər olacaq)
+    // Menu plans (MenuEntity will contain MenuBatchEntities)
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuEntity> menus = new ArrayList<>();
 
-    // Çatdırılma tarixçəsi (DeliveryEntity artıq MenuBatch-ə bağlanıb)
+    // Delivery history (DeliveryEntity is now linked to MenuBatch)
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DeliveryEntity> deliveries = new ArrayList<>();

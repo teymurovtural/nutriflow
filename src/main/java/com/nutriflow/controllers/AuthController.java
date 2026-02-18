@@ -41,14 +41,14 @@ public class AuthController {
     }
 
     /**
-     * Refresh Token endpoint-i.
-     * @RequestHeader vasitəsilə gələn tokenin boş olub-olmadığını yoxlayırıq.
+     * Refresh Token endpoint.
+     * Validates that the token coming via @RequestHeader is not blank.
      */
     @PostMapping("/refresh-token")
     public ResponseEntity<BaseAuthResponse> refreshToken(
-            @RequestHeader("Authorization") @NotBlank(message = "Refresh token boş ola bilməz") String authHeader
+            @RequestHeader("Authorization") @NotBlank(message = "Refresh token cannot be blank") String authHeader
     ) {
-        // Service-ə birbaşa header-i ötürürük, Service daxilində təmizlənəcək
+        // Passing the header directly to the Service; it will be cleaned up inside
         return ResponseEntity.ok(authService.refreshToken(authHeader));
     }
 }

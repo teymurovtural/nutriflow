@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuResponse {
+
     private Long menuId;
     private Long batchId;
     private Integer year;
@@ -19,4 +20,5 @@ public class MenuResponse {
     private String dietaryNotes;
     private String status;
     private List<MenuItemResponse> items;
+
 }

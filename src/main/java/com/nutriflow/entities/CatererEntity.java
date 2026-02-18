@@ -18,7 +18,7 @@ import java.util.List;
 public class CatererEntity extends BaseEntity {
 
     @Column(name = "name", nullable = false)
-    private String name; // Şirkət adı
+    private String name; // Company name
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -30,7 +30,7 @@ public class CatererEntity extends BaseEntity {
     private String phone;
 
     @Column(name = "address", columnDefinition = "TEXT")
-    private String address; // Şirkətin fiziki ünvanı
+    private String address; // Company's physical address
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
@@ -41,12 +41,12 @@ public class CatererEntity extends BaseEntity {
     @Column(name = "status")
     private CatererStatus status; // ACTIVE, INACTIVE
 
-    // Bu Caterer-ə təhkim olunmuş istifadəçilər
+    // Users assigned to this Caterer
     @Builder.Default
     @OneToMany(mappedBy = "caterer", fetch = FetchType.LAZY)
     private List<UserEntity> users = new ArrayList<>();
 
-    // Bu Caterer-in həyata keçirməli olduğu çatdırılmalar
+    // Deliveries this Caterer is responsible for
     @Builder.Default
     @OneToMany(mappedBy = "caterer", fetch = FetchType.LAZY)
     private List<DeliveryEntity> deliveries = new ArrayList<>();

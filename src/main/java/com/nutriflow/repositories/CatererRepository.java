@@ -12,10 +12,9 @@ import java.util.Optional;
 @Repository
 public interface CatererRepository extends JpaRepository<CatererEntity, Long> {
     Optional<CatererEntity> findByEmail(String email);
-    // Aktiv olan ilk (və yeganə) caterer-i tapır
+    // Finds the first (and only) active caterer
     Optional<CatererEntity> findFirstByStatus(CatererStatus status);
     boolean existsByEmail(String email);
-    // Şirkət adına görə axtarış
+    // Search by company name
     Page<CatererEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);
-
 }

@@ -14,17 +14,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AdminProfileUpdateRequest {
 
-    @NotBlank(message = "Ad boş ola bilməz")
+    @NotBlank(message = "First name cannot be blank")
     private String firstName;
 
-    @NotBlank(message = "Soyad boş ola bilməz")
+    @NotBlank(message = "Last name cannot be blank")
     private String lastName;
 
-    @NotBlank(message = "Email boş ola bilməz")
-    @Email(message = "Düzgün email formatı daxil edin")
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Please enter a valid email format")
     private String email;
 
-    // Əgər parol yazılacaqsa, ən az 8 simvol olmalıdır
-    @Size(min = 8, message = "Yeni parol ən az 8 simvoldan ibarət olmalıdır")
+    // If a password is provided, it must be at least 8 characters
+    @Size(min = 8, message = "New password must be at least 8 characters")
     private String newPassword;
 }

@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 public class MenuMapper {
 
     /**
-     * Request-dən gələn məlumatı MenuItemEntity-yə çevirir.
-     * Qeyd: Yemək artıq Menu-ya deyil, Batch-ə (Paketə) bağlıdır.
+     * Converts incoming Request data to MenuItemEntity.
+     * Note: The meal is now linked to a Batch (Package), not directly to a Menu.
      */
     public MenuItemEntity toMenuItemEntity(MenuItemRequest request, MenuBatchEntity batch) {
         return MenuItemEntity.builder()
@@ -32,18 +32,18 @@ public class MenuMapper {
     }
 
     /**
-     * MenuEntity və ona aid olan konkret Batch-i vahid Response DTO-ya çevirir.
+     * Converts MenuEntity and its associated Batch into a single Response DTO.
      */
     public MenuResponse toResponseDTO(MenuEntity menu, MenuBatchEntity batch) {
         if (menu == null || batch == null) return null;
 
         return MenuResponse.builder()
                 .menuId(menu.getId())
-                .batchId(batch.getId()) // Artıq DTO-da batchId var
+                .batchId(batch.getId()) // DTO now has batchId
                 .year(menu.getYear())
                 .month(menu.getMonth())
                 .dietaryNotes(menu.getDietaryNotes())
-                .status(batch.getStatus().name()) // Status artıq Batch-dən gəlir
+                .status(batch.getStatus().name()) // Status now comes from Batch
                 .items(batch.getItems().stream()
                         .map(this::toMenuItemResponseDTO)
                         .collect(Collectors.toList()))

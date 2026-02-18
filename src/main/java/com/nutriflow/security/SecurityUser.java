@@ -30,7 +30,7 @@ public class SecurityUser implements UserDetails {
     }
 
     public boolean isAdmin() {
-        // Həm Super Admin, həm də Sub-Admin "admin" sayılır
+        // Both Super Admin and Sub-Admin are considered "admin"
         return "ADMIN".equals(this.role) || "SUPER_ADMIN".equals(this.role);
     }
 
@@ -45,9 +45,10 @@ public class SecurityUser implements UserDetails {
     public boolean isUser() {
         return "USER".equals(this.role);
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Spring Security-də rollar "ROLE_" prefix-i ilə tanınır
+        // Roles are recognized with "ROLE_" prefix in Spring Security
         return List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
 

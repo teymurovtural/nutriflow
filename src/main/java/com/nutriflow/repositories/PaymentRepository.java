@@ -19,12 +19,12 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
     @Query("SELECT SUM(p.amount) FROM PaymentEntity p WHERE p.status = com.nutriflow.enums.PaymentStatus.SUCCESS")
     Double sumTotalRevenue();
 
-    Page<PaymentEntity> findAllByOrderByPaymentDateDesc(Pageable pageable); // Son ödənişlər siyahısı üçün
+    Page<PaymentEntity> findAllByOrderByPaymentDateDesc(Pageable pageable); // For latest payments list
 
     @Query("SELECT SUM(p.amount) FROM PaymentEntity p WHERE p.status = :status")
     Double getTotalRevenueByStatus(@Param("status") PaymentStatus status);
 
-    // PaymentRepository daxilində
+    // Inside PaymentRepository
     @Query(value = "SELECT TO_CHAR(p.payment_date, 'Month'), SUM(p.amount) " +
             "FROM payments p " +
             "WHERE p.status = 'SUCCESS' " +
