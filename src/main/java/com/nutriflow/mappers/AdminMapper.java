@@ -4,10 +4,12 @@ import com.nutriflow.dto.request.AdminCreateRequest;
 import com.nutriflow.dto.request.AdminProfileUpdateRequest;
 import com.nutriflow.dto.response.*;
 import com.nutriflow.entities.*;
+import com.nutriflow.enums.DeliveryStatus;
 import com.nutriflow.utils.LoggingUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -21,17 +23,29 @@ public class AdminMapper {
     /**
      * Converts User Entity to Summary Response (for Admin panel)
      */
-    public UserSummaryResponse toUserSummaryResponse(UserEntity entity) {
-        if (entity == null) return null;
+    public UserSummaryResponse toUserSummaryResponse(UserEntity user) {
+        if (user == null) return null;
+
+        HealthProfileEntity hp = user.getHealthProfile();
 
         return UserSummaryResponse.builder()
-                .userId(entity.getId())
-                .firstName(entity.getFirstName())
-                .lastName(entity.getLastName())
-                .email(entity.getEmail())
-                .status(entity.getStatus() != null ? entity.getStatus().name() : null)
-                // Directly fetching enum from HealthProfile
-                .goal(entity.getHealthProfile() != null ? entity.getHealthProfile().getGoal() : null)
+                .userId(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .status(user.getStatus() != null ? user.getStatus().name() : null)
+                .goal(hp != null ? hp.getGoal() : null)
+                .height(hp != null ? hp.getHeight() : null)
+                .weight(hp != null ? hp.getWeight() : null)
+                .restrictions(hp != null ? hp.getRestrictions() : null)
+                .notes(hp != null ? hp.getNotes() : null)
+                .dietitianFullName(user.getDietitian() != null
+                        ? user.getDietitian().getFirstName() + " " + user.getDietitian().getLastName()
+                        : null)
+                .catererFullName(user.getCaterer() != null
+                        ? user.getCaterer().getName()
+                        : null)
                 .build();
     }
 
@@ -49,6 +63,7 @@ public class AdminMapper {
                 .specialization(entity.getSpecialization())
                 .phone(entity.getPhone())
                 .role(entity.getRole() != null ? entity.getRole().name() : null)
+                .totalPatients(entity.getUsers() != null ? entity.getUsers().size() : 0)
                 .build();
     }
 
@@ -58,6 +73,26 @@ public class AdminMapper {
     public CatererResponse toCatererResponse(CatererEntity entity) {
         if (entity == null) return null;
 
+        LocalDate today = LocalDate.now();
+
+        long total = entity.getDeliveries() != null ? entity.getDeliveries().size() : 0;
+        long delivered = entity.getDeliveries() != null ? entity.getDeliveries().stream()
+                .filter(d -> d.getStatus() == DeliveryStatus.DELIVERED).count() : 0;
+        long failed = entity.getDeliveries() != null ? entity.getDeliveries().stream()
+                .filter(d -> d.getStatus() == DeliveryStatus.FAILED).count() : 0;
+        long inProgress = total - delivered - failed;
+
+        // Bugünkü statistika
+        long todayTotal = entity.getDeliveries() != null ? entity.getDeliveries().stream()
+                .filter(d -> d.getCreatedAt().toLocalDate().isEqual(today)).count() : 0;
+        long todayDelivered = entity.getDeliveries() != null ? entity.getDeliveries().stream()
+                .filter(d -> d.getStatus() == DeliveryStatus.DELIVERED
+                        && d.getCreatedAt().toLocalDate().isEqual(today)).count() : 0;
+        long todayFailed = entity.getDeliveries() != null ? entity.getDeliveries().stream()
+                .filter(d -> d.getStatus() == DeliveryStatus.FAILED
+                        && d.getCreatedAt().toLocalDate().isEqual(today)).count() : 0;
+        long todayInProgress = todayTotal - todayDelivered - todayFailed;
+
         return CatererResponse.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -65,6 +100,14 @@ public class AdminMapper {
                 .phone(entity.getPhone())
                 .address(entity.getAddress())
                 .status(entity.getStatus())
+                .totalDeliveries(total)
+                .deliveredCount(delivered)
+                .failedCount(failed)
+                .inProgressCount(inProgress)
+                .todayDeliveries(todayTotal)
+                .todayDelivered(todayDelivered)
+                .todayFailed(todayFailed)
+                .todayInProgress(todayInProgress)
                 .build();
     }
 
@@ -133,6 +176,30 @@ public class AdminMapper {
                 .operationStatus(com.nutriflow.enums.OperationStatus.SUCCESS)
                 .userStatus(user.getStatus())
                 .timestamp(java.time.LocalDateTime.now())
+                .build();
+    }
+
+    public MenuBatchAdminResponse toMenuBatchAdminResponse(MenuBatchEntity batch) {
+        if (batch == null) return null;
+
+        MenuEntity menu = batch.getMenu();
+        UserEntity user = menu.getUser();
+        DietitianEntity dietitian = menu.getDietitian();
+
+        return MenuBatchAdminResponse.builder()
+                .batchId(batch.getId())
+                .menuId(menu.getId())
+                .userFullName(user.getFirstName() + " " + user.getLastName())
+                .dietitianFullName(dietitian.getFirstName() + " " + dietitian.getLastName())
+                .catererFullName(user.getCaterer() != null
+                        ? user.getCaterer().getName()
+                        : null)
+                .status(batch.getStatus())
+                .rejectionReason(batch.getRejectionReason())
+                .year(menu.getYear())
+                .month(menu.getMonth())
+                .totalItems(batch.getItems() != null ? batch.getItems().size() : 0)
+                .createdAt(batch.getCreatedAt())
                 .build();
     }
 

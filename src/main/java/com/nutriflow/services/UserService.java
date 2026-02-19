@@ -23,5 +23,8 @@ public interface UserService {
 
     List<DeliveryDetailResponse> getMyDeliveries(String email);
 
+    SubscriptionInfoResponse getMySubscriptionInfo(String email);
+
+    UserPersonalInfoResponse getMyPersonalInfo(String email);
 
 }

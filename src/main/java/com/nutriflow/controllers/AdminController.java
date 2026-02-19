@@ -48,7 +48,7 @@ public class AdminController {
     // --- 3. CREATE ---
     @PostMapping("/users")
     public ResponseEntity<AdminActionResponse> createUser(
-            @Valid @RequestBody RegisterRequestForAdmin request, // Changed here
+            @Valid @RequestBody RegisterRequestForAdmin request,
             @AuthenticationPrincipal SecurityUser currentUser) {
         return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createUser(request, currentUser));
     }
@@ -95,7 +95,23 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllSubAdmins(pageable));
     }
 
-    // --- 5. SEARCH ---
+    // --- 5. GET BY ID ---
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserSummaryResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getUserById(id));
+    }
+
+    @GetMapping("/dietitians/{id}")
+    public ResponseEntity<DietitianProfileResponse> getDietitianById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getDietitianById(id));
+    }
+
+    @GetMapping("/caterers/{id}")
+    public ResponseEntity<CatererResponse> getCatererById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminService.getCatererById(id));
+    }
+
+    // --- 6. SEARCH ---
     @GetMapping("/users/search")
     public ResponseEntity<Page<UserSummaryResponse>> searchUsers(@RequestParam String query, Pageable pageable) {
         return ResponseEntity.ok(adminService.searchUsers(query, pageable));
@@ -106,7 +122,17 @@ public class AdminController {
         return ResponseEntity.ok(adminService.searchDietitians(query, pageable));
     }
 
-    // --- 6. ASSIGNMENT ---
+    @GetMapping("/menus")
+    public ResponseEntity<Page<MenuBatchAdminResponse>> getAllMenuBatches(Pageable pageable) {
+        return ResponseEntity.ok(adminService.getAllMenuBatches(pageable));
+    }
+
+    @GetMapping("/menus/{batchId}")
+    public ResponseEntity<MenuBatchAdminResponse> getMenuBatchById(@PathVariable Long batchId) {
+        return ResponseEntity.ok(adminService.getMenuBatchById(batchId));
+    }
+
+    // --- 7. ASSIGNMENT ---
     @PostMapping("/users/{userId}/assign-dietitian/{dietitianId}")
     public ResponseEntity<AdminActionResponse> assignDietitian(
             @PathVariable Long userId,
@@ -133,7 +159,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getPendingCatererAssignments());
     }
 
-    // --- 7. STATUS TOGGLE ---
+    // --- 8. STATUS TOGGLE ---
     @PatchMapping("/users/{id}/toggle-status")
     public ResponseEntity<AdminActionResponse> toggleUserStatus(
             @PathVariable Long id,
@@ -162,7 +188,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.toggleSubAdminStatus(id, currentUser));
     }
 
-    // --- 8. DELETE ---
+    // --- 9. DELETE ---
     @DeleteMapping("/users/{id}")
     public ResponseEntity<AdminActionResponse> deleteUser(
             @PathVariable Long id,
@@ -191,20 +217,24 @@ public class AdminController {
         return ResponseEntity.ok(adminService.deleteSubAdmin(id, currentUser));
     }
 
-    // --- 9. OTHER ---
-
+    // --- 10. PAYMENTS ---
     @GetMapping("/payments")
     public ResponseEntity<Page<PaymentAdminResponse>> getAllPayments(Pageable pageable) {
-        // Now returning PaymentAdminResponse instead of PaymentEntity
         return ResponseEntity.ok(adminService.getAllPayments(pageable));
     }
 
     @GetMapping("/payments/{id}")
     public ResponseEntity<PaymentAdminResponse> getPaymentDetails(@PathVariable Long id) {
-        // Also switched to DTO for single payment details
         return ResponseEntity.ok(adminService.getPaymentDetails(id));
     }
 
+    // --- 11. SUBSCRIPTION ---
+    @GetMapping("/users/{userId}/subscription/info")
+    public ResponseEntity<SubscriptionInfoResponse> getUserSubscriptionInfo(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.getUserSubscriptionInfo(userId));
+    }
+
+    // --- 12. LOGS ---
     @GetMapping("/logs")
     public ResponseEntity<PagedModel<ActivityLogResponse>> getActivityLogs(Pageable pageable) {
         Page<ActivityLogResponse> page = adminService.getAllActivityLogs(pageable);

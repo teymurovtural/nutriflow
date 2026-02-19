@@ -6,12 +6,15 @@ import com.nutriflow.dto.response.*;
 import com.nutriflow.entities.*;
 import com.nutriflow.enums.MenuStatus;
 import com.nutriflow.enums.Role;
+import com.nutriflow.enums.SubscriptionStatus;
 import com.nutriflow.enums.UserStatus;
 import com.nutriflow.utils.DateUtils;
 import com.nutriflow.utils.EntityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,6 +155,8 @@ public class UserMapper {
         return PatientMedicalProfileResponse.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
                 .height(profile.getHeight())
                 .weight(profile.getWeight())
                 .goal(profile.getGoal().name())
@@ -159,6 +164,66 @@ public class UserMapper {
                 .notes(profile.getNotes())
                 .bmi(bmi)
                 .files(fileDTOs)
+                .build();
+    }
+
+    public SubscriptionInfoResponse toSubscriptionInfoResponse(UserEntity user, SubscriptionEntity subscription) {
+        if (subscription == null || user == null) {
+            return null;
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate endDate = subscription.getEndDate();
+
+        long daysRemaining = Math.max(ChronoUnit.DAYS.between(today, endDate), 0);
+        long monthsRemaining = Math.max(ChronoUnit.MONTHS.between(today, endDate), 0);
+        boolean isActive = subscription.getStatus() == SubscriptionStatus.ACTIVE && daysRemaining > 0;
+
+        return SubscriptionInfoResponse.builder()
+                .userId(user.getId())
+                .subscriptionId(subscription.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .userStatus(user.getStatus())
+                .planName(subscription.getPlanName())
+                .price(subscription.getPrice())
+                .status(subscription.getStatus())
+                .startDate(subscription.getStartDate())
+                .endDate(endDate)
+                .daysRemaining(daysRemaining)
+                .monthsRemaining(monthsRemaining)
+                .isActive(isActive)
+                .build();
+    }
+
+    public UserPersonalInfoResponse toPersonalInfoResponse(UserEntity user) {
+        if (user == null) return null;
+
+        HealthProfileEntity profile = user.getHealthProfile();
+        double bmi = profile != null ? EntityUtils.calculateBMI(profile) : 0.0;
+
+        List<MedicalFileResponse> files = profile != null && profile.getMedicalFiles() != null
+                ? profile.getMedicalFiles().stream()
+                .map(this::toMedicalFileResponse)
+                .collect(Collectors.toList())
+                : List.of();
+
+        return UserPersonalInfoResponse.builder()
+                .userId(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .userStatus(user.getStatus())
+                .isEmailVerified(user.isEmailVerified())
+                .height(profile != null ? profile.getHeight() : null)
+                .weight(profile != null ? profile.getWeight() : null)
+                .bmi(bmi)
+                .goal(profile != null ? profile.getGoal() : null)
+                .restrictions(profile != null ? profile.getRestrictions() : null)
+                .notes(profile != null ? profile.getNotes() : null)
+                .medicalFiles(files)
                 .build();
     }
 

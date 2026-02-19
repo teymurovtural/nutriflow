@@ -24,6 +24,9 @@ public class DietitianUpdateRequest {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
+    @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "Invalid phone number format")
+    private String phoneNumber;
+
     @Size(max = 100, message = "Specialization must not exceed 100 characters")
     private String specialization;
 }

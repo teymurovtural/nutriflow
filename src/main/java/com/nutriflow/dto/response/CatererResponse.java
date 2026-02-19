@@ -14,5 +14,13 @@ public class CatererResponse {
     private String phone;
     private String address;
     private CatererStatus status;
+    private long totalDeliveries;
+    private long deliveredCount;
+    private long failedCount;
+    private long inProgressCount;
+    private long todayDeliveries;
+    private long todayDelivered;
+    private long todayFailed;
+    private long todayInProgress;
 
 }

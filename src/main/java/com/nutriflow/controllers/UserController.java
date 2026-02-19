@@ -85,4 +85,17 @@ public class UserController {
         return ResponseEntity.ok(deliveries);
     }
 
+    @GetMapping("/subscription/info")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<SubscriptionInfoResponse> getMySubscriptionInfo(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getMySubscriptionInfo(userDetails.getUsername()));
+    }
+
+    @GetMapping("/personal-info")
+    public ResponseEntity<UserPersonalInfoResponse> getMyPersonalInfo(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getMyPersonalInfo(userDetails.getUsername()));
+    }
+
 }

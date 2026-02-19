@@ -11,8 +11,14 @@ public class UserSummaryResponse {
     private Long userId;
     private String firstName;
     private String lastName;
+    private String dietitianFullName;
+    private String catererFullName;
     private String email;
+    private String phoneNumber;
     private String status;
     private GoalType goal;
-
+    private Double height;
+    private Double weight;
+    private String restrictions;
+    private String notes;
 }

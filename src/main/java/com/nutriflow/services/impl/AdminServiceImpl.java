@@ -80,7 +80,7 @@ public class AdminServiceImpl implements AdminService {
         if (existing.isPresent()) {
             dietitian = existing.get();
             oldData = adminMapper.formatDietitianData(dietitian); // Format from Mapper
-            dietitianMapper.updateEntityFromRequest(dietitian, request);
+            dietitianMapper.updateEntityFromCreateRequest(dietitian, request);
             actionType = ActionType.UPDATE_DIETITIAN;
         } else {
             dietitian = dietitianMapper.toEntity(request);
@@ -648,6 +648,60 @@ public class AdminServiceImpl implements AdminService {
                 .count(list.size())
                 .message(list.isEmpty() ? "There are no users currently waiting for a caterer." : list.size() + " user(s) are waiting for a caterer.")
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserSummaryResponse getUserById(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found!"));
+
+        return adminMapper.toUserSummaryResponse(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SubscriptionInfoResponse getUserSubscriptionInfo(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found!"));
+
+        SubscriptionEntity subscription = subscriptionRepository.findByUser(user)
+                .orElseThrow(() -> new BusinessException("Subscription not found!"));
+
+        return userMapper.toSubscriptionInfoResponse(user, subscription);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DietitianProfileResponse getDietitianById(Long id) {
+        DietitianEntity dietitian = dietitianRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Dietitian not found!"));
+
+        return adminMapper.toDietitianResponse(dietitian);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CatererResponse getCatererById(Long id) {
+        CatererEntity caterer = catererRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Caterer not found!"));
+
+        return adminMapper.toCatererResponse(caterer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MenuBatchAdminResponse> getAllMenuBatches(Pageable pageable) {
+        return menuBatchRepository.findAll(pageable)
+                .map(adminMapper::toMenuBatchAdminResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MenuBatchAdminResponse getMenuBatchById(Long batchId) {
+        MenuBatchEntity batch = menuBatchRepository.findById(batchId)
+                .orElseThrow(() -> new BusinessException("Menu batch not found!"));
+        return adminMapper.toMenuBatchAdminResponse(batch);
     }
 
     @Override

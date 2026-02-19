@@ -105,6 +105,7 @@ public class DietitianServiceImpl implements DietitianService {
         // Update fields
         if (request.getFirstName() != null) dietitian.setFirstName(request.getFirstName());
         if (request.getLastName() != null) dietitian.setLastName(request.getLastName());
+        if (request.getPhoneNumber() != null) dietitian.setPhone(request.getPhoneNumber());
         if (request.getSpecialization() != null) dietitian.setSpecialization(request.getSpecialization());
 
         // Email update + duplicate check

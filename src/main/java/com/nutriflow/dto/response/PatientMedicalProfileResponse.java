@@ -8,8 +8,11 @@ import java.util.List;
 @Builder
 public class PatientMedicalProfileResponse {
 
+
     private String firstName;
     private String lastName;
+    private String email;
+    private String phoneNumber;
     private Double height;
     private Double weight;
     private String goal;

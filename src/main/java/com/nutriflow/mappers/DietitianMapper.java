@@ -1,6 +1,7 @@
 package com.nutriflow.mappers;
 
 import com.nutriflow.dto.request.DietitianCreateRequest;
+import com.nutriflow.dto.request.DietitianUpdateRequest;
 import com.nutriflow.dto.response.*;
 import com.nutriflow.entities.*;
 import com.nutriflow.enums.Role;
@@ -10,16 +11,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Mapping between Dietitian Entity and DTOs.
- * Enhanced version - all response building logic in mapper.
- */
 @Component
 public class DietitianMapper {
 
-    /**
-     * Creates DietitianEntity from DietitianCreateRequest.
-     */
     public DietitianEntity toEntity(DietitianCreateRequest request) {
         if (request == null) return null;
 
@@ -34,9 +28,28 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates DietitianProfileResponse from DietitianEntity.
-     */
+
+
+    // Admin - DietitianCreateRequest ile update
+    public void updateEntityFromCreateRequest(DietitianEntity entity, DietitianCreateRequest request) {
+        if (request == null || entity == null) return;
+
+        if (request.getFirstName() != null) entity.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) entity.setLastName(request.getLastName());
+        if (request.getSpecialization() != null) entity.setSpecialization(request.getSpecialization());
+        if (request.getPhoneNumber() != null) entity.setPhone(request.getPhoneNumber());
+    }
+
+    // Dietitian - DietitianUpdateRequest ile update
+    public void updateEntityFromRequest(DietitianEntity entity, DietitianUpdateRequest request) {
+        if (request == null || entity == null) return;
+
+        if (request.getFirstName() != null) entity.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) entity.setLastName(request.getLastName());
+        if (request.getSpecialization() != null) entity.setSpecialization(request.getSpecialization());
+        if (request.getPhoneNumber() != null) entity.setPhone(request.getPhoneNumber());
+    }
+
     public DietitianProfileResponse toProfileResponse(DietitianEntity dietitian) {
         if (dietitian == null) return null;
 
@@ -51,9 +64,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates UserSummaryResponse from UserEntity (for assigned patients list).
-     */
     public UserSummaryResponse toUserSummaryResponse(UserEntity user) {
         if (user == null) return null;
 
@@ -67,21 +77,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Updates existing Entity with data from the Request.
-     */
-    public void updateEntityFromRequest(DietitianEntity entity, DietitianCreateRequest request) {
-        if (request == null || entity == null) return;
-
-        entity.setFirstName(request.getFirstName());
-        entity.setLastName(request.getLastName());
-        entity.setSpecialization(request.getSpecialization());
-        entity.setPhone(request.getPhoneNumber());
-    }
-
-    /**
-     * Creates AdminActionResponse based on the operation result.
-     */
     public AdminActionResponse toAdminActionResponse(DietitianEntity saved, String message) {
         return AdminActionResponse.builder()
                 .message(message)
@@ -92,9 +87,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Converts User list to UserSummaryResponse list.
-     */
     public List<UserSummaryResponse> toUserSummaryList(List<UserEntity> users) {
         if (users == null) return List.of();
 
@@ -103,9 +95,6 @@ public class DietitianMapper {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Creates DietitianDashboardResponse from dashboard statistics.
-     */
     public DietitianDashboardResponse toDashboardResponse(
             long totalPatients,
             long pendingMenus,
@@ -118,9 +107,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates PatientMedicalProfileResponse from User and HealthProfile.
-     */
     public PatientMedicalProfileResponse toMedicalProfileResponse(
             UserEntity user,
             HealthProfileEntity profile) {
@@ -148,9 +134,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates MedicalFileResponse from MedicalFileEntity.
-     */
     public MedicalFileResponse toMedicalFileResponse(MedicalFileEntity file) {
         if (file == null) return null;
 
@@ -161,9 +144,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates MenuBatch rejection detail response.
-     */
     public MenuRejectionDetailResponse toRejectionDetailResponse(
             MenuBatchEntity batch,
             UserEntity user) {
@@ -182,9 +162,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates medical file detail response.
-     */
     public MedicalFileDetailResponse toFileDetailResponse(
             MedicalFileEntity file,
             UserEntity user) {
@@ -198,9 +175,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates MenuResponse from MenuEntity and MenuBatchEntity.
-     */
     public MenuResponse toMenuResponse(MenuEntity menu, MenuBatchEntity batch) {
         if (menu == null || batch == null) return null;
 
@@ -219,9 +193,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates MenuItemResponse from MenuItemEntity.
-     */
     public MenuItemResponse toMenuItemResponse(MenuItemEntity item) {
         if (item == null) return null;
 
@@ -236,9 +207,6 @@ public class DietitianMapper {
                 .build();
     }
 
-    /**
-     * Creates UserSummaryResponse with special status for urgent patient.
-     */
     public UserSummaryResponse toUrgentPatientResponse(UserEntity user) {
         if (user == null) return null;
 

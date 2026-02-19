@@ -48,4 +48,11 @@ public interface AdminService {
     AdminActionResponse updateAdminProfile(AdminProfileUpdateRequest request, SecurityUser currentUser);
     PendingAssignmentResponse getPendingDietitianAssignments();
     PendingAssignmentResponse getPendingCatererAssignments();
+
+    UserSummaryResponse getUserById(Long userId);
+    SubscriptionInfoResponse getUserSubscriptionInfo(Long userId);
+    DietitianProfileResponse getDietitianById(Long id);
+    CatererResponse getCatererById(Long id);
+    Page<MenuBatchAdminResponse> getAllMenuBatches(Pageable pageable);
+    MenuBatchAdminResponse getMenuBatchById(Long batchId);
 }

@@ -14,6 +14,7 @@ import com.nutriflow.helpers.SubscriptionHelper;
 import com.nutriflow.mappers.DeliveryMapper;;
 import com.nutriflow.mappers.UserMapper;
 import com.nutriflow.repositories.MenuBatchRepository;
+import com.nutriflow.repositories.SubscriptionRepository;
 import com.nutriflow.repositories.UserRepository;
 import com.nutriflow.services.UserService;
 import com.nutriflow.utils.DateUtils;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final MenuBatchRepository menuBatchRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final PasswordEncoder passwordEncoder;
 
     // Helpers
@@ -229,6 +231,23 @@ public class UserServiceImpl implements UserService {
                     return deliveryMapper.toDetailResponse(delivery, dailyItems);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public SubscriptionInfoResponse getMySubscriptionInfo(String email) {
+        UserEntity user = entityFinder.findUserByEmail(email);
+
+        SubscriptionEntity subscription = subscriptionRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+
+        return userMapper.toSubscriptionInfoResponse(user, subscription);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserPersonalInfoResponse getMyPersonalInfo(String email) {
+        UserEntity user = entityFinder.findUserByEmail(email);
+        return userMapper.toPersonalInfoResponse(user);
     }
 
 
