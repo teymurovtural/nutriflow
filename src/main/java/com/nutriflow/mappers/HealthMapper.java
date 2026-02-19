@@ -49,6 +49,37 @@ public class HealthMapper {
     }
 
     /**
+     * Updates existing AddressEntity with new request data.
+     * Preserves the ID so Hibernate performs UPDATE instead of INSERT.
+     */
+    public AddressEntity updateAddressEntity(HealthDataRequest request, AddressEntity existing) {
+        if (request == null) return existing;
+
+        existing.setAddressDetails(request.getAddressDetails());
+        existing.setCity(request.getCity());
+        existing.setDistrict(request.getDistrict());
+        existing.setDeliveryNotes(request.getDeliveryNotes());
+
+        return existing;
+    }
+
+    /**
+     * Updates existing HealthProfileEntity with new request data.
+     * Preserves the ID so Hibernate performs UPDATE instead of INSERT.
+     */
+    public HealthProfileEntity updateHealthProfileEntity(HealthDataRequest request, HealthProfileEntity existing) {
+        if (request == null) return existing;
+
+        existing.setHeight(request.getHeight());
+        existing.setWeight(request.getWeight());
+        existing.setGoal(request.getGoal());
+        existing.setRestrictions(request.getRestrictions());
+        existing.setNotes(request.getNotes());
+
+        return existing;
+    }
+
+    /**
      * Creates HealthDataResponse from UserEntity.
      * Success response after health profile submission.
      */

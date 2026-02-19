@@ -26,6 +26,7 @@ public class EntityFinderHelper {
     private final DeliveryRepository deliveryRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final HealthProfileRepository healthProfileRepository;
+    private final MedicalFileRepository medicalFileRepository;
 
     /**
      * Finds a User by ID.
@@ -210,4 +211,16 @@ public class EntityFinderHelper {
         }
         return user.getSubscription();
     }
+
+    public MedicalFileEntity findMedicalFileById(Long fileId) {
+        return medicalFileRepository.findById(fileId)
+                .orElseThrow(() -> new IdNotFoundException("Medical file not found: " + fileId));
+    }
+
+    public MedicalFileEntity findMedicalFileByIdAndHealthProfileId(Long fileId, Long healthProfileId) {
+        return medicalFileRepository.findByIdAndHealthProfileId(fileId, healthProfileId)
+                .orElseThrow(() -> new IdNotFoundException(
+                        "Medical file not found or you do not have permission: " + fileId));
+    }
+
 }

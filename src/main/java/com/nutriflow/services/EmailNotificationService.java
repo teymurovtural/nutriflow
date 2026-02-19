@@ -13,9 +13,12 @@ import java.time.format.DateTimeFormatter;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class EmailNotificationService {
 
     private final JavaMailSender mailSender;
+
+
     // ✅ Add if repository is needed (not required in this service)
     // private final SubscriptionRepository subscriptionRepository;
 
@@ -74,7 +77,7 @@ public class EmailNotificationService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("tural57535@gmail.com");
-            message.setTo("admin@nutriflow.com");
+            message.setTo("tural57535@gmail.com");
             message.setSubject("📊 NutriFlow - Weekly Subscription Report");
             message.setText(buildWeeklyReportEmail(activeCount, expiredCount, cancelledCount));
 

@@ -6,27 +6,27 @@ import com.nutriflow.dto.response.*;
 import com.nutriflow.entities.*;
 import com.nutriflow.enums.DeliveryStatus;
 import com.nutriflow.enums.MenuStatus;
-import com.nutriflow.enums.UserStatus;
 import com.nutriflow.exceptions.*;
 import com.nutriflow.helpers.DeliveryHelper;
 import com.nutriflow.helpers.EntityFinderHelper;
 import com.nutriflow.helpers.MenuHelper;
 import com.nutriflow.helpers.SubscriptionHelper;
-import com.nutriflow.mappers.DeliveryMapper;
+import com.nutriflow.mappers.DeliveryMapper;;
 import com.nutriflow.mappers.UserMapper;
 import com.nutriflow.repositories.MenuBatchRepository;
 import com.nutriflow.repositories.UserRepository;
 import com.nutriflow.services.UserService;
 import com.nutriflow.utils.DateUtils;
 import com.nutriflow.utils.EntityUtils;
-import com.nutriflow.utils.StatisticsUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +49,7 @@ public class UserServiceImpl implements UserService {
     // Mappers
     private final DeliveryMapper deliveryMapper;
     private final UserMapper userMapper;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -83,30 +84,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public MenuResponse getMyCurrentMenu(String email) {
-        log.info("Current menu requested: email={}", email);
+    public List<MenuResponse> getMyCurrentMenus(String email) {
+        log.info("Current menus requested: email={}", email);
 
         UserEntity user = entityFinder.findUserByEmail(email);
 
-        // Find current month's menu via Helper
         MenuEntity menu = menuHelper.getCurrentMonthMenu(user.getId())
                 .orElseThrow(() -> new IdNotFoundException("No menu found for the current month."));
 
-        // Find active batch via Helper
-        MenuBatchEntity activeBatch = menuHelper.getActiveBatch(menu)
-                .orElseThrow(() -> new IdNotFoundException("No menu has been sent to you yet."));
+        // Bütün SUBMITTED batch-ləri tap
+        List<MenuBatchEntity> submittedBatches = menu.getBatches().stream()
+                .filter(batch -> batch.getStatus() == MenuStatus.SUBMITTED)
+                .sorted(Comparator.comparing(MenuBatchEntity::getCreatedAt))
+                .toList();
 
-        // Get sorted items via Helper
-        List<MenuItemEntity> sortedItems = menuHelper.getSortedMenuItems(activeBatch);
+        if (submittedBatches.isEmpty()) {
+            throw new IdNotFoundException("No menu has been sent to you yet.");
+        }
 
-        // Set sorted items on batch (mapper will use them)
-        activeBatch.setItems(sortedItems);
-
-        log.info("Menu returned: MenuId={}, BatchId={}, Items={}",
-                menu.getId(), activeBatch.getId(), sortedItems.size());
-
-        // Convert to response via Mapper
-        return userMapper.toMenuResponse(menu, activeBatch);
+        return submittedBatches.stream()
+                .map(batch -> {
+                    List<MenuItemEntity> sortedItems = menuHelper.getSortedMenuItems(batch);
+                    batch.setItems(sortedItems);
+                    return userMapper.toMenuResponse(menu, batch);
+                })
+                .toList();
     }
 
     @Override
@@ -228,6 +230,7 @@ public class UserServiceImpl implements UserService {
                 })
                 .collect(Collectors.toList());
     }
+
 
     // ==================== Private Helper Methods ====================
 

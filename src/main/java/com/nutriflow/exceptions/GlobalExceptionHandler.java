@@ -1,7 +1,7 @@
 package com.nutriflow.exceptions;
 
 import com.nutriflow.dto.response.ErrorResponse;
-import lombok.extern.slf4j.Slf4j; // Added for logging
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,6 +19,20 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j // Added for logging
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(
+            org.springframework.security.authorization.AuthorizationDeniedException ex) {
+        log.warn("Authorization denied: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.FORBIDDEN, "You do not have permission to access this resource.");
+    }
+
+    @ExceptionHandler(FileAccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<ErrorResponse> handleFileAccessDeniedException(FileAccessDeniedException ex) {
+        log.warn("Access denied: {}", ex.getMessage());
+        return buildErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
 
     // Resource not found - 404 Not Found
     @ExceptionHandler(ResourceNotFoundException.class)

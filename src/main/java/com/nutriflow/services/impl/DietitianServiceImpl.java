@@ -290,6 +290,12 @@ public class DietitianServiceImpl implements DietitianService {
 
         MenuBatchEntity batch = entityFinder.findBatchById(batchId);
 
+        // dietaryNotes update et
+        if (request.getDietaryNotes() != null) {
+            batch.getMenu().setDietaryNotes(request.getDietaryNotes());
+            menuRepository.save(batch.getMenu());
+        }
+
         // Update via Helper
         menuBatchHelper.updateRejectedBatch(batch, request.getItems());
 

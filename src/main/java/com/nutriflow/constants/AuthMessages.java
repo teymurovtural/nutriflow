@@ -34,4 +34,13 @@ public class AuthMessages {
     public static final String ADMIN_NOT_FOUND = "Admin not found: ";
     public static final String DIETITIAN_NOT_FOUND = "Dietitian not found: ";
     public static final String CATERER_NOT_FOUND = "Caterer not found: ";
+
+    // ============= RESEND OTP =============
+    public static final String ALREADY_VERIFIED = "This account is already verified.";
+    public static final String OTP_RESENT_SUCCESS = "OTP resent successfully. Please check your email.";
+
+    // ============= FORGOT PASSWORD =============
+    public static final String FORGOT_PASSWORD_OTP_SENT = "Password reset code has been sent to your email.";
+    public static final String PASSWORD_RESET_SUCCESS = "Your password has been successfully reset. You can now log in.";
+    public static final String PASSWORDS_DO_NOT_MATCH = "New passwords do not match.";
 }

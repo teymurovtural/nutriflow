@@ -63,4 +63,5 @@ public class LogMessages {
     public static final String NEW_RECORD = "NEW RECORD";
     public static final String DELETED = "DELETED";
     public static final String NO_DATA = "No data available";
+
 }

@@ -50,25 +50,35 @@ public class HealthProfileServiceImpl implements HealthProfileService {
         UserEntity user = entityFinder.findUserByEmail(email);
         log.info("User found: userId={}", user.getId());
 
-        // 2. Create HealthProfile and Address
-        HealthProfileEntity healthProfile = healthMapper.toHealthProfileEntity(request, user);
-        AddressEntity address = healthMapper.toAddressEntity(request, user);
+        // 2. HealthProfile - mövcuddursa update et, yoxdursa yeni yarat
+        HealthProfileEntity healthProfile;
+        if (user.getHealthProfile() != null) {
+            healthProfile = healthMapper.updateHealthProfileEntity(request, user.getHealthProfile());
+        } else {
+            healthProfile = healthMapper.toHealthProfileEntity(request, user);
+        }
 
-        // 3. Set on user
+        // 3. Address - mövcuddursa update et, yoxdursa yeni yarat
+        AddressEntity address;
+        if (user.getAddress() != null) {
+            address = healthMapper.updateAddressEntity(request, user.getAddress());
+        } else {
+            address = healthMapper.toAddressEntity(request, user);
+        }
+
+        // 4. Set on user
         user.setHealthProfile(healthProfile);
         user.setAddress(address);
         user.setStatus(UserStatus.DATA_SUBMITTED);
 
-        // 4. First save - to generate healthProfile ID
+        // 5. Save
         log.info("Saving user, HealthProfile and Address...");
         UserEntity savedUser = userRepository.save(user);
         log.info("First save completed. HealthProfileId={}", savedUser.getHealthProfile().getId());
 
-        // 5. Process medical files
+        // 6. Process medical files
         if (hasFiles(files)) {
             processMedicalFiles(files, savedUser.getHealthProfile());
-
-            // Second save - with medical files
             userRepository.save(savedUser);
             log.info("Medical files saved. Count={}",
                     savedUser.getHealthProfile().getMedicalFiles().size());
@@ -79,7 +89,6 @@ public class HealthProfileServiceImpl implements HealthProfileService {
         log.info("Health profile submission completed: userId={}, status={}",
                 savedUser.getId(), savedUser.getStatus());
 
-        // Create response via Mapper
         return createSuccessResponse(savedUser);
     }
 

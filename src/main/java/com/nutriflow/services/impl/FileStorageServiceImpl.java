@@ -1,7 +1,11 @@
 package com.nutriflow.services.impl;
 
 import com.nutriflow.constants.FileConstants;
+import com.nutriflow.entities.UserEntity;
 import com.nutriflow.exceptions.FileStorageException;
+import com.nutriflow.exceptions.ResourceNotAvailableException;
+import com.nutriflow.exceptions.ResourceNotFoundException;
+import com.nutriflow.exceptions.UserNotFoundException;
 import com.nutriflow.services.FileStorageService;
 import com.nutriflow.utils.FileOperationUtil;
 import com.nutriflow.utils.FileValidationUtil;
@@ -110,6 +114,31 @@ public class FileStorageServiceImpl implements FileStorageService {
         } catch (IOException e) {
             log.error("Error occurred while deleting file: {}", e.getMessage(), e);
             throw new FileStorageException(FileConstants.ERROR_FILE_DELETE_FAILED, e);
+        }
+    }
+
+    @Override
+    public byte[] loadFile(String filePath) throws IOException {
+        log.info("File load request: {}", filePath);
+
+        if (!FileOperationUtil.isValidFilePath(filePath)) {
+            log.error("Invalid file path: {}", filePath);
+            throw new FileStorageException(FileConstants.ERROR_INVALID_FILE_PATH);
+        }
+
+        Path path = FileOperationUtil.toPath(filePath);
+
+        if (!Files.exists(path)) {
+            log.error("File not found on disk: {}", filePath);
+            throw new ResourceNotFoundException("File not found: " + filePath);
+        }
+
+        try {
+            log.info("File loaded successfully: {}", filePath);
+            return Files.readAllBytes(path);
+        } catch (IOException e) {
+            log.error("Error occurred while reading file: {}", e.getMessage(), e);
+            throw new FileStorageException("File could not be read.", e);
         }
     }
 }

@@ -1,8 +1,6 @@
 package com.nutriflow.controllers;
 
-import com.nutriflow.dto.request.LoginRequest;
-import com.nutriflow.dto.request.RegisterRequest;
-import com.nutriflow.dto.request.VerifyRequest;
+import com.nutriflow.dto.request.*;
 import com.nutriflow.dto.response.BaseAuthResponse;
 import com.nutriflow.services.AuthService;
 import jakarta.validation.Valid;
@@ -40,15 +38,25 @@ public class AuthController {
         return ResponseEntity.ok("http://localhost:8080/oauth2/authorization/google");
     }
 
-    /**
-     * Refresh Token endpoint.
-     * Validates that the token coming via @RequestHeader is not blank.
-     */
     @PostMapping("/refresh-token")
     public ResponseEntity<BaseAuthResponse> refreshToken(
-            @RequestHeader("Authorization") @NotBlank(message = "Refresh token cannot be blank") String authHeader
-    ) {
-        // Passing the header directly to the Service; it will be cleaned up inside
+            @RequestHeader("Authorization") @NotBlank(message = "Refresh token cannot be blank") String authHeader) {
         return ResponseEntity.ok(authService.refreshToken(authHeader));
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<String> resendOtp(
+            @RequestParam @NotBlank(message = "Email cannot be blank") String email) {
+        return ResponseEntity.ok(authService.resendOtp(email));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(authService.resetPassword(request));
     }
 }

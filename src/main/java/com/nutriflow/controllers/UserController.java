@@ -2,10 +2,7 @@ package com.nutriflow.controllers;
 
 import com.nutriflow.dto.request.MenuApproveRequest;
 import com.nutriflow.dto.request.UserProfileUpdateRequest;
-import com.nutriflow.dto.response.DeliveryDetailResponse;
-import com.nutriflow.dto.response.MenuResponse;
-import com.nutriflow.dto.response.PatientMedicalProfileResponse;
-import com.nutriflow.dto.response.UserDashboardResponse;
+import com.nutriflow.dto.response.*;
 import com.nutriflow.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +30,8 @@ public class UserController {
 
     // 2. View Current Menu
     @GetMapping("/my-menu")
-    public ResponseEntity<MenuResponse> getMyMenu(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(userService.getMyCurrentMenu(userDetails.getUsername()));
+    public ResponseEntity<List<MenuResponse>> getMyMenu(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getMyCurrentMenus(userDetails.getUsername()));
     }
 
     // 3. Approve Menu
@@ -87,4 +84,5 @@ public class UserController {
         List<DeliveryDetailResponse> deliveries = userService.getMyDeliveries(userDetails.getUsername());
         return ResponseEntity.ok(deliveries);
     }
+
 }

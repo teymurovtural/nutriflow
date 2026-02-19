@@ -11,7 +11,7 @@ public interface UserService {
 
     PatientMedicalProfileResponse getMyMedicalProfile(String email);
 
-    MenuResponse getMyCurrentMenu(String email);
+    List<MenuResponse> getMyCurrentMenus(String email);
 
     void rejectMenu(Long batchId, String reason); // Updated with BatchId
 
@@ -22,4 +22,6 @@ public interface UserService {
     void cancelSubscription(String email);
 
     List<DeliveryDetailResponse> getMyDeliveries(String email);
+
+
 }

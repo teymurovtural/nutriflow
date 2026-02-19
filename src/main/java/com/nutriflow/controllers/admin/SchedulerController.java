@@ -11,6 +11,7 @@ import com.nutriflow.services.EmailNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,8 +107,9 @@ public class SchedulerController {
     @Transactional
     public ResponseEntity<String> testEmail() {
         try {
-            var testSubscription = subscriptionRepository.findById(1L)
-                    .orElseThrow(() -> new RuntimeException("Subscription with ID=1 not found"));
+            var testSubscription = subscriptionRepository.findAll().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("No subscription found in database"));
 
             var userEmail = testSubscription.getUser().getEmail();
             emailNotificationService.sendSubscriptionExpirationWarning(testSubscription);

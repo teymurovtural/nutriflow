@@ -41,6 +41,7 @@ public class DietitianMapper {
         if (dietitian == null) return null;
 
         return DietitianProfileResponse.builder()
+                .id(dietitian.getId())
                 .firstName(dietitian.getFirstName())
                 .lastName(dietitian.getLastName())
                 .email(dietitian.getEmail())
