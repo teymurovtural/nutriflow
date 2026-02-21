@@ -55,4 +55,14 @@ public interface AdminService {
     CatererResponse getCatererById(Long id);
     Page<MenuBatchAdminResponse> getAllMenuBatches(Pageable pageable);
     MenuBatchAdminResponse getMenuBatchById(Long batchId);
+
+    // Edit methods
+    AdminActionResponse updateUser(Long id, UserProfileUpdateRequest request, SecurityUser currentUser);
+    AdminActionResponse updateDietitian(Long id, DietitianUpdateRequest request, SecurityUser currentUser);
+    AdminActionResponse updateCaterer(Long id, CatererProfileUpdateRequest request, SecurityUser currentUser);
+    AdminActionResponse updateSubAdmin(Long id, AdminProfileUpdateRequest request, SecurityUser currentUser);
+
+    // Reassign methods
+    AdminActionResponse reassignDietitian(Long userId, ReassignDietitianRequest request, SecurityUser currentUser);
+    AdminActionResponse reassignCaterer(Long userId, ReassignCatererRequest request, SecurityUser currentUser);
 }

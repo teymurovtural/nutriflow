@@ -20,6 +20,7 @@ public class AdminActionResponse {
     private UserStatus userStatus;
     private CatererStatus catererStatus;
     private Boolean dietitianActive;
+    private Boolean adminActive;
     private LocalDateTime timestamp;
 
 }

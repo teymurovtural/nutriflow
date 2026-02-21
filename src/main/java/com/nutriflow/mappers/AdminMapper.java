@@ -4,6 +4,7 @@ import com.nutriflow.dto.request.AdminCreateRequest;
 import com.nutriflow.dto.request.AdminProfileUpdateRequest;
 import com.nutriflow.dto.response.*;
 import com.nutriflow.entities.*;
+import com.nutriflow.enums.CatererStatus;
 import com.nutriflow.enums.DeliveryStatus;
 import com.nutriflow.utils.LoggingUtils;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,7 @@ public class AdminMapper {
                 .specialization(entity.getSpecialization())
                 .phone(entity.getPhone())
                 .role(entity.getRole() != null ? entity.getRole().name() : null)
+                .active(entity.isActive())
                 .totalPatients(entity.getUsers() != null ? entity.getUsers().size() : 0)
                 .build();
     }
@@ -236,6 +238,37 @@ public class AdminMapper {
         return AdminActionResponse.builder()
                 .message(message)
                 .targetId(saved.getId())
+                .operationStatus(com.nutriflow.enums.OperationStatus.SUCCESS)
+                .adminActive(saved.isActive())
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
+    }
+
+    public AdminActionResponse toDietitianStatusResponse(Long targetId, boolean active, String message) {
+        return AdminActionResponse.builder()
+                .message(message)
+                .targetId(targetId)
+                .dietitianActive(active)
+                .operationStatus(com.nutriflow.enums.OperationStatus.SUCCESS)
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
+    }
+
+    public AdminActionResponse toCatererStatusResponse(Long targetId, CatererStatus status, String message) {
+        return AdminActionResponse.builder()
+                .message(message)
+                .targetId(targetId)
+                .catererStatus(status)
+                .operationStatus(com.nutriflow.enums.OperationStatus.SUCCESS)
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
+    }
+
+    public AdminActionResponse toAdminStatusResponse(Long targetId, boolean active, String message) {
+        return AdminActionResponse.builder()
+                .message(message)
+                .targetId(targetId)
+                .adminActive(active)
                 .operationStatus(com.nutriflow.enums.OperationStatus.SUCCESS)
                 .timestamp(java.time.LocalDateTime.now())
                 .build();

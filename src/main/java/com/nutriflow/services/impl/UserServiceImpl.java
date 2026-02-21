@@ -1,5 +1,6 @@
 package com.nutriflow.services.impl;
 
+import com.nutriflow.dto.request.HealthDataRequest;
 import com.nutriflow.dto.request.MenuApproveRequest;
 import com.nutriflow.dto.request.UserProfileUpdateRequest;
 import com.nutriflow.dto.response.*;
@@ -12,6 +13,7 @@ import com.nutriflow.helpers.EntityFinderHelper;
 import com.nutriflow.helpers.MenuHelper;
 import com.nutriflow.helpers.SubscriptionHelper;
 import com.nutriflow.mappers.DeliveryMapper;;
+import com.nutriflow.mappers.HealthMapper;
 import com.nutriflow.mappers.UserMapper;
 import com.nutriflow.repositories.MenuBatchRepository;
 import com.nutriflow.repositories.SubscriptionRepository;
@@ -51,6 +53,7 @@ public class UserServiceImpl implements UserService {
     // Mappers
     private final DeliveryMapper deliveryMapper;
     private final UserMapper userMapper;
+    private final HealthMapper healthMapper;
 
 
     @Override
@@ -189,8 +192,17 @@ public class UserServiceImpl implements UserService {
         }
 
         // Update health profile
+        // Update health profile
         if (EntityUtils.hasHealthProfile(user)) {
             updateHealthProfile(user.getHealthProfile(), request);
+        } else if (request.getWeight() != null && request.getHeight() != null && request.getGoal() != null) {
+            HealthDataRequest healthDataRequest = new HealthDataRequest();
+            healthDataRequest.setWeight(request.getWeight());
+            healthDataRequest.setHeight(request.getHeight());
+            healthDataRequest.setGoal(request.getGoal());
+            healthDataRequest.setRestrictions(request.getRestrictions());
+            healthDataRequest.setNotes(request.getNotes());
+            user.setHealthProfile(healthMapper.toHealthProfileEntity(healthDataRequest, user));
         }
 
         userRepository.save(user);

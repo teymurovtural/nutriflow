@@ -240,4 +240,55 @@ public class AdminController {
         Page<ActivityLogResponse> page = adminService.getAllActivityLogs(pageable);
         return ResponseEntity.ok(new PagedModel<>(page));
     }
+
+    // --- 13. EDIT ---
+    @PutMapping("/users/{id}")
+    public ResponseEntity<AdminActionResponse> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserProfileUpdateRequest request,
+            @AuthenticationPrincipal SecurityUser currentUser) {
+        return ResponseEntity.ok(adminService.updateUser(id, request, currentUser));
+    }
+
+    @PutMapping("/dietitians/{id}")
+    public ResponseEntity<AdminActionResponse> updateDietitian(
+            @PathVariable Long id,
+            @Valid @RequestBody DietitianUpdateRequest request,
+            @AuthenticationPrincipal SecurityUser currentUser) {
+        return ResponseEntity.ok(adminService.updateDietitian(id, request, currentUser));
+    }
+
+    @PutMapping("/caterers/{id}")
+    public ResponseEntity<AdminActionResponse> updateCaterer(
+            @PathVariable Long id,
+            @Valid @RequestBody CatererProfileUpdateRequest request,
+            @AuthenticationPrincipal SecurityUser currentUser) {
+        return ResponseEntity.ok(adminService.updateCaterer(id, request, currentUser));
+    }
+
+    @PutMapping("/sub-admins/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<AdminActionResponse> updateSubAdmin(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminProfileUpdateRequest request,
+            @AuthenticationPrincipal SecurityUser currentUser) {
+        return ResponseEntity.ok(adminService.updateSubAdmin(id, request, currentUser));
+    }
+
+    // --- 14. REASSIGN ---
+    @PatchMapping("/users/{userId}/reassign-dietitian")
+    public ResponseEntity<AdminActionResponse> reassignDietitian(
+            @PathVariable Long userId,
+            @Valid @RequestBody ReassignDietitianRequest request,
+            @AuthenticationPrincipal SecurityUser currentUser) {
+        return ResponseEntity.ok(adminService.reassignDietitian(userId, request, currentUser));
+    }
+
+    @PatchMapping("/users/{userId}/reassign-caterer")
+    public ResponseEntity<AdminActionResponse> reassignCaterer(
+            @PathVariable Long userId,
+            @Valid @RequestBody ReassignCatererRequest request,
+            @AuthenticationPrincipal SecurityUser currentUser) {
+        return ResponseEntity.ok(adminService.reassignCaterer(userId, request, currentUser));
+    }
 }

@@ -401,7 +401,7 @@ public class AdminServiceImpl implements AdminService {
                 String.format("%s status set to %s.", saved.getEmail(), newStatus ? "ACTIVE" : "INACTIVE")
         );
 
-        return adminMapper.toAdminActionResponse(id, "Dietitian status updated successfully.");
+        return adminMapper.toDietitianStatusResponse(id, newStatus, "Dietitian status updated successfully.");
     }
 
     @Override
@@ -444,7 +444,7 @@ public class AdminServiceImpl implements AdminService {
                 String.format("Status of caterer %s set to %s.", saved.getName(), newStatus)
         );
 
-        return adminMapper.toAdminActionResponse(id, "Caterer status updated successfully.");
+        return adminMapper.toCatererStatusResponse(id, newStatus, "Caterer status updated successfully.");
     }
 
     @Override
@@ -473,7 +473,7 @@ public class AdminServiceImpl implements AdminService {
                 String.format("Admin status of %s set to %s.", saved.getEmail(), newStatus ? "ACTIVE" : "INACTIVE")
         );
 
-        return adminMapper.toAdminActionResponse(id, "Admin status updated successfully.");
+        return adminMapper.toAdminStatusResponse(id, newStatus, "Admin status updated successfully.");
     }
 
 
@@ -702,6 +702,227 @@ public class AdminServiceImpl implements AdminService {
         MenuBatchEntity batch = menuBatchRepository.findById(batchId)
                 .orElseThrow(() -> new BusinessException("Menu batch not found!"));
         return adminMapper.toMenuBatchAdminResponse(batch);
+    }
+
+    // =====================================================
+    // EDIT METHODS
+    // =====================================================
+
+    @Override
+    @Transactional
+    public AdminActionResponse updateUser(Long id, UserProfileUpdateRequest request, SecurityUser currentUser) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("User not found!"));
+
+        String oldData = adminMapper.formatUserData(user);
+
+        if (request.getFirstName() != null)   user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null)    user.setLastName(request.getLastName());
+        if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        if (user.getHealthProfile() != null) {
+            HealthProfileEntity hp = user.getHealthProfile();
+            if (request.getWeight() != null)       hp.setWeight(request.getWeight());
+            if (request.getHeight() != null)       hp.setHeight(request.getHeight());
+            if (request.getGoal() != null)         hp.setGoal(request.getGoal());
+            if (request.getRestrictions() != null) hp.setRestrictions(request.getRestrictions());
+            if (request.getNotes() != null)        hp.setNotes(request.getNotes());
+        }
+
+        if (user.getAddress() != null) {
+            AddressEntity address = user.getAddress();
+            if (request.getCity() != null)           address.setCity(request.getCity());
+            if (request.getDistrict() != null)       address.setDistrict(request.getDistrict());
+            if (request.getAddressDetails() != null) address.setAddressDetails(request.getAddressDetails());
+            if (request.getDeliveryNotes() != null)  address.setDeliveryNotes(request.getDeliveryNotes());
+        }
+
+        UserEntity saved = userRepository.save(user);
+
+        activityLogService.logAction(
+                Role.ADMIN, currentUser.getId(), ActionType.UPDATE_USER,
+                "USER", saved.getId(), oldData, adminMapper.formatUserData(saved),
+                String.format("User (%s) updated by admin.", saved.getEmail())
+        );
+
+        return userMapper.toAdminActionResponse(saved, "User updated successfully.");
+    }
+
+    @Override
+    @Transactional
+    public AdminActionResponse updateDietitian(Long id, DietitianUpdateRequest request, SecurityUser currentUser) {
+        DietitianEntity dietitian = dietitianRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Dietitian not found!"));
+
+        String oldData = adminMapper.formatDietitianData(dietitian);
+
+        if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(dietitian.getEmail())) {
+            if (dietitianRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new BusinessException("This email is already in use: " + request.getEmail());
+            }
+            dietitian.setEmail(request.getEmail());
+        }
+
+        if (request.getFirstName() != null)      dietitian.setFirstName(request.getFirstName());
+        if (request.getLastName() != null)       dietitian.setLastName(request.getLastName());
+        if (request.getPhoneNumber() != null)    dietitian.setPhone(request.getPhoneNumber());
+        if (request.getSpecialization() != null) dietitian.setSpecialization(request.getSpecialization());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            dietitian.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        DietitianEntity saved = dietitianRepository.save(dietitian);
+
+        activityLogService.logAction(
+                Role.ADMIN, currentUser.getId(), ActionType.UPDATE_DIETITIAN,
+                "DIETITIAN", saved.getId(), oldData, adminMapper.formatDietitianData(saved),
+                String.format("Dietitian (%s) updated by admin.", saved.getEmail())
+        );
+
+        return dietitianMapper.toAdminActionResponse(saved, "Dietitian updated successfully.");
+    }
+
+    @Override
+    @Transactional
+    public AdminActionResponse updateCaterer(Long id, CatererProfileUpdateRequest request, SecurityUser currentUser) {
+        CatererEntity caterer = catererRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Caterer not found!"));
+
+        String oldData = adminMapper.formatCatererData(caterer);
+
+        if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(caterer.getEmail())) {
+            if (catererRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new BusinessException("This email is already in use: " + request.getEmail());
+            }
+            caterer.setEmail(request.getEmail());
+        }
+
+        if (request.getName() != null)    caterer.setName(request.getName());
+        if (request.getPhone() != null)   caterer.setPhone(request.getPhone());
+        if (request.getAddress() != null) caterer.setAddress(request.getAddress());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            caterer.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        CatererEntity saved = catererRepository.save(caterer);
+
+        activityLogService.logAction(
+                Role.ADMIN, currentUser.getId(), ActionType.UPDATE_CATERER_ADMIN,
+                "CATERER", saved.getId(), oldData, adminMapper.formatCatererData(saved),
+                String.format("Caterer (%s) updated by admin.", saved.getName())
+        );
+
+        return catererMapper.toAdminActionResponse(saved, "Caterer updated successfully.");
+    }
+
+    @Override
+    @Transactional
+    public AdminActionResponse updateSubAdmin(Long id, AdminProfileUpdateRequest request, SecurityUser currentUser) {
+        if (!currentUser.isSuperAdmin()) {
+            throw new BusinessException("Super Admin privileges are required!");
+        }
+
+        AdminEntity admin = adminRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Admin not found!"));
+
+        String oldData = adminMapper.formatAdminData(admin);
+
+        if (!admin.getEmail().equalsIgnoreCase(request.getEmail())) {
+            adminRepository.findByEmail(request.getEmail()).ifPresent(a -> {
+                throw new BusinessException("This email is already in use!");
+            });
+            admin.setEmail(request.getEmail());
+        }
+
+        admin.setFirstName(request.getFirstName());
+        admin.setLastName(request.getLastName());
+
+        if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            admin.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        }
+
+        AdminEntity saved = adminRepository.save(admin);
+
+        activityLogService.logAction(
+                Role.ADMIN, currentUser.getId(), ActionType.UPDATE_PROFILE,
+                "ADMIN", saved.getId(), oldData, adminMapper.formatAdminData(saved),
+                String.format("Sub-Admin (%s) updated by super admin.", saved.getEmail())
+        );
+
+        return adminMapper.toAdminActionResponse(saved, "Sub-admin updated successfully.");
+    }
+
+    // =====================================================
+    // REASSIGN METHODS
+    // =====================================================
+
+    @Override
+    @Transactional
+    public AdminActionResponse reassignDietitian(Long userId, ReassignDietitianRequest request, SecurityUser currentUser) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found!"));
+
+        DietitianEntity newDietitian = dietitianRepository.findById(request.getNewDietitianId())
+                .orElseThrow(() -> new BusinessException("Dietitian not found!"));
+
+        if (!newDietitian.isActive()) {
+            throw new BusinessException("Cannot assign an inactive dietitian!");
+        }
+
+        String oldData = user.getDietitian() != null
+                ? String.format("Previous Dietitian: %s %s (ID: %d)",
+                user.getDietitian().getFirstName(),
+                user.getDietitian().getLastName(),
+                user.getDietitian().getId())
+                : "Previous Dietitian: Not assigned";
+
+        user.setDietitian(newDietitian);
+        UserEntity saved = userRepository.save(user);
+
+        activityLogService.logAction(
+                Role.ADMIN, currentUser.getId(), ActionType.ASSIGN_DIETITIAN,
+                "USER", saved.getId(), oldData,
+                String.format("New Dietitian: %s %s (ID: %d)",
+                        newDietitian.getFirstName(), newDietitian.getLastName(), newDietitian.getId()),
+                String.format("Dietitian reassigned for user (%s).", saved.getEmail())
+        );
+
+        return userMapper.toAdminActionResponse(saved, "Dietitian reassigned successfully.");
+    }
+
+    @Override
+    @Transactional
+    public AdminActionResponse reassignCaterer(Long userId, ReassignCatererRequest request, SecurityUser currentUser) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found!"));
+
+        CatererEntity newCaterer = catererRepository.findById(request.getNewCatererId())
+                .orElseThrow(() -> new BusinessException("Caterer not found!"));
+
+        if (newCaterer.getStatus() != CatererStatus.ACTIVE) {
+            throw new BusinessException("Cannot assign an inactive caterer!");
+        }
+
+        String oldData = user.getCaterer() != null
+                ? String.format("Previous Caterer: %s (ID: %d)",
+                user.getCaterer().getName(),
+                user.getCaterer().getId())
+                : "Previous Caterer: Not assigned";
+
+        user.setCaterer(newCaterer);
+        UserEntity saved = userRepository.save(user);
+
+        activityLogService.logAction(
+                Role.ADMIN, currentUser.getId(), ActionType.ASSIGN_CATERER,
+                "USER", saved.getId(), oldData,
+                String.format("New Caterer: %s (ID: %d)", newCaterer.getName(), newCaterer.getId()),
+                String.format("Caterer reassigned for user (%s).", saved.getEmail())
+        );
+
+        return userMapper.toAdminActionResponse(saved, "Caterer reassigned successfully.");
     }
 
     @Override

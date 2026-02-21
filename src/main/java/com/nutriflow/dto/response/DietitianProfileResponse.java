@@ -14,6 +14,7 @@ public class DietitianProfileResponse {
     private String specialization;
     private String phone;
     private String role;
+    private boolean active;
     private long totalPatients;
 
 }
